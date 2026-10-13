@@ -64,3 +64,21 @@ active_within_games = 2
 # anytime TD, over/under vs your lines) is read off these simulations.
 n_sims = 5000
 seed = 0
+
+[scheme]
+# Online / tagged scheme data (data/external/defense_scheme.csv, data/manual/defense_tags.csv).
+# Label thresholds, in percent of dropbacks.
+blitz_heavy_pct = 33.0
+blitz_light_pct = 20.0
+man_heavy_pct = 30.0
+man_light_pct = 18.0
+# How much evidence (plays of THIS offense vs that scheme) before the
+# offense-specific scheme effect is trusted at 50%.
+shrink_plays = 40
+
+[coach]
+# Games of this season before the play-caller's career tendencies
+# (pass lean, star reliance) count half. They fade as games accumulate.
+prior_games = 3.0
+# Volume spread multiplier for first-time / newly arrived play-callers.
+new_caller_sd_mult = 1.15

@@ -50,8 +50,13 @@ def _pass_bucket(p: pd.DataFrame) -> pd.Series:
 
 class Projector:
     def __init__(self, plays: pd.DataFrame, player_games: pd.DataFrame, games: pd.DataFrame,
-                 cfg: dict, labels: pd.DataFrame | None = None, overrides: pd.DataFrame | None = None):
+                 cfg: dict, labels: pd.DataFrame | None = None, overrides: pd.DataFrame | None = None,
+                 scheme: pd.DataFrame | None = None, coach: pd.DataFrame | None = None):
         self.cfg = cfg
+        self.scheme = scheme.set_index("team") if scheme is not None and not scheme.empty else None
+        self.coach = coach.set_index("team") if coach is not None and not coach.empty else None
+        self.k_coach = cfg.get("coach", {}).get("prior_games", 3.0)
+        self.k_scheme = cfg.get("scheme", {}).get("shrink_plays", 40.0)
         self.all = plays
         self.p = plays[~plays["garbage"]].copy()
         self.pg = player_games
@@ -82,6 +87,98 @@ class Projector:
         self.lg_int = _wmean(self.passes, "interception")
         self.lg_pass_td = _wmean(self.passes, "touchdown")
         self.lg_run_td = _wmean(p[p["is_run"]], "touchdown")
+        self.games_played = plays.groupby("offense")["boxscore_id"].nunique()
+        self._scheme_cache = {}
+        p["family"] = np.where(p["is_run"], "run", np.where(p["deep"], "deep", "short"))
+        if self.scheme is not None:
+            p = p.join(self.scheme[["blitz", "coverage", "shell"]], on="defense")
+        self.p = p
+
+    # ------------------------------------------------------------- coach
+    def _coach(self, team):
+        if self.coach is None or team not in self.coach.index:
+            return None
+        return self.coach.loc[team]
+
+    def coach_volume_sd(self, team) -> float:
+        """First-time / new play-callers are less predictable: wider volume spread."""
+        c = self._coach(team)
+        base = 6.5
+        if c is not None and (c["caller_tier"] == "first-time play-caller" or c["new_caller_2026"]):
+            return base * self.cfg.get("coach", {}).get("new_caller_sd_mult", 1.15)
+        return base
+
+    def star_target_share(self, team: str, kind: str, current: float) -> float | None:
+        """Blend this season's top-player share with the play-caller's career
+        tendency. Returns the blended top share, or None if no history."""
+        c = self._coach(team)
+        col = "star_target" if kind == "target" else "star_carry"
+        if c is None or pd.isna(c.get(col, np.nan)) or pd.isna(current):
+            return None
+        from .coaches import LEAGUE_RB1_CARRY, LEAGUE_TOP_TARGET
+        prior = (LEAGUE_TOP_TARGET if kind == "target" else LEAGUE_RB1_CARRY) + c[col]
+        g = float(self.games_played.get(team, 0))
+        return (g * current + self.k_coach * prior) / (g + self.k_coach)
+
+    # ------------------------------------------------------------- scheme
+    def scheme_effect(self, team: str, opp: str) -> dict:
+        """Interaction between THIS offense and the opponent's scheme labels.
+
+        For each label (blitz / coverage / shell) the opponent carries, compare
+        how this offense performs vs defenses with that label against how
+        every offense performs vs them. Only the offense-specific part is used,
+        because the opponent's own stats already carry the league-wide part.
+        Blitz labels use 3rd/4th-down plays and are applied in proportion to
+        the offense's 3rd/4th-down share. Returns per-family yardage and
+        deep-share multipliers plus readable notes.
+        """
+        key = (team, opp)
+        if key in self._scheme_cache:
+            return self._scheme_cache[key]
+        res = {"ypp": {"deep": 1.0, "short": 1.0, "run": 1.0}, "deep_share": 1.0, "notes": []}
+        if self.scheme is None or opp not in self.scheme.index:
+            self._scheme_cache[key] = res
+            return res
+        p = self.p
+        k = self.k_scheme
+        off = p[p["offense"] == team]
+        third_share = float(off["third"].mean()) if len(off) else 0.25
+        for label in ("blitz", "coverage", "shell"):
+            v = self.scheme.loc[opp, label]
+            if not v or v == "avg" or pd.isna(v):
+                continue
+            sub = p[p["third"]] if label == "blitz" else p
+            weight = third_share if label == "blitz" else 1.0
+            vs = sub[sub[label] == v]
+            ovs = vs[vs["offense"] == team]
+            osub = sub[sub["offense"] == team]
+            if len(ovs) == 0:
+                continue
+            for fam in ("deep", "short", "run"):
+                lg_all = sub[sub["family"] == fam]["yards"].mean()
+                lg_v = vs[vs["family"] == fam]["yards"].mean()
+                o_all = osub[osub["family"] == fam]["yards"].mean()
+                o_v_rows = ovs[ovs["family"] == fam]
+                if o_v_rows.empty or not all(np.isfinite([lg_all, lg_v, o_all])) or min(lg_all, lg_v, o_all) <= 0:
+                    continue
+                inter = (o_v_rows["yards"].mean() / o_all) / (lg_v / lg_all)
+                inter = float(shrink(inter, len(o_v_rows), 1.0, k))
+                res["ypp"][fam] *= 1 + weight * (np.clip(inter, 0.6, 1.6) - 1)
+                if abs(inter - 1) >= 0.05:
+                    res["notes"].append(f"{team} {fam} plays vs {v.replace('_', ' ')} {label} defenses: "
+                                        f"x{inter:.2f} vs how other offenses fare ({len(o_v_rows)} plays)")
+            # Does this offense throw deep more often against this label?
+            pv, po = vs[vs["is_pass"]], osub[osub["is_pass"]]
+            ov_pass = ovs[ovs["is_pass"]]
+            if len(ov_pass) and po["deep"].mean() > 0 and pv["deep"].mean() > 0 and sub[sub["is_pass"]]["deep"].mean() > 0:
+                lg_ratio = pv["deep"].mean() / sub[sub["is_pass"]]["deep"].mean()
+                o_ratio = ov_pass["deep"].mean() / po["deep"].mean()
+                inter = float(shrink(o_ratio / lg_ratio, len(ov_pass), 1.0, k))
+                res["deep_share"] *= 1 + weight * (np.clip(inter, 0.5, 2.0) - 1)
+                if abs(inter - 1) >= 0.1:
+                    res["notes"].append(f"{team} deep-throw rate vs {v.replace('_', ' ')} {label}: x{inter:.2f}")
+        self._scheme_cache[key] = res
+        return res
 
     # ---------------------------------------------------------------- team
     def _ratio(self, d_val, lg_val, n):
@@ -100,6 +197,12 @@ class Projector:
         t, d = p[p["offense"] == team], p[p["defense"] == opp]
         db_rate = _wmean(t, "dropback")
         db_rate += self.dw * (_wmean(d, "dropback") - self.lg_dropback) * 0.5
+        c = self._coach(team)
+        if c is not None and not pd.isna(c.get("pass_lean", np.nan)):
+            # Early in the season lean on the play-caller's career pass tendency.
+            g = float(self.games_played.get(team, 0))
+            prior = self.lg_dropback + c["pass_lean"]
+            db_rate = (g * db_rate + self.k_coach * prior) / (g + self.k_coach)
         dropbacks = plays * db_rate
         tdb, ddb = t[t["dropback"]], d[d["dropback"]]
         sack_rate = _wmean(tdb, "is_sack") * self._ratio(_wmean(ddb, "is_sack"), self.lg_sack, len(ddb))
@@ -109,7 +212,7 @@ class Projector:
         return {"plays": plays, "dropback_rate": db_rate, "pass_att": dropbacks - sacks - scrambles,
                 "sacks": sacks, "scrambles": scrambles, "runs": plays - dropbacks}
 
-    def mix(self, team: str, family: str) -> tuple[dict, dict]:
+    def mix(self, team: str, family: str, opp: str | None = None) -> tuple[dict, dict]:
         """Bucket shares for the next game and the last-game signal used."""
         src = self.passes if family == "pass" else self.runs
         col = "pb" if family == "pass" else "bucket"
@@ -127,6 +230,12 @@ class Projector:
                     share[b] *= float(np.clip(1 + self.strength * signal[b], 0.5, 1.5))
             tot = sum(share.values()) or 1.0
             share = {b: v / tot for b, v in share.items()}
+        if family == "pass" and opp is not None:
+            ds = self.scheme_effect(team, opp)["deep_share"]
+            if ds != 1.0:
+                share = {b: v * (ds if "_deep_" in b else 1.0) for b, v in share.items()}
+                tot = sum(share.values()) or 1.0
+                share = {b: v / tot for b, v in share.items()}
         return share, {b: v for b, v in signal.items() if b in share}
 
     def bucket_matchup(self, team: str, opp: str, family: str, b: str) -> dict:
@@ -143,6 +252,8 @@ class Projector:
         team_cmp = shrink(o["cmp"] if o is not None else np.nan, o_n, lgr["cmp"], self.k_def)
         m_ypp = self._ratio(d["ypp"], lgr["ypp"], d["n_raw"]) if d is not None else 1.0
         m_cmp = self._ratio(d["cmp"], lgr["cmp"], d["n_raw"]) if d is not None and family == "pass" else 1.0
+        fam = "run" if family == "run" else ("deep" if "_deep_" in b else "short")
+        m_ypp *= self.scheme_effect(team, opp)["ypp"][fam]
         return {"ypp": float(team_ypp), "cmp": float(team_cmp), "td": float(lgr["td"]),
                 "m_ypp": m_ypp, "m_cmp": m_cmp}
 
@@ -170,7 +281,8 @@ class Projector:
         last = qbs[qbs["week"] == qbs["week"].max()]
         return last.sort_values("pass_att", ascending=False)["player_id"].iloc[0]
 
-    def _shares(self, df: pd.DataFrame, id_col: str, bucket_col: str, active: set, k: float) -> pd.DataFrame:
+    def _shares(self, df: pd.DataFrame, id_col: str, bucket_col: str, active: set, k: float,
+                team: str | None = None, kind: str | None = None) -> pd.DataFrame:
         """Per player per bucket: share of team volume, shrunk toward the
         player's overall share. Inactive players' volume is redistributed."""
         df = df[df[id_col].notna()]
@@ -188,6 +300,16 @@ class Projector:
         pb = pb.set_index([id_col, bucket_col]).reindex(grid).reset_index()
         pb["share"] = pb["share"].fillna(pb[id_col].map(players) * 0.5)
         pb["share"] = pb["share"] / pb.groupby(bucket_col)["share"].transform("sum")
+        if team is not None and kind is not None and not players.empty:
+            # Coach angle: pull the top player's share toward the play-caller's
+            # career star reliance (fades as this season's games accumulate).
+            top = players.idxmax()
+            cur = players.max() / players.sum()
+            target = self.star_target_share(team, kind, cur)
+            if target is not None and cur > 0:
+                f = float(np.clip(target / cur, 0.7, 1.4))
+                pb.loc[pb[id_col] == top, "share"] *= f
+                pb["share"] = pb["share"] / pb.groupby(bucket_col)["share"].transform("sum")
         return pb[[id_col, bucket_col, "share"]]
 
     def _player_eff(self, df, id_col, bucket_col, team_eff: dict, k: float) -> pd.DataFrame:
@@ -202,8 +324,8 @@ class Projector:
 
     def project_team(self, team: str, opp: str, week: int) -> tuple[pd.DataFrame, dict]:
         vol = self.team_volume(team, opp)
-        pmix, psig = self.mix(team, "pass")
-        rmix, rsig = self.mix(team, "run")
+        pmix, psig = self.mix(team, "pass", opp)
+        rmix, rsig = self.mix(team, "run", opp)
         peff = {b: self.bucket_matchup(team, opp, "pass", b) for b in pmix}
         reff = {b: self.bucket_matchup(team, opp, "run", b) for b in rmix}
         active_df = self.active_players(team)
@@ -227,7 +349,7 @@ class Projector:
         # Receiving
         k_t = self.cfg["players"]["shrink_targets"]
         tp = self.passes[self.passes["offense"] == team]
-        shares = self._shares(tp, "target_id", "pb", active, k_t)
+        shares = self._shares(tp, "target_id", "pb", active, k_t, team, "target")
         eff, td = self._player_eff(tp, "target_id", "pb", peff, k_t)
         lg_td_t = self.lg_pass_td
         for r in shares.itertuples():
@@ -250,7 +372,7 @@ class Projector:
         # Rushing
         k_c = self.cfg["players"]["shrink_carries"]
         tr = self.runs[self.runs["offense"] == team]
-        rshares = self._shares(tr, "rusher_id", "bucket", active, k_c)
+        rshares = self._shares(tr, "rusher_id", "bucket", active, k_c, team, "carry")
         reff_p, rtd = self._player_eff(tr, "rusher_id", "bucket", reff, k_c)
         for r in rshares.itertuples():
             b, pid = r.bucket, r.rusher_id
@@ -289,7 +411,8 @@ class Projector:
         out = pd.DataFrame(rows.values())
         context = {"team": team, "opp": opp, "volume": vol, "pass_mix": pmix, "run_mix": rmix,
                    "pass_signal": psig, "run_signal": rsig, "pass_eff": peff, "run_eff": reff,
-                   "qb": names.get(qb, qb) if qb else None}
+                   "qb": names.get(qb, qb) if qb else None,
+                   "scheme_notes": self.scheme_effect(team, opp)["notes"]}
         return out, context
 
     def project_week(self, week: int) -> tuple[pd.DataFrame, list[dict]]:

@@ -3,6 +3,8 @@
   python -m nfl_proj scrape            download schedule + every completed box score
   python -m nfl_proj build             parse cached HTML into data/nfl_<season>.db
   python -m nfl_proj styles            coaching-style / defense report + adaptation test
+  python -m nfl_proj external          refresh online defensive scheme data (Sharp Football)
+  python -m nfl_proj coaches           scrape play-caller history from PFR + coach report
   python -m nfl_proj project --week 7  projections for a week (prints choices first)
 """
 
@@ -31,6 +33,8 @@ def _paths(cfg):
         "tags": ROOT / "data" / "manual" / "defense_tags.csv",
         "overrides": ROOT / "data" / "manual" / "player_overrides.csv",
         "lines": ROOT / "data" / "manual" / "prop_lines.csv",
+        "external": ROOT / "data" / "external" / "defense_scheme.csv",
+        "coaches": ROOT / "data" / "manual" / "coaches.csv",
     }
 
 
@@ -46,6 +50,19 @@ def _analysis(cfg, paths):
     return t, plays, style, dprof, labels, matchup_splits(plays, labels)
 
 
+def _scheme_and_coach(cfg, paths, plays, labels):
+    from .coaches import history_table, load_coaches, profiles
+    from .external import load_external, scheme_labels
+    from .profiles import load_manual_labels
+    from .scrape import Fetcher
+    scheme = scheme_labels(load_external(paths["external"]), load_manual_labels(paths["tags"]), cfg)
+    coaches = load_coaches(paths["coaches"])
+    if coaches.empty:
+        return scheme, None
+    hist = history_table(coaches, Fetcher(paths["cache"].parent / "history"))
+    return scheme, profiles(coaches, hist, cfg["season"])
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="nfl_proj")
     ap.add_argument("--config", default=str(ROOT / "config" / "projection.toml"))
@@ -53,6 +70,8 @@ def main(argv=None):
     sub.add_parser("scrape")
     sub.add_parser("build")
     sub.add_parser("styles")
+    sub.add_parser("external")
+    sub.add_parser("coaches")
     pj = sub.add_parser("project")
     pj.add_argument("--week", type=int, help="defaults to the next week with unplayed games")
     pj.add_argument("--yes", action="store_true", help="skip the confirmation prompt")
@@ -65,6 +84,17 @@ def main(argv=None):
         from .scrape import scrape_season
         scrape_season(cfg["season"], paths["cache"], delay=cfg["scrape"]["delay_seconds"])
         return
+    if args.cmd == "external":
+        from datetime import date
+        from .external import scrape_sharp
+        scrape_sharp(paths["external"], date.today().isoformat())
+        return
+    if args.cmd == "coaches" and not paths["db"].exists():
+        from .coaches import load_coaches, scrape_history
+        from .scrape import Fetcher
+        scrape_history(load_coaches(paths["coaches"]), Fetcher(paths["cache"].parent / "history",
+                                                                delay=cfg["scrape"]["delay_seconds"]))
+        return
     if args.cmd == "build":
         from .build import build_season
         build_season(cfg["season"], paths["cache"], paths["db"])
@@ -73,12 +103,23 @@ def main(argv=None):
     from . import adaptation
     from .report import settings_block, styles_report, week_report
     t, plays, style, dprof, labels, splits = _analysis(cfg, paths)
+    scheme, coach = _scheme_and_coach(cfg, paths, plays, labels)
     est = adaptation.estimate(plays, cfg["adaptation"]["min_plays"])
     strength = adaptation.effective_strength(est, cfg)
     paths["out"].mkdir(parents=True, exist_ok=True)
 
+    if args.cmd == "coaches":
+        from .coaches import load_coaches, scrape_history
+        from .scrape import Fetcher
+        scrape_history(load_coaches(paths["coaches"]), Fetcher(paths["cache"].parent / "history",
+                                                                delay=cfg["scrape"]["delay_seconds"]))
+        scheme, coach = _scheme_and_coach(cfg, paths, plays, labels)
+        coach.to_csv(paths["out"] / "coaches.csv", index=False)
+        print(coach.to_markdown(index=False, floatfmt=".3f"))
+        return
+
     if args.cmd == "styles":
-        md = styles_report(style, dprof, labels, splits, est)
+        md = styles_report(style, dprof, labels, splits, est, scheme, coach, plays)
         (paths["out"] / "styles.md").write_text(md)
         style.to_csv(paths["out"] / "offense_style.csv", index=False)
         dprof.to_csv(paths["out"] / "defense_profile.csv", index=False)
@@ -96,7 +137,7 @@ def main(argv=None):
             return
     overrides = pd.read_csv(paths["overrides"], dtype=str).fillna("") if paths["overrides"].exists() else None
     from .sim import Simulator, apply_lines, wide_means
-    proj = Projector(plays, t["player_games"], games, cfg, labels, overrides)
+    proj = Projector(plays, t["player_games"], games, cfg, labels, overrides, scheme, coach)
     _, ctx = proj.project_week(week)
     sim = Simulator(proj, t["player_games"], t.get("defenders"), t.get("kickers"),
                     n_sims=cfg["sim"]["n_sims"], seed=cfg["sim"]["seed"])
@@ -113,7 +154,7 @@ def main(argv=None):
     with sqlite3.connect(paths["db"]) as con:
         for name, df in ((f"projections_week_{week:02d}", wide), (f"props_week_{week:02d}", props_out)):
             df.to_sql(name, con, if_exists="replace", index=False)
-    md = week_report(week, wide, ctx, style, dprof, labels, cfg, est, strength)
+    md = week_report(week, wide, ctx, style, dprof, labels, cfg, est, strength, scheme, coach, plays)
     if "p_over" in props_out:
         edge = props_out[props_out["line"].notna()].assign(
             best=lambda d: d[["p_over", "p_under"]].max(axis=1)).sort_values("best", ascending=False)

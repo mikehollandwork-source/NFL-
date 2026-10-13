@@ -12,6 +12,8 @@ pip install -r requirements.txt
 python -m nfl_proj scrape      # schedule + every completed box score (~4s/page, cached)
 python -m nfl_proj build       # parse cached pages -> data/nfl_2026.db
 python -m nfl_proj styles      # coaching styles, defense labels, adaptation test -> output/2026/styles.md
+python -m nfl_proj external    # refresh online scheme data (blitz / man / zone / Cover N) from Sharp Football
+python -m nfl_proj coaches     # scrape each play-caller's past seasons from PFR -> coach profiles
 python -m nfl_proj project     # next week's projections + props (shows your choices, asks y/N first)
 ```
 
@@ -71,15 +73,56 @@ marks them; otherwise reported as blank), deep-pass share overall and on 3rd dow
 mix, run direction and gap mix, 4th-down go rate, red-zone play mix (short pass / deep pass / run),
 red-zone EPA, 3rd-down conversion rate, sack rate, and explosive and negative play rates.
 
+## Coach angle (`data/manual/coaches.csv`)
+
+All 32 teams: head coach, years as an NFL head coach and with this team, who calls plays (HC or OC),
+whether the play-caller is new for 2026, and the seasons he called plays before (`caller_history`).
+Each row lists its source and confidence. The 2026 hires and play-callers come from 2026 web
+reporting; MIN's play-caller was not confirmed in 2026 sources. `coaches` scrapes each listed season
+from PFR and computes:
+
+- **Experience tiers**: first-year HC / new to team / young / veteran HC, and first-time / developing
+  / veteran play-caller (counted in seasons actually calling plays).
+- **Run-first / pass-first**: career pass rate vs league that season, adjusted for game script
+  (winning teams run more; the slope is estimated from the scraped seasons).
+- **Leans on stars**: career top-receiver target share and RB1 carry share vs league.
+
+In the projection: the play-caller's career pass lean is the early-season prior for pass rate, and his
+star reliance pulls the top receiver's and RB1's shares. Both count as `coach.prior_games` games of
+evidence, so they fade as this season's games accumulate. First-time or newly arrived play-callers get
+a wider volume spread (`coach.new_caller_sd_mult`).
+
+## Defensive scheme (`data/external/defense_scheme.csv` + your tags)
+
+Coverage and blitz data don't exist in play-by-play, so they come from online charting. Every value
+has its source, date and confidence. It's seeded with what could be verified from 2026 reporting
+(blitz rates for 13 teams, coverage splits for DET/PHI, ARI shells). `external` fills all 32 teams
+from Sharp Football Analysis when that site is reachable. Your `defense_tags.csv` always overrides.
+
+Labels: blitz heavy / light (≥33% / ≤20%), man-heavy / zone-heavy (≥30% / ≤18% man), and the
+most-used Cover N shell.
+
+In the projection, only the **offense-specific** part of a scheme matchup is used: how this offense
+does against, for example, heavy-blitz defenses on 3rd down, compared with how every other offense
+does against them. The league-wide part is already in the defense's own allowed stats, so using it
+again would double-count. Blitz effects use 3rd/4th-down plays and are weighted by the offense's
+3rd/4th-down share. If this offense throws deep more often against blitz-heavy teams, its deep-pass
+share goes up in that matchup. Everything is shrunk by `scheme.shrink_plays`, so early-season effects
+are small on purpose.
+
+`styles.md` also cross-checks the online blitz labels against the 3rd-down sack rate in the
+play-by-play. A heavy-blitz team that isn't getting sacks shows up as a mismatch.
+
 ## How a projection is built
 
 1. **Volume**: the team's plays per game, scaled by how many plays the opponent faces.
 2. **Pass/run split**: the team's dropback rate, nudged by the opponent's pass rate faced.
+0. **Coach prior**: pass rate and star usage start from the play-caller's career tendencies.
 3. **Playbook mix** across 11 buckets: pass {short, deep} × {left, middle, right} and run
    {outside left, inside left, middle, inside right, outside right}. It uses the team's
    recency-weighted mix, then adjusts each bucket by how it did last game (adaptation).
 4. **Matchup**: each bucket's yards and completion rate × what this defense allows in that
-   bucket relative to league average (shrunk).
+   bucket relative to league average (shrunk), × this offense's scheme interaction effect.
 5. **Players**: each player's share of targets or carries in each bucket × his own shrunk
    efficiency there. Passing totals go to the starting QB.
 
@@ -104,6 +147,8 @@ nfl_proj/profiles.py    offense style, defense profile, labels, matchup splits
 nfl_proj/adaptation.py  "do more of what worked" test + last-game signal
 nfl_proj/project.py     projection inputs (volume, mix, matchup, player shares)
 nfl_proj/sim.py         Monte Carlo game simulation -> every prop
+nfl_proj/coaches.py     coach experience, career pass lean, star reliance
+nfl_proj/external.py    online scheme data (Sharp scraper), scheme labels, PBP cross-check
 nfl_proj/report.py      markdown reports
 tests/                  parser tests + end-to-end run on synthetic PFR-format pages
 ```

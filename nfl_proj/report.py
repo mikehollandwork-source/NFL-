@@ -63,8 +63,27 @@ def matchup_notes(ctx: dict, style: pd.DataFrame, dprof: pd.DataFrame, labels: p
     return notes
 
 
+def _coach_line(team, coach, plays):
+    if coach is None or team not in set(coach["team"]):
+        return None
+    from .coaches import current_concentration, describe
+    cur = current_concentration(plays).set_index("team") if plays is not None else None
+    row = coach.set_index("team").loc[team]
+    return describe(row, cur.loc[team] if cur is not None and team in cur.index else None)
+
+
+def _scheme_line(team, scheme):
+    if scheme is None or team not in set(scheme["team"]):
+        return None
+    r = scheme.set_index("team").loc[team]
+    parts = [f"{k}: {r[k]}" for k in ("blitz", "coverage", "shell") if r[k]]
+    return (", ".join(parts) + f" [{r['scheme_source']}]") if parts else None
+
+
 def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.DataFrame,
-                dprof: pd.DataFrame, labels: pd.DataFrame, cfg: dict, est: dict, strength: float) -> str:
+                dprof: pd.DataFrame, labels: pd.DataFrame, cfg: dict, est: dict, strength: float,
+                scheme: pd.DataFrame | None = None, coach: pd.DataFrame | None = None,
+                plays: pd.DataFrame | None = None) -> str:
     lg_style = style.mean(numeric_only=True)
     lg_def = dprof.mean(numeric_only=True)
     out = [f"# Week {week} projections", "", settings_block(cfg, est, strength)]
@@ -79,7 +98,13 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
             notes = describe_style(style.set_index("team").loc[team], lg_style)
             if notes:
                 out.append("**Coaching style:** " + "; ".join(notes) + ".")
-        for n in matchup_notes(ctx, style, dprof, labels, lg_def):
+        cl = _coach_line(team, coach, plays)
+        if cl:
+            out.append(f"**Coach angle:** {cl}.")
+        sl = _scheme_line(opp, scheme)
+        if sl:
+            out.append(f"**{opp} defensive scheme (online/tagged):** {sl}.")
+        for n in matchup_notes(ctx, style, dprof, labels, lg_def) + ctx.get("scheme_notes", []):
             out.append(f"- {n}")
         t = proj[proj["team"] == team]
         cols = ["player", "pos", "pass_yds", "pass_td", "interceptions", "carries", "rush_yds",
@@ -99,7 +124,8 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
 
 
 def styles_report(style: pd.DataFrame, dprof: pd.DataFrame, labels: pd.DataFrame,
-                  splits: pd.DataFrame, est: dict) -> str:
+                  splits: pd.DataFrame, est: dict, scheme: pd.DataFrame | None = None,
+                  coach: pd.DataFrame | None = None, plays: pd.DataFrame | None = None) -> str:
     lg = style.mean(numeric_only=True)
     out = ["# Coaching styles and defensive profiles", "",
            "## Do coaches call more of what worked last game?",
@@ -112,4 +138,17 @@ def styles_report(style: pd.DataFrame, dprof: pd.DataFrame, labels: pd.DataFrame
             labels.to_markdown(index=False), "",
             "## League: play family vs defense label", "",
             splits.to_markdown(index=False, floatfmt=".2f") if not splits.empty else "(no data)", ""]
+    if coach is not None:
+        out += ["## Coaches", ""]
+        for t in sorted(coach["team"]):
+            out.append(f"- **{t}**: {_coach_line(t, coach, plays)}")
+        out.append("")
+    if scheme is not None:
+        from .external import compare_with_pbp
+        chk = compare_with_pbp(scheme, labels)
+        out += ["## Online scheme data vs what the play-by-play shows", "",
+                "Blitz labels come from online charting; `third_down_pressure` comes from 3rd-down sack "
+                "rate in the scraped play-by-play. A mismatch means the blitzes aren't getting home (or "
+                "pressure comes without blitzing), which is worth knowing before betting on it.", "",
+                chk.to_markdown(index=False) if not chk.empty else "(no online blitz data)", ""]
     return "\n".join(out)

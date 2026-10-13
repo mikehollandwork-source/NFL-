@@ -57,14 +57,14 @@ class Simulator:
     def offense(self, team: str, opp: str) -> tuple[dict, dict]:
         P, rng, n = self.P, self.rng, self.n
         vol = P.team_volume(team, opp)
-        pmix, _ = P.mix(team, "pass")
-        rmix, _ = P.mix(team, "run")
+        pmix, _ = P.mix(team, "pass", opp)
+        rmix, _ = P.mix(team, "run", opp)
         peff = {b: P.bucket_matchup(team, opp, "pass", b) for b in pmix}
         reff = {b: P.bucket_matchup(team, opp, "run", b) for b in rmix}
         active_df = P.active_players(team)
         active = set(active_df["player_id"])
 
-        plays = np.clip(np.round(rng.normal(vol["plays"], 6.5, n)), 40, 95).astype(int)
+        plays = np.clip(np.round(rng.normal(vol["plays"], P.coach_volume_sd(team), n)), 40, 95).astype(int)
         db = rng.binomial(plays, np.clip(vol["dropback_rate"], 0.2, 0.85))
         dropbacks = vol["pass_att"] + vol["sacks"] + vol["scrambles"]
         sacks = rng.binomial(db, vol["sacks"] / dropbacks)
@@ -86,7 +86,7 @@ class Simulator:
         # --- passing / receiving
         tp = P.passes[P.passes["offense"] == team]
         k_t = P.cfg["players"]["shrink_targets"]
-        shares = P._shares(tp, "target_id", "pb", active, k_t)
+        shares = P._shares(tp, "target_id", "pb", active, k_t, team, "target")
         eff, td = P._player_eff(tp, "target_id", "pb", peff, k_t)
         tgt_rate = tp.assign(has=tp["target_id"].notna()).groupby("pb").apply(
             lambda d: np.average(d["has"], weights=d["w"]), include_groups=False)
@@ -148,7 +148,7 @@ class Simulator:
         # --- rushing
         tr = P.runs[P.runs["offense"] == team]
         k_c = P.cfg["players"]["shrink_carries"]
-        rshares = P._shares(tr, "rusher_id", "bucket", active, k_c)
+        rshares = P._shares(tr, "rusher_id", "bucket", active, k_c, team, "carry")
         reff_p, rtd = P._player_eff(tr, "rusher_id", "bucket", reff, k_c)
         d_run = P.p[(P.p["defense"] == opp) & P.p["is_run"]]
         m_run_td = P._ratio(_wmean(d_run, "touchdown"), P.lg_run_td, len(d_run))
