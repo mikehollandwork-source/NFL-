@@ -40,7 +40,14 @@ def prep_plays(plays: pd.DataFrame, cfg: dict) -> pd.DataFrame:
                       | (p["is_run"] & (p["yards"] >= d["explosive_run_yards"])))
     turnover = p["interception"].astype(bool) | (p["fumble"].astype(bool) & (p["epa"] < -1.5))
     mode = d["negative_play"]
-    if mode == "epa":
+    yards = p["yards"].fillna(0)
+    p["converted"] = (yards >= p["ytg"]) | p["touchdown"].astype(bool)
+    p["failed_conversion"] = p["third"] & ~p["converted"]
+    if mode == "custom":
+        # Nets zero or less (incompletions, stuffs, sacks), any turnover, or a
+        # 3rd/4th-down play that doesn't move the chains.
+        p["negative"] = (yards <= 0) | turnover | p["failed_conversion"]
+    elif mode == "epa":
         p["negative"] = p["epa"] < 0
     elif mode == "success":
         p["negative"] = p["success"] == 0
@@ -49,6 +56,9 @@ def prep_plays(plays: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     else:
         raise ValueError(f"unknown negative_play definition {mode!r}")
 
+    ytg = p["ytg"]
+    p["dist"] = np.select([ytg <= 2, ytg <= 6, ytg <= 10], ["short", "medium", "long"], "very_long")
+    p["down_dist"] = p["down"].fillna(0).astype(int).astype(str) + "_" + p["dist"]
     last_week = p["week"].max()
     hl = cfg["weighting"]["half_life_weeks"]
     p["w"] = 0.5 ** ((last_week - p["week"]) / hl)
@@ -87,9 +97,23 @@ def offense_style(plays: pd.DataFrame, all_plays: pd.DataFrame) -> pd.DataFrame:
             "success_rate": _wmean(g, "success"),
             "negative_rate": _wmean(g, "negative"),
             "explosive_rate": _wmean(g, "explosive"),
-            "shotgun_rate": _wmean(g, "shotgun") if g["shotgun"].any() else np.nan,
-            "no_huddle_rate": _wmean(g, "no_huddle") if g["no_huddle"].any() else np.nan,
+            # NaN when the source text never marks formation / tempo.
+            "shotgun_rate": _wmean(g, "shotgun") if plays["shotgun"].any() else np.nan,
+            "no_huddle_rate": _wmean(g, "no_huddle") if plays["no_huddle"].any() else np.nan,
         }
+        for dd in ("1_long", "2_short", "2_medium", "2_long", "3_short", "3_medium", "3_long", "3_very_long"):
+            sub = g[g["down_dist"] == dd]
+            r[f"pass_rate_{dd}"] = _wmean(sub, "dropback") if len(sub) >= 5 else np.nan
+        rz = g[g["redzone"]]
+        rz_pass = rz[rz["is_pass"]]
+        r["redzone_plays_per_game"] = len(rz) / max(games, 1)
+        r["redzone_epa"] = _wmean(rz, "epa")
+        r["redzone_td_rate"] = rz.groupby("boxscore_id")["touchdown"].sum().sum() / max(len(rz), 1)
+        for fam, sub in (("short_pass", rz_pass[rz_pass["depth"] == "short"]),
+                         ("deep_pass", rz_pass[rz_pass["deep"]]),
+                         ("run", rz[rz["is_run"]])):
+            r[f"redzone_share_{fam}"] = len(sub) / max(len(rz), 1)
+        r["third_down_conversion"] = _wmean(g[g["third"]], "converted")
         for b in PASS_BUCKETS:
             r[f"share_{b}"] = (passes["bucket"] == b).sum() / max(passes["bucket"].notna().sum(), 1)
         for b in RUN_BUCKETS:
@@ -128,6 +152,12 @@ def describe_style(row: pd.Series, league: pd.Series) -> list[str]:
     cmp("redzone_pass_rate", "Red-zone pass rate", thresh=0.06)
     cmp("fourth_down_go_rate", "4th-down go rate", thresh=0.06)
     cmp("sack_rate", "Sack rate", thresh=0.015)
+    cmp("shotgun_rate", "Shotgun rate", thresh=0.08)
+    cmp("no_huddle_rate", "No-huddle rate", thresh=0.04)
+    cmp("pass_rate_2_short", "Pass rate on 2nd & short", thresh=0.12)
+    cmp("pass_rate_3_short", "Pass rate on 3rd & short", thresh=0.12)
+    cmp("redzone_share_run", "Red-zone run share", thresh=0.07)
+    cmp("third_down_conversion", "3rd-down conversion", thresh=0.05)
     cmp("epa_per_pass", "EPA/dropback", fmt="{:+.2f}", thresh=0.05)
     cmp("epa_per_run", "EPA/run", fmt="{:+.2f}", thresh=0.05)
     run_cols = {b: row.get(f"share_{b}", np.nan) for b in RUN_BUCKETS}

@@ -44,6 +44,18 @@ def box_id(week, home):
     return f"202609{week:02d}0{ABBR_TO_FRANCHISE[home]}"
 
 
+def dlink(team, n):
+    p = f"{team.title()}Lb{n:02d}"
+    return f'<a href="/players/{p[0]}/{p}.htm">{team} LB{n}</a>'
+
+
+def tackle(rng, dfn):
+    a = dlink(dfn, rng.choice([1, 1, 2, 3]))
+    if rng.random() < 0.3:
+        return f" (tackle by {a} and {dlink(dfn, 4)})"
+    return f" (tackle by {a})"
+
+
 def gen_drive_plays(rng, off, dfn, n):
     """Yield (text, html, yards, stats) tuples for n offensive plays."""
     soft_deep = dfn == "DAL"
@@ -59,7 +71,10 @@ def gen_drive_plays(rng, off, dfn, n):
             if rng.random() < p_cmp:
                 y = rng.randint(16, 45) if depth == "deep" else rng.randint(2, 14)
                 txt = f"{off} QB pass complete {depth} {side} to {off} {slot} for {y} yards"
-                html = f"{plink(off, 'QB')} pass complete {depth} {side} to {plink(off, slot)} for {y} yards"
+                td = ", touchdown" if y >= 30 or rng.random() < 0.03 else tackle(rng, dfn)
+                txt += td if td.startswith(",") else ""
+                html = (f"{plink(off, 'QB')} pass complete {depth} {side} to {plink(off, slot)} "
+                        f"for {y} yards{td}")
                 yield txt, html, y, ("pass", slot, True, y)
             else:
                 txt = f"{off} QB pass incomplete {depth} {side} intended for {off} {slot}"
@@ -67,12 +82,14 @@ def gen_drive_plays(rng, off, dfn, n):
                 yield txt, html, 0, ("pass", slot, False, 0)
         elif r < 0.6:
             y = -rng.randint(3, 9)
-            yield (f"{off} QB sacked by X for {y} yards", f"{plink(off, 'QB')} sacked by X for {y} yards",
+            yield (f"{off} QB sacked by X for {y} yards",
+                   f"{plink(off, 'QB')} sacked by {dlink(dfn, 2)} for {y} yards",
                    y, ("sack", None, None, y))
         else:
             gap = rng.choice(["left end", "left tackle", "up the middle", "right guard", "right end"])
             y = rng.randint(-2, 9)
-            yield (f"{off} RB {gap} for {y} yards", f"{plink(off, 'RB')} {gap} for {y} yards",
+            end = ", touchdown" if rng.random() < 0.03 else tackle(rng, dfn)
+            yield (f"{off} RB {gap} for {y} yards", f"{plink(off, 'RB')} {gap} for {y} yards{end}",
                    y, ("run", "RB", None, y))
 
 
@@ -105,8 +122,14 @@ def render_boxscore(rng, week, away, home):
                 elif kind == "run":
                     stats[(off, "RB")]["rush_att"] += 1
                     stats[(off, "RB")]["rush_yds"] += yds
+            kicker = f'<a href="/players/{off[0]}/{off.title()}Kk00.htm">{off} K</a>'
+            dist = rng.randint(25, 55)
+            res = "good" if rng.random() < 0.85 else "no good"
             rows.append(f'<tr><th data-stat="quarter">{q}</th><td data-stat="detail">'
-                        f'{off} K punts 45 yards</td></tr>')
+                        f'{kicker} {dist} yard field goal {res}</td></tr>')
+            if q % 2 == 0:
+                rows.append(f'<tr><th data-stat="quarter">{q}</th><td data-stat="detail">'
+                            f'{kicker} kicks extra point good</td></tr>')
     pbp = '<table id="pbp"><tbody>' + "".join(rows) + "</tbody></table>"
 
     po = []

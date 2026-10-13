@@ -73,3 +73,27 @@ def test_out_override_removes_player(tmp_path):
     assert "BUF WR1" not in set(df["player"])
     buf = df[df["team"] == "BUF"]
     assert abs(buf["targets"].sum() - buf["pass_att"].max()) < 0.5
+
+
+def test_simulation_props(tmp_path):
+    from nfl_proj.sim import Simulator, apply_lines, wide_means
+    cache = tmp_path / "raw"
+    write_cache(cache)
+    t = build_season(2026, cache, tmp_path / "nfl.db", log=lambda *_: None)
+    assert not t["defenders"].empty and not t["kickers"].empty
+    plays = prep_plays(t["plays"], CFG)
+    proj = Projector(plays, t["player_games"], t["games"], CFG)
+    sim = Simulator(proj, t["player_games"], t["defenders"], t["kickers"], n_sims=800)
+    props = sim.run_week(7)
+    lines = pd.DataFrame([{"player": "BUF WR1", "stat": "rec_yds", "line": "60.5"}])
+    props = apply_lines(props, lines)
+    row = props[(props["player"] == "BUF WR1") & (props["stat"] == "rec_yds")].iloc[0]
+    assert abs(row["p_over"] + row["p_under"] - 1) < 1e-9
+    w = wide_means(props).set_index("player")
+    # QB passing yards equal the sum of his receivers' yards.
+    buf = w[w["team"] == "BUF"]
+    assert abs(buf.loc["BUF QB", "pass_yds"] - buf["rec_yds"].sum()) < 1.0
+    assert buf.loc["BUF QB", "longest_completion"] >= buf["longest_rec"].max() - 1e-6
+    assert w.loc["BUF K", "kicking_points"] > 0
+    assert w.loc["DAL LB1", "tackles"] > w.loc["DAL LB3", "tackles"]
+    assert 0 < w.loc["BUF RB", "anytime_td"] <= 1

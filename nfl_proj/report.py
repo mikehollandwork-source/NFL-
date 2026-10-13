@@ -82,12 +82,19 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
         for n in matchup_notes(ctx, style, dprof, labels, lg_def):
             out.append(f"- {n}")
         t = proj[proj["team"] == team]
-        cols = ["player", "pos", "pass_yds", "pass_td", "carries", "rush_yds", "rush_td",
-                "targets", "receptions", "rec_yds", "rec_td"]
-        t = t[(t["pass_att"] > 1) | (t["carries"] > 1.5) | (t["targets"] > 1.5)][cols]
-        out.append("")
-        out.append(t.to_markdown(index=False, floatfmt=".1f"))
-        out.append("")
+        cols = ["player", "pos", "pass_yds", "pass_td", "interceptions", "carries", "rush_yds",
+                "targets", "receptions", "rec_yds", "anytime_td"]
+        off = t[(t["pass_att"] > 1) | (t["carries"] > 1.5) | (t["targets"] > 1.5)]
+        out += ["", off[[c for c in cols if c in off]].to_markdown(index=False, floatfmt=".2f"), ""]
+        if "kicking_points" in t:
+            k = t[t["kicking_points"] > 0][["player", "fg_made", "xp_made", "kicking_points"]]
+            if not k.empty:
+                out += [f"**{team} kicker**", "", k.to_markdown(index=False, floatfmt=".2f"), ""]
+        if "tackles" in t:
+            d = t[t["tackles"] > 1.5].sort_values("tackles", ascending=False)[["player", "tackles", "sacks", "def_int"]]
+            if not d.empty:
+                out += [f"**{team} defenders (vs {opp} offense)**", "",
+                        d.head(8).to_markdown(index=False, floatfmt=".2f"), ""]
     return "\n".join(out)
 
 

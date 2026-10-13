@@ -23,6 +23,12 @@ PASS_RE = re.compile(
 RUN_RE = re.compile(
     r"\b(left|right)\s+(end|tackle|guard)\b|\bup the middle\b|\bmiddle for\b", re.I)
 YARDS_RE = re.compile(r"\bfor (-?\d+) yards?\b", re.I)
+_ID = r'<a href="/players/\w/([A-Za-z0-9.\-]+)\.htm"'
+TACKLE_RE = re.compile(r"tackle by ([^)]*)\)", re.I)
+SACKER_RE = re.compile(r"sacked by ([^)]*?)(?: for |$)", re.I)
+INTERCEPTOR_RE = re.compile(r"intercepted by\s+" + _ID, re.I)
+FG_RE = re.compile(r"(\d+) yard field goal (good|no good|blocked)", re.I)
+XP_RE = re.compile(r"extra point (good|no good|blocked)", re.I)
 
 SPECIAL = re.compile(
     r"\bpunts?\b|\bkicks? off\b|\bkickoff\b|\bfield goal\b|\bextra point\b|"
@@ -56,6 +62,8 @@ def parse_detail(text: str, html: str = "") -> dict:
         "no_play": "(no play)" in low, "shotgun": "shotgun" in low,
         "no_huddle": "no huddle" in low, "passer_id": None, "target_id": None,
         "rusher_id": None, "first_player_id": ids[0] if ids else None,
+        "kicker_id": None, "kick_type": None, "kick_distance": None, "kick_good": None,
+        **defenders(html or ""),
     }
 
     m = YARDS_RE.search(t)
@@ -72,6 +80,14 @@ def parse_detail(text: str, html: str = "") -> dict:
         return out
     if SPECIAL.search(low):
         out["play_type"] = "special"
+        fg, xp = FG_RE.search(t), XP_RE.search(t)
+        if fg:
+            out.update(kick_type="fg", kick_distance=float(fg.group(1)),
+                       kick_good=fg.group(2).lower() == "good", kicker_id=out["first_player_id"])
+        elif xp:
+            out.update(kick_type="xp", kick_good=xp.group(1).lower() == "good")
+            m = re.search(_ID + r"[^<]*</a>\s+kicks extra point", html or "")
+            out["kicker_id"] = m.group(1) if m else None
         return out
     if "kneels" in low:
         out["play_type"] = "kneel"
@@ -124,6 +140,23 @@ def parse_detail(text: str, html: str = "") -> dict:
     if out["penalty"]:
         out["play_type"] = "penalty"
     return out
+
+
+def defenders(html: str) -> dict:
+    """Defensive credits as comma-joined player ids (tackles include assists)."""
+    tacklers = []
+    for chunk in TACKLE_RE.findall(html):
+        tacklers += re.findall(_ID, chunk)
+    sackers = []
+    for chunk in SACKER_RE.findall(html):
+        sackers += re.findall(_ID, chunk)
+    m = INTERCEPTOR_RE.search(html)
+    return {"tacklers": ",".join(tacklers), "sackers": ",".join(sackers),
+            "interceptor_id": m.group(1) if m else None}
+
+
+def player_names(html: str) -> dict[str, str]:
+    return dict(re.findall(_ID + r">([^<]+)</a>", html))
 
 
 def is_success(down, ytg, yards) -> bool | None:

@@ -30,6 +30,7 @@ def _paths(cfg):
         "out": ROOT / "output" / str(season),
         "tags": ROOT / "data" / "manual" / "defense_tags.csv",
         "overrides": ROOT / "data" / "manual" / "player_overrides.csv",
+        "lines": ROOT / "data" / "manual" / "prop_lines.csv",
     }
 
 
@@ -94,13 +95,33 @@ def main(argv=None):
             print("Stopped. Edit config/projection.toml and re-run.")
             return
     overrides = pd.read_csv(paths["overrides"], dtype=str).fillna("") if paths["overrides"].exists() else None
+    from .sim import Simulator, apply_lines, wide_means
     proj = Projector(plays, t["player_games"], games, cfg, labels, overrides)
-    df, ctx = proj.project_week(week)
-    df.to_csv(paths["out"] / f"week_{week:02d}_projections.csv", index=False)
-    md = week_report(week, df, ctx, style, dprof, labels, cfg, est, strength)
-    (paths["out"] / f"week_{week:02d}_report.md").write_text(md)
-    print(f"wrote {paths['out']}/week_{week:02d}_projections.csv and _report.md "
-          f"({len(df)} players, {len(ctx) // 2} games)")
+    _, ctx = proj.project_week(week)
+    sim = Simulator(proj, t["player_games"], t.get("defenders"), t.get("kickers"),
+                    n_sims=cfg["sim"]["n_sims"], seed=cfg["sim"]["seed"])
+    props = sim.run_week(week)
+    lines = pd.read_csv(paths["lines"], dtype=str) if paths["lines"].exists() else None
+    props = apply_lines(props, lines)
+    wide = wide_means(props)
+    props_out = props.drop(columns="_samples").round(3)
+
+    stem = paths["out"] / f"week_{week:02d}"
+    wide.to_csv(f"{stem}_projections.csv", index=False)
+    props_out.to_csv(f"{stem}_props.csv", index=False)
+    import sqlite3
+    with sqlite3.connect(paths["db"]) as con:
+        for name, df in ((f"projections_week_{week:02d}", wide), (f"props_week_{week:02d}", props_out)):
+            df.to_sql(name, con, if_exists="replace", index=False)
+    md = week_report(week, wide, ctx, style, dprof, labels, cfg, est, strength)
+    if "p_over" in props_out:
+        edge = props_out[props_out["line"].notna()].assign(
+            best=lambda d: d[["p_over", "p_under"]].max(axis=1)).sort_values("best", ascending=False)
+        md += "\n## Your prop lines\n\n" + edge[["player", "stat", "line", "median", "p_over", "p_under"]] \
+            .to_markdown(index=False, floatfmt=".2f") + "\n"
+    Path(f"{stem}_report.md").write_text(md)
+    print(f"wrote {stem}_projections.csv, _props.csv, _report.md "
+          f"({wide['player'].nunique()} players, {len(ctx) // 2} games)")
 
 
 if __name__ == "__main__":

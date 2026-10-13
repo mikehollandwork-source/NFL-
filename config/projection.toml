@@ -15,10 +15,12 @@ neutral_score_margin = 8
 
 [definitions]
 # What counts as a "negative play" when deciding what a coach cuts:
+#   "custom"  -> nets 0 or less (incl. incompletions, sacks), a turnover, or a
+#                3rd/4th-down play that fails to convert (your definition)
 #   "epa"     -> expected points added < 0 (uses PFR's EP before/after)
 #   "success" -> fails the success-rate bar (40% / 60% / 100% of yards to go)
 #   "loss"    -> lost yardage, sack, or turnover only
-negative_play = "epa"
+negative_play = "custom"
 explosive_pass_yards = 20
 explosive_run_yards = 10
 
@@ -56,3 +58,9 @@ shrink_targets = 25
 shrink_carries = 40
 # A player must have appeared in one of the team's last N games to be projected.
 active_within_games = 2
+
+[sim]
+# Simulated games per matchup. Every prop (medians, ranges, longest plays,
+# anytime TD, over/under vs your lines) is read off these simulations.
+n_sims = 5000
+seed = 0

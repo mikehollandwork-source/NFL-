@@ -5,6 +5,8 @@ Tables written to ``data/nfl_<season>.db``:
   player_games  box score line per player per game (plus snaps / position)
   plays         one row per play with offense/defense, bucket, EPA, success
   team_defense  PFR advanced defense (blitz / pressure) season totals
+  defenders     tackles (incl. assists), sacks, interceptions per defender per game
+  kickers       FG / XP attempts and makes per kicker per game
 """
 
 from __future__ import annotations
@@ -15,7 +17,7 @@ from pathlib import Path
 import pandas as pd
 
 from .parse_pfr import parse_boxscore, parse_schedule, parse_team_defense
-from .playparse import is_success, parse_detail
+from .playparse import is_success, parse_detail, player_names
 from .scrape import Fetcher
 
 
@@ -82,6 +84,45 @@ def build_game_plays(game: dict, box: dict) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def defender_games(plays: pd.DataFrame, names: dict) -> pd.DataFrame:
+    rows = {}
+    for r in plays.itertuples():
+        if r.no_play or not r.defense:
+            continue
+        def add(pid, stat, v):
+            key = (r.boxscore_id, pid)
+            row = rows.setdefault(key, {"boxscore_id": r.boxscore_id, "week": r.week,
+                                        "player_id": pid, "player": names.get(pid, pid),
+                                        "team": r.defense, "tackles": 0.0, "sacks": 0.0,
+                                        "def_int": 0.0})
+            row[stat] += v
+        if r.play_type in ("pass", "run", "sack", "scramble"):
+            for pid in filter(None, (r.tacklers or "").split(",")):
+                add(pid, "tackles", 1.0)
+        sackers = [x for x in (r.sackers or "").split(",") if x]
+        for pid in sackers:
+            add(pid, "sacks", 1.0 / len(sackers))
+        if r.interceptor_id:
+            add(r.interceptor_id, "def_int", 1.0)
+    return pd.DataFrame(rows.values())
+
+
+def kicker_games(plays: pd.DataFrame, names: dict) -> pd.DataFrame:
+    k = plays[plays["kick_type"].notna() & plays["kicker_id"].notna() & plays["offense"].notna()]
+    if k.empty:
+        return pd.DataFrame()
+    k = k.assign(fg=k["kick_type"].eq("fg"), xp=k["kick_type"].eq("xp"),
+                 good=k["kick_good"].fillna(False).astype(bool))
+    g = k.groupby(["boxscore_id", "week", "kicker_id", "offense"]).apply(
+        lambda d: pd.Series({"fg_att": d["fg"].sum(), "fg_made": (d["fg"] & d["good"]).sum(),
+                             "fg_50_made": (d["fg"] & d["good"] & (d["kick_distance"] >= 50)).sum(),
+                             "xp_att": d["xp"].sum(), "xp_made": (d["xp"] & d["good"]).sum()}),
+        include_groups=False).reset_index()
+    g = g.rename(columns={"kicker_id": "player_id", "offense": "team"})
+    g["player"] = g["player_id"].map(lambda x: names.get(x, x))
+    return g
+
+
 def build_season(season: int, cache_dir: Path, db_path: Path, log=print) -> dict[str, pd.DataFrame]:
     fetcher = Fetcher(cache_dir)
     sched_path = fetcher.cache_path(f"/years/{season}/games.htm")
@@ -89,7 +130,7 @@ def build_season(season: int, cache_dir: Path, db_path: Path, log=print) -> dict
         raise FileNotFoundError(f"No cached schedule at {sched_path}; run `scrape` first.")
     games = parse_schedule(sched_path.read_text(encoding="utf-8"), season)
 
-    play_frames, player_rows = [], []
+    play_frames, player_rows, names = [], [], {}
     for g in games:
         if not g["boxscore_id"]:
             continue
@@ -101,6 +142,8 @@ def build_season(season: int, cache_dir: Path, db_path: Path, log=print) -> dict
         if not box["pbp"]:
             log(f"warning: {g['boxscore_id']} has no play-by-play table")
         play_frames.append(build_game_plays(g, box))
+        for raw in box["pbp"]:
+            names.update(player_names(raw["detail_html"]))
 
         snaps = {(s["player_id"], s["team"]): s for s in box["snaps"]}
         seen = set()
@@ -124,6 +167,9 @@ def build_season(season: int, cache_dir: Path, db_path: Path, log=print) -> dict
         "plays": pd.concat(play_frames, ignore_index=True) if play_frames else pd.DataFrame(),
         "player_games": pd.DataFrame(player_rows).fillna(0) if player_rows else pd.DataFrame(),
     }
+    if play_frames:
+        tables["defenders"] = defender_games(tables["plays"], names)
+        tables["kickers"] = kicker_games(tables["plays"], names)
     opp_path = fetcher.cache_path(f"/years/{season}/opp.htm")
     tables["team_defense"] = (pd.DataFrame(parse_team_defense(opp_path.read_text(encoding="utf-8")))
                               if opp_path.exists() else pd.DataFrame())
