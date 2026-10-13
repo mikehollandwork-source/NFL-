@@ -1,0 +1,58 @@
+# Every modeling choice lives here. Change a value, re-run `project`.
+# The CLI prints the active choices before it projects anything.
+
+season = 2026
+
+[scrape]
+delay_seconds = 4.0          # PFR bans clients above ~20 requests/minute
+
+[filters]
+# Plays dropped before measuring tendencies (garbage time distorts play-calling).
+garbage_time_quarter = 4
+garbage_time_score_margin = 17
+# "Neutral" situations used for pass rate: score within this margin, quarters 1-3.
+neutral_score_margin = 8
+
+[definitions]
+# What counts as a "negative play" when deciding what a coach cuts:
+#   "epa"     -> expected points added < 0 (uses PFR's EP before/after)
+#   "success" -> fails the success-rate bar (40% / 60% / 100% of yards to go)
+#   "loss"    -> lost yardage, sack, or turnover only
+negative_play = "epa"
+explosive_pass_yards = 20
+explosive_run_yards = 10
+
+[weighting]
+# Exponential recency weighting: a game this many weeks old counts half.
+half_life_weeks = 4.0
+
+[adaptation]
+# "Coaches cut what failed and do more of what worked."
+# "measured" -> use the effect size estimated from this season's data, scaled
+#               down when it is not statistically clear (recommended)
+# "assume"   -> apply `assumed_strength` no matter what the data says
+# "off"      -> ignore last week's results
+mode = "measured"
+assumed_strength = 0.5
+# Minimum plays of a type in the last game before it can trigger an adjustment.
+min_plays = 3
+
+[matchup]
+# How much the opponent's defense moves the projection. 0 = ignore opponent,
+# 1 = fully trust the defense's allowed rates (after shrinkage).
+defense_weight = 0.75
+# Plays of evidence needed before a defense's rate is trusted at 50%.
+# Higher = more regression to league average.
+shrink_plays = 40
+# Defense labels to use for "how offenses perform against different defenses":
+#   "auto"   -> derive from scraped data (deep-pass allowed, 3rd-down pressure, run defense)
+#   "manual" -> use data/manual/defense_tags.csv (your coverage / blitz labels)
+#   "both"   -> manual where provided, auto otherwise
+defense_labels = "both"
+
+[players]
+# Plays of evidence before a player's own per-target / per-carry rate is trusted at 50%.
+shrink_targets = 25
+shrink_carries = 40
+# A player must have appeared in one of the team's last N games to be projected.
+active_within_games = 2
