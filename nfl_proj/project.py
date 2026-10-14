@@ -103,6 +103,21 @@ class Projector:
         self.def_run = bucket_rates(dweight(self.runs), ["defense", "bucket"]).set_index(["defense", "bucket"])
         self.off_pass = bucket_rates(self.passes, ["offense", "pb"]).set_index(["offense", "pb"])
         self.off_run = bucket_rates(self.runs, ["offense", "bucket"]).set_index(["offense", "bucket"])
+        # Run defense by lane failed the out-of-sample test (output/<season>/factor_tests.md): a
+        # defense's yards allowed in one lane doesn't repeat beyond its overall run defense. With
+        # run_def_by_lane off, every lane uses the defense's overall rate (offense lane mix kept).
+        self.run_def_by_lane = cfg["matchup"].get("run_def_by_lane", False)
+        # method "measured": plays before a team rate is trusted at 50%, per side and stat,
+        # measured 2021-25 (factor_tests.md section 0); zone / lane splits use the team's overall
+        # rate because neither offense nor defense zone splits repeat. "legacy": one shrink_plays.
+        self.measured = cfg["matchup"].get("method", "legacy") == "measured"
+        self.k = cfg["matchup"].get("shrink", {}) if self.measured else {}
+        self.lg_pass_all = bucket_rates(self.passes.assign(_all="p"), ["_all"]).set_index("_all").loc["p"]
+        self.off_pass_all = bucket_rates(self.passes, ["offense"]).set_index("offense")
+        self.def_pass_all = bucket_rates(dweight(self.passes), ["defense"]).set_index("defense")
+        self.off_run_all = bucket_rates(self.runs, ["offense"]).set_index("offense")
+        self.lg_run_all = bucket_rates(self.runs.assign(_all="run"), ["_all"]).set_index("_all").loc["run"]
+        self.def_run_all = bucket_rates(dweight(self.runs), ["defense"]).set_index("defense")
 
         self.est = adaptation.estimate(plays, cfg["adaptation"]["min_plays"])
         self.strength = adaptation.effective_strength(self.est, cfg)
@@ -286,8 +301,11 @@ class Projector:
             f, notes = self.corners.receiver_factors(opp, rec)
         f = dict(f)
         moved = []
+        use_pos = self.cfg.get("defense", {}).get("position_factor", True)
         for r in rec.itertuples():
-            pf = self.defan.position_factor(opp, r.pos)
+            # Yards per target vs WR / TE / RB beyond the defense's overall rate doesn't repeat
+            # (factor_tests: split-half r ~ 0), so [defense] position_factor = false skips it.
+            pf = self.defan.position_factor(opp, r.pos) if use_pos else 1.0
             if pf != 1.0:
                 f[r.player_id] = f.get(r.player_id, 1.0) * pf
                 if abs(pf - 1) >= 0.05 and r.share >= 0.08:
@@ -359,18 +377,22 @@ class Projector:
         s = a["sos"]["off_pts"] * a["sos"]["def_pts"] * a["td_factor"]
         pf = self.priors.factor
         return {"pass_td": self._ratio(_wmean(d_pass, "touchdown"), self.lg_pass_td, len(d_pass),
-                                       pf("def", opp, "pass_td")) * s,
+                                       pf("def", opp, "pass_td"), "def_pass_td") * s,
                 "run_td": self._ratio(_wmean(d_run, "touchdown"), self.lg_run_td, len(d_run),
-                                      pf("def", opp, "run_td")) * s,
-                "int": self._ratio(_wmean(d_pass, "interception"), self.lg_int, len(d_pass))}
+                                      pf("def", opp, "run_td"), "def_run_td") * s,
+                "int": self._ratio(_wmean(d_pass, "interception"), self.lg_int, len(d_pass), key="def_int")}
 
     # ---------------------------------------------------------------- team
-    def _ratio(self, d_val, lg_val, n, prior_mult: float = 1.0):
+    def _ratio(self, d_val, lg_val, n, prior_mult: float = 1.0, key: str | None = None):
         """Opponent multiplier: shrunk D rate / league rate, weighted by dw.
         Small samples are pulled toward ``prior_mult`` x league (the
-        defense's regressed 2025 rate when priors are on)."""
+        defense's regressed 2025 rate when priors are on). With measured
+        shrinkage (``key`` names the rate) the measured constant already
+        sets how much to trust the defense, so dw isn't applied again."""
         if lg_val is None or pd.isna(lg_val) or lg_val == 0:
             return 1.0
+        if self.measured and key in self.k:
+            return float(shrink(d_val, n, lg_val * prior_mult, self.k[key]) / lg_val)
         d = shrink(d_val, n, lg_val * prior_mult, self.k_def)
         return float(1 + self.dw * (d / lg_val - 1))
 
@@ -402,7 +424,10 @@ class Projector:
             db_rate = float(np.clip(db_rate + self.adjustments(team, opp, week)["dropback_shift"], 0.3, 0.8))
         dropbacks = plays * db_rate
         tdb, ddb = t[t["dropback"]], d[d["dropback"]]
-        sack_rate = _wmean(tdb, "is_sack") * self._ratio(_wmean(ddb, "is_sack"), self.lg_sack, len(ddb))
+        own_sack = _wmean(tdb, "is_sack")
+        if self.measured and "off_sack" in self.k:
+            own_sack = shrink(own_sack, len(tdb), self.lg_sack, self.k["off_sack"])
+        sack_rate = own_sack * self._ratio(_wmean(ddb, "is_sack"), self.lg_sack, len(ddb), key="def_sack")
         if week is not None:
             sack_rate *= self.adjustments(team, opp, week)["oline"]["sack"]
         scramble_rate = _wmean(tdb, "play_type", fn=lambda s: s == "scramble")
@@ -446,6 +471,18 @@ class Projector:
             return {"ypp": 0.0, "cmp": 0.0, "td": 0.0, "m_ypp": 1.0, "m_cmp": 1.0}
         o = oo.loc[(team, b)] if (team, b) in oo.index else None
         d = dd.loc[(opp, b)] if (opp, b) in dd.index else None
+        if self.measured:
+            return self._matchup_measured(team, opp, family, b, lgr, week)
+        if family != "pass" and not self.run_def_by_lane:
+            d_all = self.def_run_all.loc[opp] if opp in self.def_run_all.index else None
+            lane_lg = lgr
+            lgr = lgr.copy()
+            if d_all is not None:
+                # Defense's overall ratio applied to this lane's league rate
+                d = pd.Series({"ypp": d_all["ypp"] / self.lg_run_all["ypp"] * lane_lg["ypp"],
+                               "n_raw": d_all["n_raw"]})
+            else:
+                d = None
         o_n = o["n_raw"] if o is not None else 0
         fam_p = "pass" if family == "pass" else "run"
         team_ypp = shrink(o["ypp"] if o is not None else np.nan, o_n,
@@ -463,6 +500,43 @@ class Projector:
             team_ypp *= a["sos"][f"off_{side}"]
             m_ypp *= a["sos"][f"def_{side}"] * a["ypp_factor"]
             m_ypp *= a["oline"][side] * (a["weather"]["pass"] if side == "pass" else 1.0)
+        return {"ypp": float(team_ypp), "cmp": float(team_cmp), "td": float(lgr["td"]),
+                "m_ypp": m_ypp, "m_cmp": m_cmp}
+
+    def _matchup_measured(self, team, opp, family, b, lgr, week):
+        """Bucket rate = league rate for this bucket x the offense's overall
+        ratio x the defense's overall ratio, each shrunk by its measured
+        constant toward the team's regressed 2025 rate."""
+        fam = "pass" if family == "pass" else "run"
+        lg_all = self.lg_pass_all if fam == "pass" else self.lg_run_all
+        o_all = (self.off_pass_all if fam == "pass" else self.off_run_all)
+        d_all = (self.def_pass_all if fam == "pass" else self.def_run_all)
+        o = o_all.loc[team] if team in o_all.index else None
+        d = d_all.loc[opp] if opp in d_all.index else None
+        pf = self.priors.factor
+        ko, kd = (self.k.get("off_pass_ypp", 150), self.k.get("def_pass_ypp", 1000)) if fam == "pass" else \
+                 (self.k.get("off_run_ypp", 325), self.k.get("def_run_ypp", 380))
+        o_ratio = shrink(o["ypp"] if o is not None else np.nan, o["n_raw"] if o is not None else 0,
+                         lg_all["ypp"] * pf("off", team, fam), ko) / lg_all["ypp"]
+        team_ypp = lgr["ypp"] * o_ratio
+        if fam == "pass":
+            o_cmp = shrink(o["cmp"] if o is not None else np.nan, o["n_raw"] if o is not None else 0,
+                           lg_all["cmp"] * pf("off", team, "cmp"), self.k.get("off_cmp", 275)) / lg_all["cmp"]
+            team_cmp = min(lgr["cmp"] * o_cmp, 0.95)
+            m_cmp = self._ratio(d["cmp"] if d is not None else np.nan, lg_all["cmp"],
+                                d["n_raw"] if d is not None else 0, pf("def", opp, "cmp"), "def_cmp")
+        else:
+            team_cmp, m_cmp = float(lgr["cmp"]), 1.0
+        m_ypp = float(shrink(d["ypp"] if d is not None else np.nan, d["n_raw"] if d is not None else 0,
+                             lg_all["ypp"] * pf("def", opp, fam), kd) / lg_all["ypp"])
+        sfam = "run" if fam == "run" else ("deep" if "_deep_" in b else "short")
+        m_ypp *= self.scheme_effect(team, opp)["ypp"][sfam]
+        m_ypp *= self.comps.effect(team, opp)[fam]
+        if week is not None:
+            a = self.adjustments(team, opp, week)
+            team_ypp *= a["sos"][f"off_{fam}"]
+            m_ypp *= a["sos"][f"def_{fam}"] * a["ypp_factor"]
+            m_ypp *= a["oline"][fam] * (a["weather"]["pass"] if fam == "pass" else 1.0)
         return {"ypp": float(team_ypp), "cmp": float(team_cmp), "td": float(lgr["td"]),
                 "m_ypp": m_ypp, "m_cmp": m_cmp}
 
@@ -819,8 +893,8 @@ class Projector:
             tp_int = _wmean(tp, "interception")
             n = len(tp)
             x["pass_td"] = vol["pass_att"] * shrink(tp_td, n, self.lg_pass_td * self.priors.factor(
-                "off", team, "pass_td"), 150) * m_pass_td
-            x["interceptions"] = vol["pass_att"] * shrink(tp_int, n, self.lg_int, 200) * m_int
+                "off", team, "pass_td"), self.k.get("off_pass_td", 150)) * m_pass_td
+            x["interceptions"] = vol["pass_att"] * shrink(tp_int, n, self.lg_int, self.k.get("off_int", 200)) * m_int
             sc = self.p[(self.p["offense"] == team) & (self.p["play_type"] == "scramble")]
             sc_ypc = sc["yards"].mean() if len(sc) else 6.0
             x["rush_td"] = x.get("rush_td", 0) + vol["scrambles"] * self.scramble_td_rate(team) * m_run_td

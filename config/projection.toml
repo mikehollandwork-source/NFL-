@@ -52,6 +52,12 @@ defense_weight = 0.75
 # Plays of evidence needed before a defense's rate is trusted at 50%.
 # Higher = more regression to league average.
 shrink_plays = 40
+# "measured": per-stat trust levels below (plays before a team's rate counts
+# 50%, measured 2021-25 odd vs even weeks, output/2026/factor_tests.md) and
+# zone / lane efficiency taken from the team's overall rate, since zone
+# splits don't repeat for offenses or defenses. "legacy": shrink_plays for all.
+method = "measured"
+run_def_by_lane = false
 # Defense labels to use for "how offenses perform against different defenses":
 #   "auto"   -> derive from scraped data (deep-pass allowed, 3rd-down pressure, run defense)
 #   "manual" -> use data/manual/defense_tags.csv (your coverage / blitz labels)
@@ -122,7 +128,7 @@ doubtful_plays = false
 # Cornerback matchups (PFR coverage charting + depth chart + researched
 # shadow corners in data/external/defense_personnel.csv).
 enabled = true
-shrink_targets = 30.0        # targets before a corner's own yds/target is trusted at 50%
+shrink_targets = 160.0       # targets before a corner's yds/target is trusted at 50% (measured 2024-25: odd vs even weeks r 0.16 at 29 targets)
 replacement_ypt_mult = 1.08  # an out corner's targets go to a replacement this much worse than league
 shadow_share = 0.7           # share of WR1's routes spent against an active shadow corner
 te_weight = 0.5              # tight ends get this share of the corner-group effect
@@ -138,6 +144,9 @@ pass_rate_per_point = 0.004
 [defense]
 # Position-group weakness (WR / TE / RB) and struggle-week diagnosis.
 shrink_targets = 40.0        # targets vs a position group before the split is trusted at 50%
+# Off: a defense's yards per target vs WR / TE / RB beyond its overall pass
+# defense is noise (odd vs even weeks r = 0.00 WR, 0.00 TE, -0.06 RB, 2021-25).
+position_factor = false
 struggle_epa = 0.12          # a "struggle" = EPA/play allowed this much above the defense's other games
 absent_game_weight = 0.5     # weight of a struggle game played without starters who are back now
 min_factor = 0.8
@@ -163,6 +172,21 @@ star_target_share = 0.25     # "consistent action" exemption from the usage-tren
 star_carry_share = 0.55
 star_cv = 0.35               # max game-to-game variation in usage for the exemption
 
+[matchup.shrink]
+off_pass_ypp = 150
+off_cmp = 275
+off_run_ypp = 325
+off_sack = 285
+off_pass_td = 410
+off_int = 4400
+def_pass_ypp = 1000
+def_cmp = 470
+def_run_ypp = 380
+def_sack = 1075
+def_pass_td = 50000   # defense TD rates don't repeat at all
+def_run_td = 3000
+def_int = 1600
+
 [priors]
 # Last season's team rates, regressed toward league average, as the
 # starting point that this season's games gradually replace.
@@ -172,6 +196,10 @@ regress = 0.5                # keep this share of a team's 2025 edge over league
 regress_new_caller = 0.3     # ...for offenses with a new play-caller
 regress_defense = 0.4
 volume_prior_games = 3.0     # plays per game: 2025 counts as this many games
+# Measured share of a team's 2025 edge over league that repeats (2021-25
+# season pairs); replaces regress / regress_defense per stat. A new
+# play-caller scales the offense values by regress_new_caller / regress.
+carryover = {off_pass = 0.46, off_run = 0.29, off_cmp = 0.48, off_pass_td = 0.37, off_run_td = 0.27, off_plays = 0.15, def_pass = 0.20, def_run = 0.23, def_cmp = 0.22, def_pass_td = 0.05, def_run_td = 0.13}
 
 [player_adaptation]
 # Per player: play types (buckets) that failed for him last game are cut by

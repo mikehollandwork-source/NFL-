@@ -107,6 +107,7 @@ def main(argv=None):
     gr = sub.add_parser("grade")
     gr.add_argument("--week", type=int, required=True)
     sub.add_parser("paper-summary")
+    sub.add_parser("factor-tests", help="out-of-sample tests of candidate factors (2021-25)")
     pj = sub.add_parser("project")
     pj.add_argument("--week", type=int, help="defaults to the next week with unplayed games")
     pj.add_argument("--yes", action="store_true", help="skip the confirmation prompt")
@@ -114,6 +115,13 @@ def main(argv=None):
 
     cfg = load_cfg(Path(args.config))
     paths = _paths(cfg)
+
+    if args.cmd == "factor-tests":
+        from .factor_tests import run_all
+        out = paths["out"] / "factor_tests.md"
+        run_all(paths["nflverse"], ROOT / "data" / "external" / "coordinators.csv", out)
+        print(f"wrote {out}")
+        return
 
     if args.cmd == "scrape" and _provider(cfg) == "nflverse":
         from .nflverse import download_season

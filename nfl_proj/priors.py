@@ -29,6 +29,10 @@ class Priors:
         self.r_new = c.get("regress_new_caller", 0.3)
         self.r_def = c.get("regress_defense", 0.4)
         self.k_games = c.get("volume_prior_games", 3.0)
+        # Measured year-to-year carryover per side and stat (factor_tests.md); overrides the
+        # flat regress values when present. A new play-caller scales the offense's carryover.
+        self.carry = c.get("carryover", {})
+        self.new_caller_scale = self.r_new / self.r_off if self.r_off else 1.0
         self.new_caller = set()
         if coach is not None and not coach.empty:
             self.new_caller = set(coach[coach["new_caller_2026"].astype(bool)]["team"])
@@ -38,7 +42,8 @@ class Priors:
         p = plays_prev[~plays_prev["garbage"]]
         drop, runs, passes = p[p["dropback"]], p[p["is_run"]], p[p["is_pass"]]
         lg = {"pass": drop["yards"].mean(), "run": runs["yards"].mean(),
-              "pass_td": passes["touchdown"].astype(float).mean(), "run_td": runs["touchdown"].astype(float).mean()}
+              "pass_td": passes["touchdown"].astype(float).mean(), "run_td": runs["touchdown"].astype(float).mean(),
+              "cmp": passes["complete"].fillna(False).astype(float).mean()}
         self.lg = lg
         rows = {}
         for side, key in (("off", "offense"), ("def", "defense")):
@@ -47,13 +52,18 @@ class Priors:
                 rows[(side, t)] = {
                     "pass": d["yards"].mean() / lg["pass"], "run": r["yards"].mean() / lg["run"],
                     "pass_td": ps["touchdown"].astype(float).mean() / lg["pass_td"],
+                    "cmp": ps["complete"].fillna(False).astype(float).mean() / lg["cmp"],
                     "run_td": r["touchdown"].astype(float).mean() / lg["run_td"]}
         self.ratio = rows
         allp = plays_prev
         per_game = allp.groupby(["offense", "boxscore_id"]).size().groupby(level=0).mean()
         self.plays_pg = (per_game / per_game.mean()).to_dict()
 
-    def _regress(self, side: str, team: str) -> float:
+    def _regress(self, side: str, team: str, stat: str | None = None) -> float:
+        key = f"{side}_{stat}" if stat else None
+        if key in self.carry:
+            r = float(self.carry[key])
+            return r * self.new_caller_scale if side == "off" and team in self.new_caller else r
         if side == "def":
             return self.r_def
         return self.r_new if team in self.new_caller else self.r_off
@@ -65,12 +75,12 @@ class Priors:
         v = self.ratio[(side, team)].get(stat, 1.0)
         if not np.isfinite(v):
             return 1.0
-        return float(1 + self._regress(side, team) * (v - 1))
+        return float(1 + self._regress(side, team, stat) * (v - 1))
 
     def plays_factor(self, team: str) -> float:
         if not self.enabled or team not in self.plays_pg:
             return 1.0
-        return float(1 + self._regress("off", team) * (self.plays_pg[team] - 1))
+        return float(1 + self._regress("off", team, "plays") * (self.plays_pg[team] - 1))
 
 
 def load_prev_plays(db_path: Path, cfg: dict) -> pd.DataFrame | None:
