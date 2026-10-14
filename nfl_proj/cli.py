@@ -36,6 +36,7 @@ def _paths(cfg):
         "external": ROOT / "data" / "external" / "defense_scheme.csv",
         "coaches": ROOT / "data" / "manual" / "coaches.csv",
         "nflverse": ROOT / "data" / "raw" / "nflverse",
+        "personnel": ROOT / "data" / "external" / "defense_personnel.csv",
     }
 
 
@@ -176,7 +177,12 @@ def main(argv=None):
     for f in avail_flags:
         print("availability:", f)
     from .sim import Simulator, apply_lines, wide_means
-    proj = Projector(plays, t["player_games"], games, cfg, labels, overrides, scheme, coach)
+    from .corners import Corners, load_personnel
+    outs = overrides[overrides["status"].str.lower() == "out"] if overrides is not None else pd.DataFrame()
+    corners = Corners(t.get("coverage"), t.get("depth_db"), load_personnel(paths["personnel"]),
+                      set(outs.get("player_id", pd.Series(dtype=str))) - {""},
+                      set(outs.get("player", pd.Series(dtype=str))), cfg)
+    proj = Projector(plays, t["player_games"], games, cfg, labels, overrides, scheme, coach, corners=corners)
     _, ctx = proj.project_week(week)
     sim = Simulator(proj, t["player_games"], t.get("defenders"), t.get("kickers"),
                     n_sims=cfg["sim"]["n_sims"], seed=cfg["sim"]["seed"])
@@ -194,7 +200,7 @@ def main(argv=None):
         for name, df in ((f"projections_week_{week:02d}", wide), (f"props_week_{week:02d}", props_out)):
             df.to_sql(name, con, if_exists="replace", index=False)
     md = week_report(week, wide, ctx, style, dprof, labels, cfg, est, strength, scheme, coach, plays,
-                     overrides=overrides, flags=avail_flags, market=proj.market)
+                     overrides=overrides, flags=avail_flags, market=proj.market, corners=corners)
     if "p_over" in props_out:
         edge = props_out[props_out["line"].notna()].assign(
             best=lambda d: d[["p_over", "p_under"]].max(axis=1)).sort_values("best", ascending=False)

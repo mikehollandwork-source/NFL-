@@ -374,14 +374,20 @@ def build_season(season: int, cache_dir: Path, db_path: Path, log=print) -> dict
         "defenders": build_defenders(stats, games),
         "kickers": build_kickers(stats, games),
     }
-    tables["team_defense"] = team_defense(plays, pd.read_csv(opt["adv_def"]) if "adv_def" in opt else None)
+    adv = pd.read_csv(opt["adv_def"]) if "adv_def" in opt else None
+    tables["team_defense"] = team_defense(plays, adv)
+    rosters = pd.read_csv(paths["rosters"], low_memory=False)
+    if adv is not None:
+        tables["coverage"] = coverage_table(adv, rosters)
     if "injuries" in opt:
         tables["injuries"] = injuries_table(pd.read_csv(opt["injuries"], low_memory=False))
     if "depth" in opt:
-        tables["depth_qb"] = depth_qbs(pd.read_csv(opt["depth"], low_memory=False))
+        depth = pd.read_csv(opt["depth"], low_memory=False)
+        tables["depth_qb"] = depth_qbs(depth)
+        tables["depth_db"] = depth_dbs(depth)
     db_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(db_path) as con:
-        for name in ("team_defense", "injuries", "depth_qb"):
+        for name in ("team_defense", "injuries", "depth_qb", "depth_db", "coverage"):
             con.execute(f"drop table if exists {name}")
         for name, df in tables.items():
             df.to_sql(name, con, if_exists="replace", index=False)
@@ -447,6 +453,35 @@ def depth_qbs(depth: pd.DataFrame) -> pd.DataFrame:
     q = last[last["pos_abb"] == "QB"].sort_values(["team", "pos_rank"]).drop_duplicates(["team", "gsis_id"])
     return pd.DataFrame({"as_of": q["dt"], "team": q["team"].map(team), "player_id": q["gsis_id"],
                          "player": q["player_name"], "rank": q["pos_rank"]})
+
+
+DB_SLOTS = {"LCB": "outside", "RCB": "outside", "CB": "outside", "NB": "slot",
+            "SS": "safety", "FS": "safety"}
+
+
+def depth_dbs(depth: pd.DataFrame) -> pd.DataFrame:
+    """Latest depth-chart snapshot, defensive backs with their alignment
+    (LCB / RCB outside, NB nickel = slot, SS / FS safeties)."""
+    last = depth[(depth["dt"] == depth["dt"].max()) & depth["pos_abb"].isin(list(DB_SLOTS))]
+    last = last.sort_values(["team", "pos_abb", "pos_rank"])
+    return pd.DataFrame({"as_of": last["dt"], "team": last["team"].map(team), "player_id": last["gsis_id"],
+                         "player": last["player_name"], "slot": last["pos_abb"],
+                         "role": last["pos_abb"].map(DB_SLOTS), "rank": last["pos_rank"]})
+
+
+def coverage_table(adv: pd.DataFrame, rosters: pd.DataFrame) -> pd.DataFrame:
+    """PFR charting per defender per game: targets, completions, yards and
+    TDs allowed in coverage. Keyed to GSIS ids through the weekly rosters."""
+    a = adv[adv["game_type"] == "REG"]
+    pfr_to_gsis = (rosters.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id")
+                   .set_index("pfr_id")["gsis_id"])
+    pos = rosters.dropna(subset=["pfr_id"]).drop_duplicates("pfr_id").set_index("pfr_id")["position"]
+    return pd.DataFrame({"week": a["week"], "team": a["team"].map(team),
+                         "player_id": a["pfr_player_id"].map(pfr_to_gsis), "pfr_id": a["pfr_player_id"],
+                         "player": a["pfr_player_name"], "pos": a["pfr_player_id"].map(pos),
+                         "targets": a["def_targets"].fillna(0), "completions": a["def_completions_allowed"].fillna(0),
+                         "yards": a["def_yards_allowed"].fillna(0), "td": a["def_receiving_td_allowed"].fillna(0),
+                         "ints": a["def_ints"].fillna(0)})
 
 
 # --------------------------------------------------------------------------

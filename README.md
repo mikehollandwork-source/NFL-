@@ -157,6 +157,21 @@ play-by-play. A heavy-blitz team that isn't getting sacks shows up as a mismatch
    played recently, in which case last game's starter is used and the report flags it. Your
    `player_overrides.csv` always wins. Rows written to `week_NN_availability.csv`.
 
+9. **Cornerbacks** (`[corners]`): each defensive back's yards allowed per target (PFR coverage
+   charting, shrunk toward league average) and the live depth chart (LCB / RCB / nickel). When
+   defensive backs are out, their share of targets goes to a replacement-level corner and the
+   opposing wide receivers' yards per target rise by this week's coverage ÷ the season's.
+   When `defense_personnel.csv` names a shadow corner and he plays, the offense's top WR spends
+   70% of his routes against him; the other WRs face the group without him. Capped at ±20%.
+
+## Researched defensive personnel (`data/external/defense_personnel.csv`)
+
+Web research on each defense: coordinator, man / zone lean, scheme notes, shadow corner, and the
+weak spot opponents attack, each row with source links, date and confidence. Only the shadow
+corner feeds the math; the rest is printed in the report under each game ("secondary"). Corner
+alignment always comes from the live depth chart, not the research, because rosters change weekly.
+Every name was checked against the current rosters. Re-research before trusting it in later weeks.
+
 ## What the data can and can't tell you
 
 - PBP gives down, distance, depth (short/deep), direction, run gap, sacks, EPA, and score.
@@ -188,6 +203,7 @@ nfl_proj/coaches.py     coach experience, career pass lean, star reliance
 nfl_proj/ratings.py     strength of schedule (opponent-adjusted ratings)
 nfl_proj/market.py      implied team totals, teams missing them, market blend
 nfl_proj/availability.py injury report + depth chart -> outs and starting QB
+nfl_proj/corners.py     cornerback coverage quality, injuries, shadow assignments
 nfl_proj/external.py    online scheme data (Sharp scraper), scheme labels, PBP cross-check
 nfl_proj/report.py      markdown reports
 tests/                  parser + nflverse mapping tests, end-to-end run on synthetic pages

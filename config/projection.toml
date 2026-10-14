@@ -117,3 +117,14 @@ max_factor = 1.6
 # Injury report + depth chart -> automatic outs and starting QB.
 # data/manual/player_overrides.csv always wins.
 doubtful_plays = false
+
+[corners]
+# Cornerback matchups (PFR coverage charting + depth chart + researched
+# shadow corners in data/external/defense_personnel.csv).
+enabled = true
+shrink_targets = 30.0        # targets before a corner's own yds/target is trusted at 50%
+replacement_ypt_mult = 1.08  # an out corner's targets go to a replacement this much worse than league
+shadow_share = 0.7           # share of WR1's routes spent against an active shadow corner
+te_weight = 0.5              # tight ends get this share of the corner-group effect
+min_factor = 0.8
+max_factor = 1.2

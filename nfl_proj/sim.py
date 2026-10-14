@@ -89,6 +89,7 @@ class Simulator:
         k_t = P.cfg["players"]["shrink_targets"]
         shares = P._shares(tp, "target_id", "pb", active, k_t, team, "target")
         eff, td = P._player_eff(tp, "target_id", "pb", peff, k_t)
+        cbf, _ = P.corner_factors(team, opp)
         tgt_rate = tp.assign(has=tp["target_id"].notna()).groupby("pb").apply(
             lambda d: np.average(d["has"], weights=d["w"]), include_groups=False)
         m_pass_td = tm["pass_td"]
@@ -109,7 +110,7 @@ class Simulator:
             for i, pid in enumerate(pids):
                 k = per[:, i]
                 e = eff.loc[(pid, b)] if (pid, b) in eff.index else None
-                ypt = (e["ypp_s"] if e is not None else e_b["ypp"]) * e_b["m_ypp"]
+                ypt = (e["ypp_s"] if e is not None else e_b["ypp"]) * e_b["m_ypp"] * cbf.get(pid, 1.0)
                 cr = min((e["cmp_s"] if e is not None else e_b["cmp"]) * e_b["m_cmp"], 0.95)
                 comp = rng.binomial(k, max(cr, 0.01))
                 scale = ypt / max(cr, 0.01) / pool_mean if pool_mean > 0 else 1.0

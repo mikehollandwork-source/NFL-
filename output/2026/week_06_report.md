@@ -34,6 +34,7 @@ Projected 56 plays, 61% dropbacks, 31.7 pass att, 21.8 runs, 1.2 sacks. QB: Bo N
 **Strength of schedule:** own pass yds x1.03, own run yds x1.04, own scoring x1.05 (raw stats re-rated against the opponents actually faced).
 **Out:** Pat Surtain II (carried from week 5 report: Out (Ankle)), Riley Moss (carried from week 5 report: Out (Ribs)).
 **Coach angle:** HC Sean Payton (veteran HC, 20 prior seasons); plays called by OC Davis Webb (first-time play-caller, 0 seasons calling); no prior play-calling seasons: this season's data only; this season top target share 22%.
+**SEA secondary:** DC Mike Macdonald, mixed-leaning: Witherspoon stays at nickel (run fits / screens / blitzes); Emmanwori can also play inside; outside Devon Witherspoon / Josh Jobe; nickel Nick Emmanwori; note: depth chart lists Devon Witherspoon outside but reporting has him at nickel; weak spot: Outside corners tested (Mike Evans 113 yards in the SF loss); [research confidence medium, 2026-10-14].
 **SEA defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy, shell: two_high [online (high)].
 - Best matchups: run_outside_right (x1.06), run_inside_right (x1.05); worst: pass_short_middle (x0.85).
 - SEA blitzes 21% of dropbacks (league 31%, FTN charting); DEN gains x0.76 as much per dropback vs the blitz as other offenses (57 blitzed dropbacks) -> pass yards x1.03
@@ -77,20 +78,23 @@ Projected 61 plays, 53% dropbacks, 29.1 pass att, 28.6 runs, 2.8 sacks. QB: Sam 
 **Strength of schedule:** opp pass D x0.96, opp run D x0.98 (raw stats re-rated against the opponents actually faced).
 **Out:** Chazz Surratt (carried from week 5 report: Out (Calf)), Zach Charbonnet (carried from week 5 report: Out (Knee)), Julian Neal (carried from week 5 report: Out (Hamstring)).
 **Coach angle:** HC Mike Macdonald (young HC, 2 prior seasons); plays called by OC Brian Fleury (first-time play-caller, 0 seasons calling); no prior play-calling seasons: this season's data only; this season top target share 34%.
+**DEN secondary:** DC Vance Joseph, man-leaning: Man-heavy with Cover 1 among the league's most used; pressure plan built around Surtain's assignment; outside Pat Surtain II (OUT) / Riley Moss (OUT); nickel Ja'Quan McMillian; weak spot: Without Surtain the replacements (Barron / Abrams-Draine) take the boundary; Riley Moss also out; [research confidence medium, 2026-10-14].
 **DEN defensive scheme (online/tagged):** blitz: heavy, coverage: avg, shell: two_high [online (high)].
 - DEN brings heavy 3rd-down pressure (source: blitz_pct); 3rd-down deep EPA allowed -1.10 on 7 attempts. SEA 3rd-down deep share 19%.
 - Best matchups: pass_short_left (x1.21), run_middle (x1.07); worst: pass_deep_left (x0.82).
 - SEA short plays vs two high shell defenses: x1.11 vs how other offenses fare (86 plays)
+- DEN DBs out: Riley Moss (22 tgts, 7.4 yds/tgt allowed), Patrick Surtain II (18 tgts, 7.2 yds/tgt allowed) -> coverage 7.8 → 8.4 yds/tgt; WR yards x1.07
+- DEN shadow corner Pat Surtain II is out: no shadow this week
 
 | player             | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Sam Darnold        | QB    |     217.96 |      1.64 |            1.08 |      0.85 |       6.53 |      0.00 |         0.00 |      0.00 |         0.00 |
-| Jaxon Smith-Njigba | WR    |       0.00 |      0.00 |            0.00 |      0.33 |       1.41 |      9.89 |         6.27 |     84.40 |         0.56 |
+| Sam Darnold        | QB    |     230.01 |      1.64 |            1.08 |      0.85 |       6.53 |      0.00 |         0.00 |      0.00 |         0.00 |
+| Jaxon Smith-Njigba | WR    |       0.00 |      0.00 |            0.00 |      0.33 |       1.41 |      9.89 |         6.27 |     90.68 |         0.56 |
 | Emanuel Wilson     | RB    |       0.00 |      0.00 |            0.00 |     20.70 |      80.96 |      1.71 |         1.10 |     12.23 |         0.49 |
 | George Holani      | RB    |       0.00 |      0.00 |            0.00 |      6.67 |      26.52 |      2.70 |         1.85 |     20.09 |         0.27 |
-| AJ Barner          | TE    |       0.00 |      0.00 |            0.00 |      0.20 |       0.73 |      4.50 |         2.78 |     31.76 |         0.19 |
-| Rashid Shaheed     | WR    |       0.00 |      0.00 |            0.00 |      0.61 |       2.88 |      3.75 |         2.26 |     28.80 |         0.14 |
-| Cooper Kupp        | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.10 |         1.96 |     23.21 |         0.15 |
+| AJ Barner          | TE    |       0.00 |      0.00 |            0.00 |      0.20 |       0.73 |      4.50 |         2.78 |     32.94 |         0.19 |
+| Rashid Shaheed     | WR    |       0.00 |      0.00 |            0.00 |      0.61 |       2.88 |      3.75 |         2.26 |     30.94 |         0.14 |
+| Cooper Kupp        | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.10 |         1.96 |     24.93 |         0.15 |
 
 **SEA kicker**
 
@@ -118,6 +122,7 @@ Projected 58 plays, 59% dropbacks, 30.5 pass att, 23.8 runs, 2.5 sacks. QB: Trev
 **Strength of schedule:** own pass yds x1.03, own scoring x1.03 (raw stats re-rated against the opponents actually faced).
 **Out:** Eric Murray (carried from week 5 report: Doubtful (Concussion)), Jaylon Jones (carried from week 5 report: Out (Hamstring)).
 **Coach angle:** HC Liam Coen (young HC, 1 prior seasons); calls own plays (developing play-caller, 2 seasons calling); career balanced (+1.1 pts pass rate vs league, 2 seasons); spreads it around; this season top target share 24%.
+**HOU secondary:** DC DeMeco Ryans, mixed-leaning: Mixes zone and man; declined to shadow George Pickens with Stingley; outside Derek Stingley Jr. / Kamari Lassiter; nickel Jalen Pitre; weak spot: Receivers who move around avoid Stingley; [research confidence medium, 2026-10-14].
 **HOU defensive scheme (online/tagged):** blitz: light, coverage: zone_heavy [online (high)].
 - HOU is soft deep (+0.95 EPA/deep att vs league +0.43); JAX throws deep 15%.
 - Best matchups: pass_deep_middle (x1.12), pass_deep_right (x1.11); worst: run_outside_left (x0.84).
@@ -164,6 +169,7 @@ Projected 61 plays, 68% dropbacks, 37.5 pass att, 19.6 runs, 2.1 sacks. QB: C.J.
 **Strength of schedule:** own pass yds x0.95, own scoring x0.95, opp pass D x1.03, opp run D x1.02, opp scoring D x1.02 (raw stats re-rated against the opponents actually faced).
 **Out:** Tank Dell (carried from week 5 report: Out (Knee)).
 **Coach angle:** HC DeMeco Ryans (young HC, 3 prior seasons); plays called by OC Nick Caley (developing play-caller, 1 seasons calling); career balanced (+1.8 pts pass rate vs league, 1 seasons); typical; this season top target share 18%.
+**JAX secondary:** DC Anthony Campanile, coverage lean unknown: New coverage scheme with pass game coordinator Mathieu Araujo; outside Travis Hunter / Montaric Brown; nickel Jourdan Lewis; weak spot: Hunter is the least experienced starter (returning from LCL tear); [research confidence low, 2026-10-14].
 **JAX defensive scheme (online/tagged):** blitz: avg, coverage: avg, shell: two_high [online (high)].
 - Best matchups: pass_short_left (x1.22), pass_short_right (x1.19); worst: pass_deep_left (x0.92).
 - JAX blitzes 31% of dropbacks (league 31%, FTN charting); HOU gains x1.34 as much per dropback vs the blitz as other offenses (42 blitzed dropbacks) -> pass yards x1.00
@@ -173,16 +179,16 @@ Projected 61 plays, 68% dropbacks, 37.5 pass att, 19.6 runs, 2.1 sacks. QB: C.J.
 
 | player            | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| C.J. Stroud       | QB    |     296.46 |      1.07 |            0.55 |      2.62 |      15.20 |      0.00 |         0.00 |      0.00 |         0.07 |
-| Xavier Hutchinson | WR    |       0.00 |      0.00 |            0.00 |      0.27 |       1.03 |      6.83 |         4.30 |     59.49 |         0.14 |
-| Dalton Schultz    | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.93 |         4.18 |     52.48 |         0.12 |
+| C.J. Stroud       | QB    |     296.68 |      1.07 |            0.55 |      2.62 |      15.20 |      0.00 |         0.00 |      0.00 |         0.07 |
+| Xavier Hutchinson | WR    |       0.00 |      0.00 |            0.00 |      0.27 |       1.03 |      6.83 |         4.30 |     59.55 |         0.14 |
+| Dalton Schultz    | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.93 |         4.18 |     52.51 |         0.12 |
 | Woody Marks       | RB    |       0.00 |      0.00 |            0.00 |      7.92 |      30.12 |      2.97 |         2.09 |     22.15 |         0.37 |
-| Nico Collins      | WR    |       0.00 |      0.00 |            0.00 |      0.10 |       0.39 |      5.25 |         3.50 |     45.90 |         0.23 |
+| Nico Collins      | WR    |       0.00 |      0.00 |            0.00 |      0.10 |       0.39 |      5.25 |         3.50 |     45.94 |         0.23 |
 | David Montgomery  | RB    |       0.00 |      0.00 |            0.00 |      9.34 |      32.98 |      1.20 |         0.85 |      9.67 |         0.37 |
-| Jaylin Noel       | WR    |       0.00 |      0.00 |            0.00 |      0.68 |       2.83 |      3.77 |         2.54 |     32.43 |         0.15 |
-| Kayshon Boutte    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.90 |         2.48 |     31.99 |         0.10 |
-| Foster Moreau     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.59 |         1.76 |     19.82 |         0.09 |
-| Jared Wayne       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.10 |         1.25 |     17.33 |         0.07 |
+| Jaylin Noel       | WR    |       0.00 |      0.00 |            0.00 |      0.68 |       2.83 |      3.77 |         2.54 |     32.46 |         0.15 |
+| Kayshon Boutte    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.90 |         2.48 |     32.02 |         0.10 |
+| Foster Moreau     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.59 |         1.76 |     19.83 |         0.09 |
+| Jared Wayne       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.10 |         1.25 |     17.34 |         0.07 |
 
 **HOU kicker**
 
@@ -210,6 +216,7 @@ Projected 53 plays, 55% dropbacks, 25.7 pass att, 23.6 runs, 2.5 sacks. QB: Mich
 **Strength of schedule:** own scoring x0.97 (raw stats re-rated against the opponents actually faced).
 **Out:** Yasir Abdullah (carried from week 5 report: Out (Hamstring)).
 **Coach angle:** HC Kevin Stefanski (new to team, 6 prior seasons); plays called by OC Tommy Rees (developing play-caller, 1 seasons calling); career balanced (+1.5 pts pass rate vs league, 1 seasons); spreads it around; this season top target share 32%.
+**CHI secondary:** DC Dennis Allen, man-leaning: Man-heavy scheme; Allen has used his top corner to shadow WR1s in the past but not in 2026 while Jaylon Johnson recovered; outside Jaylon Johnson / Tyrique Stevenson; nickel Cam Lewis; weak spot: Johnson allowing a 118.8 passer rating when targeted through week 5 (PFF); rookie Malik Muhammad targeted; [research confidence medium, 2026-10-14].
 **CHI defensive scheme (online/tagged):** blitz: heavy, coverage: man_heavy [online (high)].
 - CHI is soft deep (+1.54 EPA/deep att vs league +0.43); ATL throws deep 20%.
 - CHI brings heavy 3rd-down pressure (source: blitz_pct); 3rd-down deep EPA allowed +0.59 on 5 attempts. ATL 3rd-down deep share 27%.
@@ -254,6 +261,7 @@ Projected 75 plays, 55% dropbacks, 36.5 pass att, 33.4 runs, 2.0 sacks. QB: Tyso
 **Strength of schedule:** own pass yds x1.05, own scoring x1.03, opp pass D x0.98, opp scoring D x0.98 (raw stats re-rated against the opponents actually faced).
 **Out:** Kyle Monangai (carried from week 5 report: Out (Thumb)), Keyshaun Elliott (carried from week 5 report: Out (Quadricep)).
 **Coach angle:** HC Ben Johnson (young HC, 1 prior seasons); calls own plays (developing play-caller, 4 seasons calling); career balanced (-0.8 pts pass rate vs league, 4 seasons); typical; this season top target share 23%.
+**ATL secondary:** DC Jeff Ulbrich, man-leaning: Ulbrich pushed toward more man coverage; 4-3 roots; outside C.J. Henderson / Mike Hughes; nickel Billy Bowman Jr.; weak spot: Terrell graded 46-48 in coverage by PFF early in 2026; current depth chart lists C.J. Henderson and Mike Hughes outside; [research confidence medium, 2026-10-14].
 **ATL defensive scheme (online/tagged):** blitz: avg, coverage: avg, shell: single_high [online (high)].
 - Best matchups: run_middle (x1.19), pass_deep_middle (x1.05); worst: pass_short_right (x0.92).
 - ATL blitzes 30% of dropbacks (league 31%, FTN charting); CHI gains x1.16 as much per dropback vs the blitz as other offenses (79 blitzed dropbacks) -> pass yards x1.00
@@ -295,6 +303,7 @@ Projected 58 plays, 64% dropbacks, 30.5 pass att, 21.1 runs, 3.4 sacks. QB: Desh
 **Strength of schedule:** own scoring x1.05 (raw stats re-rated against the opponents actually faced).
 **Out:** Tylan Wallace (carried from week 5 report: Out (Knee)), Teven Jenkins (carried from week 5 report: Out (Back)), Kalia Davis (carried from week 5 report: Out (Quadricep)), Mike Hall Jr. (carried from week 5 report: Out (Ankle)), Mason Graham (carried from week 5 report: Out (Knee)), Dillon Gabriel (carried from week 5 report: Out (Back)), Carsen Ryan (carried from week 5 report: Out (Calf)).
 **Coach angle:** HC Todd Monken (first-year HC, 0 prior seasons); calls own plays (developing play-caller, 4 seasons calling); career run-first (-4.8 pts pass rate vs league, 4 seasons); leans on stars; this season top target share 19%.
+**BAL secondary:** DC Jesse Minter, zone-leaning: 3-3-5 nickel base; floods the field with DBs and uses zone to mask individual matchups; big nickel with Kyle Hamilton as hybrid; outside Nate Wiggins / Marlon Humphrey; nickel Kyle Hamilton; weak spot: Humphrey graded 105th of 114 corners by PFF in 2025; [research confidence medium, 2026-10-14].
 **BAL defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy, shell: two_high [online (high)].
 - BAL is soft deep (+0.98 EPA/deep att vs league +0.43); CLE throws deep 17%.
 - Best matchups: run_inside_left (x1.26), pass_deep_right (x1.14); worst: pass_short_left (x0.82).
@@ -342,6 +351,7 @@ Projected 62 plays, 52% dropbacks, 26.7 pass att, 29.9 runs, 3.0 sacks. QB: Tyle
 **Strength of schedule:** own run yds x0.97, own scoring x0.96 (raw stats re-rated against the opponents actually faced).
 **Out:** Trey Hendrickson (carried from week 5 report: Out (Finger)), Lamar Jackson (carried from week 5 report: Out (Ankle)), Cam Jurgens (carried from week 5 report: Out (Concussion)).
 **Coach angle:** HC Jesse Minter (first-year HC, 0 prior seasons); plays called by OC Declan Doyle (first-time play-caller, 0 seasons calling); no prior play-calling seasons: this season's data only; this season top target share 25%.
+**CLE secondary:** DC Mike Rutenberg, mixed-leaning: First-year DC from Saleh tree; 73% zone in week 1 then back to 73% man vs PIT (Next Gen Stats); more disguise than Schwartz; outside Denzel Ward / Tyson Campbell; nickel Myles Harden; weak spot: Run fits and zone busts when they leave man; [research confidence medium, 2026-10-14].
 **CLE defensive scheme (online/tagged):** blitz: avg, coverage: man_heavy, shell: single_high [online (high)].
 - CLE run defense is soft (+0.01 EPA/run).
 - Best matchups: run_outside_left (x1.20), run_inside_left (x1.11); worst: pass_short_left (x0.79).
@@ -385,6 +395,7 @@ Projected 65 plays, 54% dropbacks, 32.7 pass att, 29.8 runs, 1.5 sacks. QB: Dani
 **Strength of schedule:** own pass yds x0.97, own run yds x1.04, opp run D x1.03, opp scoring D x1.03 (raw stats re-rated against the opponents actually faced).
 **Out:** Arden Key (carried from week 5 report: Out (Hamstring)), Ashton Dulin (carried from week 5 report: Out (Hamstring)), Will Mallory (carried from week 5 report: Out (Thumb)), Jaylon Carlies (carried from week 5 report: Out (Ribs)).
 **Coach angle:** HC Shane Steichen (young HC, 3 prior seasons); calls own plays (veteran play-caller, 5 seasons calling); career run-first (-3.3 pts pass rate vs league, 5 seasons); typical; this season top target share 22%.
+**TEN secondary:** DC Robert Saleh, zone-leaning: 4-3 wide-9; rushes four with stunts; zone-dominant (Cover 3 / quarters); blitz about 23%; outside Cor'Dale Flott / Alontae Taylor; nickel Marcus Harris; weak spot: Corners struggled in camp; [research confidence medium, 2026-10-14].
 **TEN defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy, shell: two_high [online (high)].
 - TEN is soft deep (+0.94 EPA/deep att vs league +0.43); IND throws deep 17%.
 - Best matchups: run_inside_right (x1.32), run_inside_left (x1.24); worst: pass_deep_middle (x0.99).
@@ -392,15 +403,16 @@ Projected 65 plays, 54% dropbacks, 32.7 pass att, 29.8 runs, 1.5 sacks. QB: Dani
 - IND deep plays vs zone heavy coverage defenses: x0.90 vs how other offenses fare (23 plays)
 - IND run plays vs two high shell defenses: x1.15 vs how other offenses fare (77 plays)
 - IND deep-throw rate vs two high shell: x0.72
+- TEN DBs out: Amani Hooker (17 tgts, 8.9 yds/tgt allowed) -> coverage 8.2 → 8.1 yds/tgt; WR yards x0.99
 
 | player           | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-----------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Daniel Jones     | QB    |     205.61 |      1.34 |            0.48 |      2.74 |      14.72 |      0.00 |         0.00 |      0.00 |         0.11 |
+| Daniel Jones     | QB    |     204.26 |      1.34 |            0.48 |      2.74 |      14.72 |      0.00 |         0.00 |      0.00 |         0.11 |
 | Jonathan Taylor  | RB    |       0.00 |      0.00 |            0.00 |     21.88 |     110.19 |      3.87 |         2.68 |     24.26 |         0.78 |
-| Tyler Warren     | TE    |       0.00 |      0.00 |            0.00 |      0.69 |       3.09 |      7.69 |         5.66 |     50.98 |         0.31 |
-| Josh Downs       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.25 |         4.15 |     44.49 |         0.19 |
-| Keenan Allen     | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.52 |         3.64 |     34.06 |         0.24 |
-| Laquon Treadwell | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.21 |         2.80 |     30.04 |         0.16 |
+| Tyler Warren     | TE    |       0.00 |      0.00 |            0.00 |      0.69 |       3.09 |      7.69 |         5.66 |     50.75 |         0.31 |
+| Josh Downs       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.25 |         4.15 |     44.08 |         0.19 |
+| Keenan Allen     | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.52 |         3.64 |     33.75 |         0.24 |
+| Laquon Treadwell | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.21 |         2.80 |     29.76 |         0.16 |
 | Seth McGowan     | RB    |       0.00 |      0.00 |            0.00 |      4.73 |      24.10 |      0.92 |         0.66 |      5.55 |         0.21 |
 
 **IND kicker**
@@ -429,6 +441,7 @@ Projected 54 plays, 64% dropbacks, 31.3 pass att, 19.3 runs, 1.1 sacks. QB: Cam 
 **Strength of schedule:** own scoring x1.02 (raw stats re-rated against the opponents actually faced).
 **Out:** Amani Hooker (carried from week 5 report: Out (Concussion)).
 **Coach angle:** HC Robert Saleh (new to team, 5 prior seasons); plays called by OC Brian Daboll (veteran play-caller, 6 seasons calling); career balanced (-0.7 pts pass rate vs league, 6 seasons); typical; this season top target share 29%.
+**IND secondary:** DC Lou Anarumo, mixed-leaning: Multiple; game-plans corners to the opponent each week; disguise; outside Sauce Gardner / Charvarius Ward; nickel Justin Walley; weak spot: Allowed 1029 yards through two games; Ward and Gardner banged up early; [research confidence low, 2026-10-14].
 **IND defensive scheme (online/tagged):** blitz: avg, coverage: avg [online (high)].
 - IND run defense is soft (+0.08 EPA/run).
 - Best matchups: run_inside_left (x1.19), run_outside_left (x1.07); worst: run_inside_right (x0.88).
@@ -471,6 +484,7 @@ Projected 63 plays, 57% dropbacks, 29.4 pass att, 27.4 runs, 3.0 sacks. QB: Drak
 **Market:** implied team total 25.5 (spread +7.5); has scored -0.2 pts/game vs its implied totals over 5 games (fell short in 60%), correction -0.1. Model 19.9 → blended 23.2: TD rates x1.17, yards x1.05, dropback rate -3.0%.
 **Out:** Mack Hollins (carried from week 5 report: Out (Calf)), Carlton Davis III (carried from week 5 report: Out (Neck)), Reggie Gilliam (carried from week 5 report: Out (Ankle)), Christian Gonzalez (carried from week 5 report: Out (Shoulder)), Karon Prunty (carried from week 5 report: Out (Hamstring)), Channing Canada (carried from week 5 report: Out (Hamstring)).
 **Coach angle:** HC Mike Vrabel (veteran HC, 8 prior seasons); plays called by OC Josh McDaniels (veteran play-caller, 13 seasons calling); career balanced (+0.7 pts pass rate vs league, 13 seasons); typical; this season top target share 15%.
+**NYJ secondary:** DC Aaron Glenn, man-leaning: Glenn calls it; multiple fronts; Detroit led the NFL in man rate (41.2%) under him; expected man-heavy but under 40%; outside Azareye'h Thomas / Brandon Stephens; nickel Jarvis Brownlee Jr.; weak spot: Nahshon Wright rotates outside; [research confidence medium, 2026-10-14].
 **NYJ defensive scheme (online/tagged):** blitz: heavy, coverage: avg, shell: two_high [online (high)].
 - NYJ brings heavy 3rd-down pressure (source: blitz_pct); 3rd-down deep EPA allowed +0.02 on 9 attempts. NWE 3rd-down deep share 17%.
 - Best matchups: pass_short_middle (x1.13), pass_short_right (x1.11); worst: run_inside_left (x0.91).
@@ -518,6 +532,7 @@ Projected 55 plays, 64% dropbacks, 29.6 pass att, 19.9 runs, 3.5 sacks. QB: Geno
 **Strength of schedule:** opp pass D x0.95, opp scoring D x0.95 (raw stats re-rated against the opponents actually faced).
 **Out:** Dylan Parham (carried from week 5 report: Out (Knee)), Breece Hall (carried from week 5 report: Out (Quadricep)), Adonai Mitchell (carried from week 5 report: Out (Finger)), Francisco Mauigoa (carried from week 5 report: Out (Quadricep)).
 **Coach angle:** HC Aaron Glenn (young HC, 1 prior seasons); plays called by OC Frank Reich (veteran play-caller, 5 seasons calling); career balanced (-0.9 pts pass rate vs league, 5 seasons); spreads it around; this season top target share 31%.
+**NWE secondary:** DC Terrell Williams, man-leaning: Shadow man coverage with Gonzalez when available; outside Carlton Davis III (OUT) / Christian Gonzalez (OUT); nickel Marcus Jones; weak spot: Both starting corners were out in week 5; [research confidence medium, 2026-10-14].
 **NWE defensive scheme (online/tagged):** blitz: heavy, coverage: avg, shell: two_high [online (high)].
 - NWE is soft deep (+0.67 EPA/deep att vs league +0.43); NYJ throws deep 16%.
 - NWE brings heavy 3rd-down pressure (source: blitz_pct); 3rd-down deep EPA allowed +0.48 on 11 attempts. NYJ 3rd-down deep share 19%.
@@ -526,15 +541,17 @@ Projected 55 plays, 64% dropbacks, 29.6 pass att, 19.9 runs, 3.5 sacks. QB: Geno
 - NYJ short plays vs two high shell defenses: x1.08 vs how other offenses fare (98 plays)
 - NYJ run plays vs two high shell defenses: x0.95 vs how other offenses fare (74 plays)
 - NYJ deep-throw rate vs two high shell: x1.18
+- NWE DBs out: Carlton Davis (18 tgts, 7.5 yds/tgt allowed), Christian Gonzalez (18 tgts, 5.9 yds/tgt allowed) -> coverage 7.5 → 8.2 yds/tgt; WR yards x1.10
+- NWE shadow corner Christian Gonzalez is out: no shadow this week
 
 | player          | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:----------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Geno Smith      | QB    |     192.46 |      1.30 |            0.36 |      2.41 |      15.56 |      0.00 |         0.00 |      0.00 |         0.03 |
-| Garrett Wilson  | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      9.33 |         6.00 |     69.67 |         0.39 |
+| Geno Smith      | QB    |     205.67 |      1.30 |            0.36 |      2.41 |      15.56 |      0.00 |         0.00 |      0.00 |         0.03 |
+| Garrett Wilson  | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      9.33 |         6.00 |     76.33 |         0.39 |
 | Braelon Allen   | RB    |       0.00 |      0.00 |            0.00 |     17.81 |      66.28 |      3.22 |         2.04 |     17.65 |         0.52 |
-| Kenyon Sadiq    | TE    |       0.00 |      0.00 |            0.00 |      0.14 |       0.59 |      5.66 |         3.53 |     36.33 |         0.22 |
-| Isaiah Williams | WR    |       0.00 |      0.00 |            0.00 |      0.49 |       1.95 |      3.60 |         2.29 |     26.12 |         0.17 |
-| Jeremy Ruckert  | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.77 |         1.22 |     11.76 |         0.09 |
+| Kenyon Sadiq    | TE    |       0.00 |      0.00 |            0.00 |      0.14 |       0.59 |      5.66 |         3.53 |     38.06 |         0.22 |
+| Isaiah Williams | WR    |       0.00 |      0.00 |            0.00 |      0.49 |       1.95 |      3.60 |         2.29 |     28.62 |         0.17 |
+| Jeremy Ruckert  | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.77 |         1.22 |     12.32 |         0.09 |
 
 **NYJ kicker**
 
@@ -562,6 +579,7 @@ Projected 64 plays, 60% dropbacks, 34.3 pass att, 25.9 runs, 2.6 sacks. QB: Jame
 **Strength of schedule:** own pass yds x0.93, own scoring x0.93, opp scoring D x0.97 (raw stats re-rated against the opponents actually faced).
 **Out:** Jason Pinnock (carried from week 5 report: Out (Concussion)), Chauncey Golston (carried from week 5 report: Out (Neck)).
 **Coach angle:** HC John Harbaugh (new to team, 18 prior seasons); plays called by OC Matt Nagy (developing play-caller, 3 seasons calling); career balanced (+1.2 pts pass rate vs league, 3 seasons); leans on stars; this season top target share 31%.
+**NOR secondary:** DC Brandon Staley, zone-leaning: Zone-heavy off coverage; light box; two-high safety shells; outside Kool-Aid McKinstry / Quincy Riley; nickel Jonas Sanker; weak spot: Safety Jonas Sanker covering slot receivers and tight ends after Alontae Taylor left; [research confidence medium, 2026-10-14].
 **NOR defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy, shell: single_high [online (high)].
 - NOR is soft deep (+0.79 EPA/deep att vs league +0.43); NYG throws deep 22%.
 - NOR brings heavy 3rd-down pressure (source: blitz_pct); 3rd-down deep EPA allowed +0.35 on 9 attempts. NYG 3rd-down deep share 25%.
@@ -607,6 +625,7 @@ Projected 63 plays, 64% dropbacks, 37.7 pass att, 22.7 runs, 2.1 sacks. QB: Tyle
 **Strength of schedule:** opp pass D x1.02, opp scoring D x1.03 (raw stats re-rated against the opponents actually faced).
 **Out:** Kaden Elliss (carried from week 5 report: Out (Calf)), Anfernee Jennings (carried from week 5 report: Out (Knee)), Jeremiah Wright (carried from week 5 report: Out (Concussion)).
 **Coach angle:** HC Kellen Moore (young HC, 1 prior seasons); calls own plays (veteran play-caller, 7 seasons calling); career balanced (-0.1 pts pass rate vs league, 7 seasons); typical; this season top target share 28%.
+**NYG secondary:** DC Dennard Wilson, coverage lean unknown: New DC Wilson; physical press-oriented coverage approach; outside Deonte Banks / Greg Newsome II; nickel Dru Phillips; weak spot: Adebo reported on IR; Banks' coverage grade 73.3 (15th); [research confidence low, 2026-10-14].
 **NYG defensive scheme (online/tagged):** blitz: heavy, coverage: avg, shell: two_high [online (high)].
 - NYG brings heavy 3rd-down pressure (source: blitz_pct); 3rd-down deep EPA allowed +0.03 on 7 attempts. NOR 3rd-down deep share 27%.
 - Best matchups: run_middle (x1.29), run_outside_right (x1.14); worst: pass_deep_left (x0.98).
@@ -617,14 +636,14 @@ Projected 63 plays, 64% dropbacks, 37.7 pass att, 22.7 runs, 2.1 sacks. QB: Tyle
 
 | player        | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:--------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Tyler Shough  | QB    |     246.05 |      1.92 |            1.37 |      2.59 |      13.80 |      0.00 |         0.00 |      0.00 |         0.08 |
-| Chris Olave   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      9.72 |         6.60 |     74.51 |         0.32 |
-| Juwan Johnson | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.77 |         4.94 |     46.41 |         0.39 |
-| Devaughn Vele | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.94 |         4.52 |     47.52 |         0.29 |
+| Tyler Shough  | QB    |     246.43 |      1.92 |            1.37 |      2.59 |      13.80 |      0.00 |         0.00 |      0.00 |         0.08 |
+| Chris Olave   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      9.72 |         6.60 |     74.66 |         0.32 |
+| Juwan Johnson | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.77 |         4.94 |     46.46 |         0.39 |
+| Devaughn Vele | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.94 |         4.52 |     47.62 |         0.29 |
 | Alvin Kamara  | RB    |       0.00 |      0.00 |            0.00 |      7.91 |      32.93 |      3.67 |         2.61 |     21.56 |         0.35 |
 | Kendre Miller | RB    |       0.00 |      0.00 |            0.00 |     10.11 |      41.43 |      1.55 |         1.07 |      9.22 |         0.40 |
-| Bryce Lance   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.65 |         2.14 |     22.67 |         0.14 |
-| Noah Fant     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.61 |         1.89 |     16.47 |         0.21 |
+| Bryce Lance   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.65 |         2.14 |     22.71 |         0.14 |
+| Noah Fant     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.61 |         1.89 |     16.49 |         0.21 |
 | CJ Donaldson  | RB    |       0.00 |      0.00 |            0.00 |      2.52 |      10.39 |      0.57 |         0.39 |      3.78 |         0.11 |
 
 **NOR kicker**
@@ -653,6 +672,7 @@ Projected 61 plays, 63% dropbacks, 34.7 pass att, 22.6 runs, 2.1 sacks. QB: Jale
 **Strength of schedule:** own pass yds x0.96, own run yds x1.04, own scoring x1.02 (raw stats re-rated against the opponents actually faced).
 **Out:** Saquon Barkley (carried from week 5 report: Out (Hamstring)), Marcus Epps (carried from week 5 report: Out (Groin)), Marquise Brown (carried from week 5 report: Out (Ankle)), DeVonta Smith (carried from week 5 report: Out (Hamstring)), Drew Kendall (carried from week 5 report: Out (Knee)).
 **Coach angle:** HC Nick Sirianni (veteran HC, 5 prior seasons); plays called by OC Sean Mannion (first-time play-caller, 0 seasons calling); no prior play-calling seasons: this season's data only; this season top target share 20%.
+**CAR secondary:** DC Ejiro Evero, zone-leaning: 3-4 base; zone-heavy two-high shells and disguise; soft zone that rarely plays man (2025 description); outside Akayleb Evans / Will Lee III; nickel Chau Smith-Wade; weak spot: Passive off coverage when Horn is out; [research confidence low, 2026-10-14].
 **CAR defensive scheme (online/tagged):** blitz: heavy, coverage: zone_heavy [online (high)].
 - CAR is soft deep (+0.54 EPA/deep att vs league +0.43); PHI throws deep 16%.
 - CAR brings heavy 3rd-down pressure (source: blitz_pct); 3rd-down deep EPA allowed -0.29 on 3 attempts. PHI 3rd-down deep share 19%.
@@ -698,6 +718,7 @@ Projected 70 plays, 65% dropbacks, 42.9 pass att, 24.1 runs, 1.9 sacks. QB: Bryc
 **Market:** implied team total 19.5 (spread -1.5); has scored +7.4 pts/game vs its implied totals over 4 games (fell short in 25%), correction +3.0. Model 26.3 → blended 24.0: TD rates x0.91, yards x0.97, dropback rate +0.6%.
 **Strength of schedule:** opp pass D x0.97 (raw stats re-rated against the opponents actually faced).
 **Coach angle:** HC Dave Canales (young HC, 2 prior seasons); calls own plays (developing play-caller, 3 seasons calling); career balanced (-0.9 pts pass rate vs league, 3 seasons); leans on stars; this season top target share 27%.
+**PHI secondary:** DC Vic Fangio, zone-leaning: Fangio two-high quarters / match zone; DeJean at safety in base and slot in nickel; outside Riq Woolen / Quinyon Mitchell; nickel Cooper DeJean; [research confidence medium, 2026-10-14].
 **PHI defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy, shell: two_high [online (high)].
 - Best matchups: pass_short_left (x1.28), pass_short_right (x1.21); worst: pass_deep_middle (x0.86).
 - Last game — worked: pass_deep_right; failed: none.
@@ -705,19 +726,20 @@ Projected 70 plays, 65% dropbacks, 42.9 pass att, 24.1 runs, 1.9 sacks. QB: Bryc
 - CAR run plays vs zone heavy coverage defenses: x1.06 vs how other offenses fare (25 plays)
 - CAR short plays vs two high shell defenses: x1.11 vs how other offenses fare (39 plays)
 - CAR run plays vs two high shell defenses: x1.06 vs how other offenses fare (25 plays)
+- PHI DBs out: Marcus Epps (7 tgts, 9.4 yds/tgt allowed) -> coverage 7.9 → 7.8 yds/tgt; WR yards x0.99
 
 | player            | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Bryce Young       | QB    |     319.56 |      1.52 |            0.72 |      0.82 |       6.41 |      0.00 |         0.00 |      0.00 |         0.00 |
+| Bryce Young       | QB    |     317.46 |      1.52 |            0.72 |      0.82 |       6.41 |      0.00 |         0.00 |      0.00 |         0.00 |
 | Chuba Hubbard     | RB    |       0.00 |      0.00 |            0.00 |     20.21 |      98.05 |      3.05 |         2.01 |     22.91 |         0.67 |
-| Tetairoa McMillan | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |     10.47 |         6.50 |     91.49 |         0.32 |
-| Darren Waller     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.24 |         3.88 |     49.09 |         0.26 |
-| Jalen Coker       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.15 |         3.29 |     43.04 |         0.17 |
-| Tommy Tremble     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.65 |         2.99 |     35.34 |         0.13 |
-| John Metchie III  | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.50 |         2.19 |     27.14 |         0.13 |
-| Brycen Tremayne   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.82 |         1.67 |     23.52 |         0.08 |
+| Tetairoa McMillan | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |     10.47 |         6.50 |     90.69 |         0.32 |
+| Darren Waller     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.24 |         3.88 |     48.88 |         0.26 |
+| Jalen Coker       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.15 |         3.29 |     42.67 |         0.17 |
+| Tommy Tremble     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.65 |         2.99 |     35.19 |         0.13 |
+| John Metchie III  | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.50 |         2.19 |     26.90 |         0.13 |
+| Brycen Tremayne   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.82 |         1.67 |     23.32 |         0.08 |
 | AJ Dillon         | RB    |       0.00 |      0.00 |            0.00 |      3.88 |      17.59 |      0.74 |         0.48 |      5.40 |         0.16 |
-| Mitchell Evans    | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.88 |         1.23 |     14.47 |         0.06 |
+| Mitchell Evans    | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.88 |         1.23 |     14.41 |         0.06 |
 
 **CAR kicker**
 
@@ -745,23 +767,25 @@ Projected 58 plays, 61% dropbacks, 28.6 pass att, 22.7 runs, 2.8 sacks. QB: Jalo
 **Strength of schedule:** own run yds x0.96, own scoring x1.02, opp pass D x1.03 (raw stats re-rated against the opponents actually faced).
 **Out:** Baker Mayfield (carried from week 5 report: Out (Thumb)), Antoine Winfield Jr. (carried from week 5 report: Out (Rib)), SirVocea Dennis (carried from week 5 report: Out (Ankle)), Benjamin Morrison (carried from week 5 report: Out (Quadricep)).
 **Coach angle:** HC Todd Bowles (veteran HC, 11 prior seasons); plays called by OC Zac Robinson (developing play-caller, 2 seasons calling); career run-first (-2.5 pts pass rate vs league, 2 seasons); leans on stars; this season top target share 24%.
+**PIT secondary:** DC Patrick Graham, zone-leaning: Game-plans week to week; zero man snaps reported in week 1; Ramsey used as the slot Star and in pressure packages; outside Asante Samuel Jr. / Jamel Dean (OUT); nickel Jalen Ramsey; weak spot: Joey Porter Jr. traded to DAL (reported); new corners not yet in sync per Ramsey; [research confidence low, 2026-10-14].
 **PIT defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy [online (high)].
 - Best matchups: pass_deep_right (x1.06), pass_short_middle (x1.04); worst: run_inside_right (x0.79).
 - PIT blitzes 27% of dropbacks (league 31%, FTN charting); TAM gains x0.87 as much per dropback vs the blitz as other offenses (71 blitzed dropbacks) -> pass yards x1.01
 - TAM deep plays vs zone heavy coverage defenses: x0.94 vs how other offenses fare (9 plays)
 - TAM run plays vs zone heavy coverage defenses: x0.85 vs how other offenses fare (43 plays)
 - TAM deep-throw rate vs zone heavy coverage: x0.90
+- PIT DBs out: Jamel Dean (18 tgts, 8.3 yds/tgt allowed) -> coverage 8.6 → 8.6 yds/tgt; WR yards x1.01
 
 | player           | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-----------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Jalon Daniels    | QB    |     189.77 |      1.06 |            0.74 |      4.35 |      32.82 |      0.00 |         0.00 |      0.00 |         0.01 |
+| Jalon Daniels    | QB    |     190.63 |      1.06 |            0.74 |      4.35 |      32.82 |      0.00 |         0.00 |      0.00 |         0.01 |
 | Bucky Irving     | RB    |       0.00 |      0.00 |            0.00 |     15.93 |      63.32 |      3.24 |         2.34 |     19.22 |         0.50 |
-| Emeka Egbuka     | WR    |       0.00 |      0.00 |            0.00 |      0.32 |       1.26 |      6.81 |         4.53 |     45.43 |         0.24 |
-| Cade Otton       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.12 |         3.43 |     38.90 |         0.14 |
+| Emeka Egbuka     | WR    |       0.00 |      0.00 |            0.00 |      0.32 |       1.26 |      6.81 |         4.53 |     45.73 |         0.24 |
+| Cade Otton       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.12 |         3.43 |     39.03 |         0.14 |
 | Kenny Gainwell   | RB    |       0.00 |      0.00 |            0.00 |      3.42 |      12.19 |      3.40 |         2.34 |     20.12 |         0.24 |
-| Chris Godwin Jr. | WR    |       0.00 |      0.00 |            0.00 |      0.50 |       1.83 |      4.24 |         3.10 |     29.29 |         0.15 |
-| Ted Hurst III    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.35 |         1.49 |     17.92 |         0.10 |
-| Tez Johnson      | WR    |       0.00 |      0.00 |            0.00 |      0.25 |       1.00 |      1.66 |         1.06 |     12.95 |         0.08 |
+| Chris Godwin Jr. | WR    |       0.00 |      0.00 |            0.00 |      0.50 |       1.83 |      4.24 |         3.10 |     29.48 |         0.15 |
+| Ted Hurst III    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.35 |         1.49 |     18.04 |         0.10 |
+| Tez Johnson      | WR    |       0.00 |      0.00 |            0.00 |      0.25 |       1.00 |      1.66 |         1.06 |     13.04 |         0.08 |
 | Sean Tucker      | RB    |       0.00 |      0.00 |            0.00 |      1.94 |       6.76 |      0.00 |         0.00 |      0.00 |         0.09 |
 
 **TAM kicker**
@@ -790,6 +814,7 @@ Projected 56 plays, 66% dropbacks, 34.4 pass att, 18.9 runs, 1.7 sacks. QB: Aaro
 **Strength of schedule:** own pass yds x1.03, own run yds x0.97, opp run D x1.03 (raw stats re-rated against the opponents actually faced).
 **Out:** DeShon Elliott (carried from week 5 report: Out (Knee)), Jamel Dean (carried from week 5 report: Out (Ankle)), Michael Pittman (carried from week 5 report: Out (Foot)).
 **Coach angle:** HC Mike McCarthy (new to team, 20 prior seasons); calls own plays (veteran play-caller, 15 seasons calling); career pass-first (+3.4 pts pass rate vs league, 15 seasons); typical; this season top target share 20%.
+**TAM secondary:** DC Todd Bowles, mixed-leaning: Among the highest blitz rates; man 22.8% / zone 71.9% through five games (unverified figure); outside Zyon McCollum / Benjamin Morrison (OUT); nickel Jacob Parrish; weak spot: No edge rush to support the blitz; [research confidence medium, 2026-10-14].
 **TAM defensive scheme (online/tagged):** blitz: heavy, coverage: avg, shell: single_high [online (high)].
 - TAM brings heavy 3rd-down pressure (source: blitz_pct); 3rd-down deep EPA allowed -0.59 on 12 attempts. PIT 3rd-down deep share 29%.
 - Best matchups: pass_deep_middle (x1.13), pass_deep_right (x1.07); worst: pass_short_middle (x0.83).
@@ -798,16 +823,17 @@ Projected 56 plays, 66% dropbacks, 34.4 pass att, 18.9 runs, 1.7 sacks. QB: Aaro
 - PIT short plays vs single high shell defenses: x0.86 vs how other offenses fare (65 plays)
 - PIT run plays vs single high shell defenses: x0.89 vs how other offenses fare (37 plays)
 - PIT deep-throw rate vs single high shell: x1.12
+- TAM DBs out: Benjamin Morrison (17 tgts, 7.0 yds/tgt allowed), Antoine Winfield Jr. (7 tgts, 8.3 yds/tgt allowed) -> coverage 7.7 → 7.9 yds/tgt; WR yards x1.03
 
 | player             | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Aaron Rodgers      | QB    |     235.67 |      1.68 |            1.03 |      0.73 |       5.64 |      0.00 |         0.00 |      0.00 |         0.00 |
+| Aaron Rodgers      | QB    |     240.94 |      1.68 |            1.03 |      0.73 |       5.64 |      0.00 |         0.00 |      0.00 |         0.00 |
 | Jaylen Warren      | RB    |       0.00 |      0.00 |            0.00 |     15.97 |      69.72 |      5.65 |         3.83 |     41.11 |         0.45 |
-| DK Metcalf         | WR    |       0.00 |      0.00 |            0.00 |      0.27 |       1.23 |      7.59 |         4.46 |     55.02 |         0.26 |
-| Pat Freiermuth     | TE    |       0.00 |      0.00 |            0.00 |      0.71 |       2.67 |      5.57 |         3.58 |     39.52 |         0.38 |
-| Roman Wilson       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.58 |         2.69 |     34.96 |         0.24 |
-| Germie Bernard     | WR    |       0.00 |      0.00 |            0.00 |      0.27 |       1.15 |      4.67 |         2.91 |     33.18 |         0.16 |
-| Darnell Washington | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.52 |         2.29 |     24.66 |         0.16 |
+| DK Metcalf         | WR    |       0.00 |      0.00 |            0.00 |      0.27 |       1.23 |      7.59 |         4.46 |     56.81 |         0.26 |
+| Pat Freiermuth     | TE    |       0.00 |      0.00 |            0.00 |      0.71 |       2.67 |      5.57 |         3.58 |     40.17 |         0.38 |
+| Roman Wilson       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.58 |         2.69 |     36.10 |         0.24 |
+| Germie Bernard     | WR    |       0.00 |      0.00 |            0.00 |      0.27 |       1.15 |      4.67 |         2.91 |     34.26 |         0.16 |
+| Darnell Washington | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.52 |         2.29 |     25.07 |         0.16 |
 
 **PIT kicker**
 
@@ -833,6 +859,7 @@ Projected 67 plays, 59% dropbacks, 37.7 pass att, 27.2 runs, 1.4 sacks. QB: Matt
 **Coaching style:** Neutral-script pass rate high: 65% (league 59%); Early-down pass rate high: 61% (league 53%); Red-zone pass rate high: 60% (league 53%); 4th-down go rate high: 26% (league 19%); Sack rate low: 3% (league 6%); No-huddle rate high: 11% (league 6%); Pass rate on 2nd & short high: 57% (league 31%); 3rd-down conversion high: 50% (league 42%); EPA/dropback high: +0.16 (league +0.06); EPA/run high: -0.00 (league -0.09); Favors run middle (40%).
 **Market:** implied team total 32.0 (spread +12.5); has scored -1.4 pts/game vs its implied totals over 5 games (fell short in 20%), correction -0.6. Model 39.9 → blended 34.8: TD rates x0.87, yards x0.96, dropback rate -5.0%.
 **Coach angle:** HC Sean McVay (veteran HC, 9 prior seasons); calls own plays (veteran play-caller, 9 seasons calling); career balanced (+1.2 pts pass rate vs league, 9 seasons); typical; this season top target share 24%.
+**ARI secondary:** DC Nick Rallis, coverage lean unknown: Heavy dime user (about 20% dime in 2025); young corners protected with structure and safety rotation; outside Garrett Williams / Denzel Burke; nickel Max Melton; weak spot: Young outside corners starting while Will Johnson is out; [research confidence low, 2026-10-14].
 **ARI defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy, shell: cover4 [online (low)].
 - ARI is soft deep (+1.13 EPA/deep att vs league +0.43); LAR throws deep 22%.
 - Best matchups: pass_short_left (x1.09), pass_short_right (x1.06); worst: pass_deep_middle (x0.86).
@@ -840,17 +867,18 @@ Projected 67 plays, 59% dropbacks, 37.7 pass att, 27.2 runs, 1.4 sacks. QB: Matt
 - ARI blitzes 25% of dropbacks (league 31%, FTN charting); LAR gains x0.92 as much per dropback vs the blitz as other offenses (43 blitzed dropbacks) -> pass yards x1.00
 - LAR deep plays vs zone heavy coverage defenses: x0.93 vs how other offenses fare (25 plays)
 - LAR run plays vs zone heavy coverage defenses: x0.94 vs how other offenses fare (66 plays)
+- ARI DBs out: Andrew Wingard (8 tgts, 9.0 yds/tgt allowed) -> coverage 8.3 → 8.3 yds/tgt; WR yards x1.00
 
 | player           | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-----------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Matthew Stafford | QB    |     281.65 |      2.73 |            0.93 |      1.02 |       6.64 |      0.00 |         0.00 |      0.00 |         0.01 |
+| Matthew Stafford | QB    |     280.81 |      2.73 |            0.93 |      1.02 |       6.64 |      0.00 |         0.00 |      0.00 |         0.01 |
 | Kyren Williams   | RB    |       0.00 |      0.00 |            0.00 |     17.73 |      71.50 |      6.64 |         4.62 |     45.93 |         0.73 |
-| Puka Nacua       | WR    |       0.00 |      0.00 |            0.00 |      0.76 |       3.07 |      9.20 |         6.17 |     71.17 |         0.44 |
-| Davante Adams    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.30 |         4.67 |     61.66 |         0.52 |
-| Tyler Higbee     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.06 |         3.50 |     39.35 |         0.30 |
+| Puka Nacua       | WR    |       0.00 |      0.00 |            0.00 |      0.76 |       3.07 |      9.20 |         6.17 |     70.86 |         0.44 |
+| Davante Adams    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.30 |         4.67 |     61.38 |         0.52 |
+| Tyler Higbee     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.06 |         3.50 |     39.26 |         0.30 |
 | Blake Corum      | RB    |       0.00 |      0.00 |            0.00 |      8.41 |      32.51 |      2.33 |         1.57 |     17.36 |         0.34 |
-| Konata Mumpfield | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.13 |         1.29 |     17.92 |         0.16 |
-| Davis Allen      | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.54 |         0.97 |     11.04 |         0.09 |
+| Konata Mumpfield | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.13 |         1.29 |     17.84 |         0.16 |
+| Davis Allen      | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.54 |         0.97 |     11.01 |         0.09 |
 
 **LAR kicker**
 
@@ -878,6 +906,7 @@ Projected 64 plays, 69% dropbacks, 40.5 pass att, 20.0 runs, 2.5 sacks. QB: Jaco
 **Strength of schedule:** own pass yds x1.04 (raw stats re-rated against the opponents actually faced).
 **Out:** Andrew Wingard (carried from week 5 report: Out (Knee)), Isaiah Adams (carried from week 5 report: Out (Ankle)).
 **Coach angle:** HC Mike LaFleur (first-year HC, 0 prior seasons); calls own plays (developing play-caller, 2 seasons calling); career pass-first (+3.9 pts pass rate vs league, 2 seasons); spreads it around; this season top target share 29%.
+**LAR secondary:** DC Chris Shula, zone-leaning: Zone lean (more Cover 3 than Cover 1); most dime in the NFL the last two seasons; McDuffie in man only 25.7% vs SF; outside Jaylen Watson / Trent McDuffie; nickel Quentin Lake; weak spot: Scheme may move toward more man under Jimmy Lake; [research confidence medium, 2026-10-14].
 **LAR defensive scheme (online/tagged):** blitz: avg, coverage: avg, shell: two_high [online (high)].
 - Best matchups: run_inside_right (x1.03), run_inside_left (x1.01); worst: pass_deep_right (x0.87).
 - Last game — worked: pass_short_left, run_middle; failed: pass_deep_right, run_outside_right.
@@ -919,22 +948,24 @@ Projected 61 plays, 55% dropbacks, 30.8 pass att, 27.3 runs, 1.4 sacks. QB: Patr
 **Market:** implied team total 25.5 (spread +8.5); has scored +3.9 pts/game vs its implied totals over 4 games (fell short in 25%), correction +1.6. Model 27.5 → blended 27.2: TD rates x0.99, yards x1.00, dropback rate -3.4%.
 **Strength of schedule:** own pass yds x0.97, own run yds x0.97, own scoring x0.98, opp scoring D x0.97 (raw stats re-rated against the opponents actually faced).
 **Coach angle:** HC Andy Reid (veteran HC, 27 prior seasons); calls own plays (veteran play-caller, 13 seasons calling); career pass-first (+3.1 pts pass rate vs league, 13 seasons); typical; this season top target share 19%.
+**LAC secondary:** DC Chris O'Leary, coverage lean unknown: First-year DC; more five- and six-man fronts at Western Michigan; outside Cam Hart / Donte Jackson (OUT); nickel Tarheeb Still; weak spot: Hart inconsistent; depth charts disagree on sides; [research confidence low, 2026-10-14].
 **LAC defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy, shell: two_high [online (high)].
 - Best matchups: run_outside_left (x1.16), run_inside_left (x1.08); worst: pass_short_middle (x0.87).
 - LAC blitzes 27% of dropbacks (league 31%, FTN charting); KAN gains x1.17 as much per dropback vs the blitz as other offenses (38 blitzed dropbacks) -> pass yards x0.99
 - KAN run plays vs two high shell defenses: x1.06 vs how other offenses fare (70 plays)
 - KAN deep-throw rate vs two high shell: x1.19
+- LAC DBs out: Derwin James (11 tgts, 6.9 yds/tgt allowed), Donte Jackson (9 tgts, 7.9 yds/tgt allowed) -> coverage 8.1 → 8.4 yds/tgt; WR yards x1.04
 
 | player             | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Patrick Mahomes    | QB    |     205.72 |      1.52 |            0.70 |      1.79 |      13.75 |      0.00 |         0.00 |      0.00 |         0.00 |
+| Patrick Mahomes    | QB    |     211.48 |      1.52 |            0.70 |      1.79 |      13.75 |      0.00 |         0.00 |      0.00 |         0.00 |
 | Kenneth Walker III | RB    |       0.00 |      0.00 |            0.00 |     22.95 |     120.43 |      4.02 |         2.56 |     24.95 |         0.75 |
-| Xavier Worthy      | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.07 |         3.80 |     43.12 |         0.25 |
-| Travis Kelce       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.06 |         3.24 |     38.89 |         0.26 |
-| Tyquan Thornton    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.94 |         2.41 |     32.07 |         0.21 |
-| Rashee Rice        | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.12 |         2.63 |     31.94 |         0.17 |
+| Xavier Worthy      | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.07 |         3.80 |     44.82 |         0.25 |
+| Travis Kelce       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.06 |         3.24 |     39.65 |         0.26 |
+| Tyquan Thornton    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.94 |         2.41 |     33.34 |         0.21 |
+| Rashee Rice        | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.12 |         2.63 |     33.20 |         0.17 |
 | Emmett Johnson     | RB    |       0.00 |      0.00 |            0.00 |      3.44 |      16.17 |      0.93 |         0.61 |      5.91 |         0.16 |
-| Noah Gray          | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.97 |         1.21 |     13.02 |         0.07 |
+| Noah Gray          | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.97 |         1.21 |     13.28 |         0.07 |
 
 **KAN kicker**
 
@@ -962,6 +993,7 @@ Projected 63 plays, 62% dropbacks, 33.1 pass att, 23.6 runs, 2.4 sacks. QB: Just
 **Strength of schedule:** own pass yds x1.03, own scoring x0.94, opp pass D x1.03 (raw stats re-rated against the opponents actually faced).
 **Out:** Donte Jackson (carried from week 5 report: Out (Hamstring)), Derwin James (carried from week 5 report: Out (Hamstring)), Kayode Awosika (carried from week 5 report: Out (Fibula)), Trey Lance (carried from week 5 report: Doubtful (Groin)), Trevor Penning (carried from week 5 report: Out (Concussion)), Quentin Johnston (carried from week 5 report: Out (Chest)), Joe Alt (carried from week 5 report: Out (Neck)), Brenen Thompson (carried from week 5 report: Out (Quadricep)).
 **Coach angle:** HC Jim Harbaugh (veteran HC, 15 prior seasons); plays called by OC Mike McDaniel (developing play-caller, 4 seasons calling); career balanced (+1.1 pts pass rate vs league, 4 seasons); typical; this season top target share 18%.
+**KAN secondary:** DC Steve Spagnuolo, mixed-leaning: Blitz-heavy (third-highest blitz rate in 2025); Sneed moved to the nickel and used as a blitzer; outside Nohl Williams / Mansoor Delane; nickel L'Jarius Sneed; weak spot: Young outside corners; [research confidence medium, 2026-10-14].
 **KAN defensive scheme (online/tagged):** blitz: avg, coverage: avg, shell: two_high [online (high)].
 - Best matchups: run_middle (x1.06), run_outside_right (x1.04); worst: run_inside_right (x0.92).
 - KAN blitzes 29% of dropbacks (league 31%, FTN charting); LAC gains x0.92 as much per dropback vs the blitz as other offenses (44 blitzed dropbacks) -> pass yards x1.00
@@ -1006,6 +1038,7 @@ Projected 69 plays, 63% dropbacks, 41.7 pass att, 25.5 runs, 1.5 sacks. QB: Kirk
 **Strength of schedule:** opp pass D x0.97 (raw stats re-rated against the opponents actually faced).
 **Out:** Jalen Nailor (carried from week 5 report: Out (Concussion)), Dont'e Thornton Jr. (carried from week 5 report: Out (Hamstring)), Trey Zuhn III (carried from week 5 report: Out (Knee)).
 **Coach angle:** HC Klint Kubiak (first-year HC, 0 prior seasons); calls own plays (developing play-caller, 3 seasons calling); career balanced (-1.0 pts pass rate vs league, 3 seasons); leans on stars; this season top target share 24%.
+**BUF secondary:** DC Jim Leonhard, mixed-leaning: Switched from 4-2-5 to aggressive multiple 3-4; pressure from varied angles and five-man rushes on money downs; outside Christian Benford / Maxwell Hairston; nickel Dee Alford; weak spot: Benford / Alford / Hairston all ranked among the worst in coverage by PFF entering week 4; communication busts; [research confidence medium, 2026-10-14].
 **BUF defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy, shell: two_high [online (high)].
 - Best matchups: pass_deep_left (x1.05), run_outside_left (x1.02); worst: run_inside_left (x0.85).
 - BUF blitzes 25% of dropbacks (league 31%, FTN charting); LVR gains x1.17 as much per dropback vs the blitz as other offenses (48 blitzed dropbacks) -> pass yards x0.99
@@ -1049,6 +1082,7 @@ Projected 58 plays, 55% dropbacks, 26.2 pass att, 26.1 runs, 1.9 sacks. QB: Josh
 **Strength of schedule:** own pass yds x1.03, opp scoring D x1.03 (raw stats re-rated against the opponents actually faced).
 **Out:** Ed Oliver (carried from week 5 report: Out (Knee)), Josh Palmer (carried from week 5 report: Out (Shoulder)).
 **Coach angle:** HC Joe Brady (first-year HC, 0 prior seasons); calls own plays (developing play-caller, 4 seasons calling); career balanced (-1.9 pts pass rate vs league, 4 seasons); typical; this season top target share 20%.
+**LVR secondary:** DC Rob Leonard, mixed-leaning: Macdonald-style multiple and aggressive defense; outside Eric Stokes / Hezekiah Masses; nickel Taron Johnson; weak spot: Young corner room; [research confidence medium, 2026-10-14].
 **LVR defensive scheme (online/tagged):** blitz: avg, coverage: avg, shell: two_high [online (high)].
 - LVR is soft deep (+0.58 EPA/deep att vs league +0.43); BUF throws deep 24%.
 - Best matchups: run_inside_right (x1.33), pass_short_right (x1.17); worst: pass_deep_middle (x0.94).
@@ -1094,21 +1128,23 @@ Projected 57 plays, 61% dropbacks, 33.5 pass att, 22.3 runs, 1.4 sacks. QB: Jord
 **Strength of schedule:** own scoring x1.06 (raw stats re-rated against the opponents actually faced).
 **Out:** Aaron Banks (carried from week 5 report: Doubtful (Knee)), Chris Brooks (carried from week 5 report: Out (Ankle)), Jacob Monk (carried from week 5 report: Doubtful (Quadricep)), Savion Williams (carried from week 5 report: Out (Ankle)).
 **Coach angle:** HC Matt LaFleur (veteran HC, 7 prior seasons); calls own plays (veteran play-caller, 8 seasons calling); career balanced (-1.7 pts pass rate vs league, 8 seasons); typical; this season top target share 23%.
+**DAL secondary:** DC Christian Parker, mixed-leaning: Multiple 3-4 with 4-2-5 nickel; will play man if the corners allow; analysts expect more zone; outside Joey Porter Jr. / DaRon Bland; nickel Caleb Downs; weak spot: Depleted corner room; Joey Porter Jr. added Oct 1; [research confidence low, 2026-10-14].
 **DAL defensive scheme (online/tagged):** blitz: avg, coverage: avg [online (high)].
 - DAL is soft deep (+0.83 EPA/deep att vs league +0.43); GNB throws deep 22%.
 - Best matchups: run_inside_right (x1.13), run_outside_left (x1.08); worst: run_middle (x0.94).
 - DAL blitzes 27% of dropbacks (league 31%, FTN charting); GNB gains x1.14 as much per dropback vs the blitz as other offenses (74 blitzed dropbacks) -> pass yards x0.99
+- DAL DBs out: Cobie Durant (5 tgts, 7.3 yds/tgt allowed) -> coverage 8.3 → 8.4 yds/tgt; WR yards x1.01
 
 | player           | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-----------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Jordan Love      | QB    |     249.30 |      2.24 |            0.24 |      0.80 |       4.32 |      0.00 |         0.00 |      0.00 |         0.02 |
-| Christian Watson | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.61 |         4.88 |     61.28 |         0.58 |
+| Jordan Love      | QB    |     250.77 |      2.24 |            0.24 |      0.80 |       4.32 |      0.00 |         0.00 |      0.00 |         0.02 |
+| Christian Watson | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.61 |         4.88 |     61.77 |         0.58 |
 | MarShawn Lloyd   | RB    |       0.00 |      0.00 |            0.00 |     12.88 |      49.51 |      3.29 |         2.35 |     21.87 |         0.55 |
-| Matthew Golden   | WR    |       0.00 |      0.00 |            0.00 |      0.26 |       1.23 |      7.98 |         5.11 |     64.06 |         0.34 |
-| Tucker Kraft     | TE    |       0.00 |      0.00 |            0.00 |      0.72 |       2.59 |      6.33 |         4.39 |     46.52 |         0.31 |
+| Matthew Golden   | WR    |       0.00 |      0.00 |            0.00 |      0.26 |       1.23 |      7.98 |         5.11 |     64.57 |         0.34 |
+| Tucker Kraft     | TE    |       0.00 |      0.00 |            0.00 |      0.72 |       2.59 |      6.33 |         4.39 |     46.70 |         0.31 |
 | Kaleb Johnson    | RB    |       0.00 |      0.00 |            0.00 |      6.55 |      26.93 |      0.70 |         0.47 |      4.45 |         0.23 |
-| Skyy Moore       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.51 |         1.68 |     16.65 |         0.12 |
-| Bo Melton        | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.52 |         1.05 |     11.05 |         0.08 |
+| Skyy Moore       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.51 |         1.68 |     16.79 |         0.12 |
+| Bo Melton        | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.52 |         1.05 |     11.13 |         0.08 |
 
 **GNB kicker**
 
@@ -1136,6 +1172,7 @@ Projected 63 plays, 64% dropbacks, 37.5 pass att, 22.7 runs, 1.3 sacks. QB: Dak 
 **Strength of schedule:** own run yds x1.02, opp run D x0.97, opp scoring D x1.02 (raw stats re-rated against the opponents actually faced).
 **Out:** Cobie Durant (carried from week 5 report: Out (Hamstring)), DeMarvion Overshown (carried from week 5 report: Out (Hamstring)), Drew Shelton (carried from week 5 report: Out (Hamstring)).
 **Coach angle:** HC Brian Schottenheimer (young HC, 1 prior seasons); calls own plays (developing play-caller, 4 seasons calling); career run-first (-2.5 pts pass rate vs league, 4 seasons); typical; this season top target share 27%.
+**GNB secondary:** DC Jonathan Gannon, coverage lean unknown: New DC Gannon; aggressive style per players; outside Keisean Nixon / Brandon Cisse; nickel Javon Bullard; weak spot: Right corner spot unsettled (Cisse / Valentine / St-Juste); Nixon coverage grade 50.4; [research confidence low, 2026-10-14].
 **GNB defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy, shell: two_high [online (high)].
 - GNB brings heavy 3rd-down pressure (source: blitz_pct); 3rd-down deep EPA allowed +0.82 on 11 attempts. DAL 3rd-down deep share 13%.
 - GNB run defense is soft (+0.01 EPA/run).
@@ -1185,6 +1222,7 @@ Projected 57 plays, 57% dropbacks, 29.2 pass att, 24.2 runs, 0.7 sacks. QB: Broc
 **Strength of schedule:** own pass yds x1.03, opp pass D x1.04, opp run D x1.02 (raw stats re-rated against the opponents actually faced).
 **Out:** Kyle Juszczyk (carried from week 5 report: Out (Knee)), Nick Bosa (carried from week 5 report: Out (Knee)), Marques Sigle (carried from week 5 report: Out (Ankle)), James Thompson Jr. (carried from week 5 report: Out (Ankle)).
 **Coach angle:** HC Kyle Shanahan (veteran HC, 9 prior seasons); calls own plays (veteran play-caller, 11 seasons calling); career balanced (-1.3 pts pass rate vs league, 11 seasons); typical; this season top target share 27%.
+**WAS secondary:** DC Daronte Jones, mixed-leaning: Flores-style: disguised pressure (35-40% blitz) with heavy Cover 2 and Cover 0; interchangeable DBs; outside Rasul Douglas / Fabian Moreau; nickel Amik Robertson; weak spot: Sainristil allowed 15 TDs in coverage over two seasons; [research confidence medium, 2026-10-14].
 **WAS defensive scheme (online/tagged):** blitz: heavy, coverage: zone_heavy, shell: two_high [online (high)].
 - WAS is soft deep (+0.68 EPA/deep att vs league +0.43); SFO throws deep 19%.
 - WAS brings heavy 3rd-down pressure (source: blitz_pct); 3rd-down deep EPA allowed +0.50 on 7 attempts. SFO 3rd-down deep share 23%.
@@ -1195,14 +1233,15 @@ Projected 57 plays, 57% dropbacks, 29.2 pass att, 24.2 runs, 0.7 sacks. QB: Broc
 - SFO run plays vs zone heavy coverage defenses: x1.05 vs how other offenses fare (41 plays)
 - SFO deep-throw rate vs zone heavy coverage: x1.13
 - SFO short plays vs two high shell defenses: x0.92 vs how other offenses fare (103 plays)
+- WAS DBs out: Nick Cross (6 tgts, 8.2 yds/tgt allowed) -> coverage 8.1 → 8.1 yds/tgt; WR yards x1.00
 
 | player              | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:--------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Brock Purdy         | QB    |     237.20 |      2.21 |            0.46 |      4.21 |      26.43 |      0.00 |         0.00 |      0.00 |         0.05 |
+| Brock Purdy         | QB    |     237.82 |      2.21 |            0.46 |      4.21 |      26.43 |      0.00 |         0.00 |      0.00 |         0.05 |
 | Christian McCaffrey | RB    |       0.00 |      0.00 |            0.00 |     13.36 |      60.86 |      5.19 |         3.46 |     37.66 |         0.60 |
-| Mike Evans          | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.81 |         4.93 |     74.55 |         0.50 |
-| George Kittle       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.94 |         4.56 |     60.16 |         0.49 |
-| Deebo Samuel Sr.    | WR    |       0.00 |      0.00 |            0.00 |      1.99 |       9.55 |      4.34 |         2.94 |     33.31 |         0.33 |
+| Mike Evans          | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.81 |         4.93 |     74.83 |         0.50 |
+| George Kittle       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.94 |         4.56 |     60.27 |         0.49 |
+| Deebo Samuel Sr.    | WR    |       0.00 |      0.00 |            0.00 |      1.99 |       9.55 |      4.34 |         2.94 |     33.44 |         0.33 |
 | Kaelon Black        | RB    |       0.00 |      0.00 |            0.00 |      6.96 |      29.93 |      0.40 |         0.25 |      2.90 |         0.17 |
 
 **SFO kicker**
@@ -1231,23 +1270,25 @@ Projected 65 plays, 64% dropbacks, 34.5 pass att, 23.2 runs, 2.6 sacks. QB: Jayd
 **Strength of schedule:** own run yds x0.97, opp pass D x1.03, opp scoring D x1.02 (raw stats re-rated against the opponents actually faced).
 **Out:** Stefon Diggs (carried from week 5 report: Out (Hamstring)), Marcus Mariota (carried from week 5 report: Out (Knee)), Charles Omenihu (carried from week 5 report: Out (Groin)), Nick Cross (carried from week 5 report: Out (Illness)), Percy Butler (carried from week 5 report: Out (Hamstring)), Tyler Owens (carried from week 5 report: Out (Hamstring)).
 **Coach angle:** HC Dan Quinn (veteran HC, 11 prior seasons); plays called by OC David Blough (first-time play-caller, 0 seasons calling); no prior play-calling seasons: this season's data only; this season top target share 19%.
+**SFO secondary:** DC Raheem Morris, mixed-leaning: Five-man fronts; dime with Lenoir / Green / Stout / Jack Jones; outside Renardo Green / Deommodore Lenoir; nickel Upton Stout; weak spot: Lenoir's coverage fell off in 2025 (65.7); [research confidence medium, 2026-10-14].
 **SFO defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy [online (high)].
 - Best matchups: pass_short_left (x1.04), pass_deep_middle (x1.00); worst: pass_short_right (x0.89).
 - SFO blitzes 33% of dropbacks (league 31%, FTN charting); WAS gains x0.88 as much per dropback vs the blitz as other offenses (55 blitzed dropbacks) -> pass yards x1.00
 - WAS deep plays vs zone heavy coverage defenses: x0.93 vs how other offenses fare (15 plays)
 - WAS short plays vs zone heavy coverage defenses: x0.93 vs how other offenses fare (58 plays)
 - WAS run plays vs zone heavy coverage defenses: x0.92 vs how other offenses fare (57 plays)
+- SFO DBs out: Marques Sigle (7 tgts, 6.9 yds/tgt allowed) -> coverage 7.5 → 7.7 yds/tgt; WR yards x1.02
 
 | player                 | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-----------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Jayden Daniels         | QB    |     213.59 |      1.31 |            0.49 |      5.24 |      38.42 |      0.00 |         0.00 |      0.00 |         0.02 |
+| Jayden Daniels         | QB    |     216.01 |      1.31 |            0.49 |      5.24 |      38.42 |      0.00 |         0.00 |      0.00 |         0.02 |
 | Jacory Croskey-Merritt | RB    |       0.00 |      0.00 |            0.00 |     13.02 |      46.82 |      1.92 |         1.25 |     12.04 |         0.46 |
-| Terry McLaurin         | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.38 |         3.88 |     46.27 |         0.21 |
-| Antonio Williams       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.18 |         3.85 |     39.07 |         0.21 |
+| Terry McLaurin         | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.38 |         3.88 |     46.98 |         0.21 |
+| Antonio Williams       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.18 |         3.85 |     39.66 |         0.21 |
 | Rachaad White          | RB    |       0.00 |      0.00 |            0.00 |      5.44 |      19.81 |      2.34 |         1.64 |     14.29 |         0.26 |
-| Chig Okonkwo           | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.94 |         2.39 |     25.81 |         0.13 |
-| Treylon Burks          | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.47 |         2.05 |     23.76 |         0.18 |
-| Dyami Brown            | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.71 |         2.14 |     24.94 |         0.12 |
+| Chig Okonkwo           | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.94 |         2.39 |     26.01 |         0.13 |
+| Treylon Burks          | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.47 |         2.05 |     24.13 |         0.18 |
+| Dyami Brown            | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.71 |         2.14 |     25.32 |         0.12 |
 | Austin Ekeler          | RB    |       0.00 |      0.00 |            0.00 |      1.60 |       6.04 |      0.99 |         0.64 |      6.18 |         0.10 |
 | Kaytron Allen          | RB    |       0.00 |      0.00 |            0.00 |      1.94 |       7.16 |      0.00 |         0.00 |      0.00 |         0.08 |
 

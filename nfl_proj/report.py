@@ -108,7 +108,7 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
                 dprof: pd.DataFrame, labels: pd.DataFrame, cfg: dict, est: dict, strength: float,
                 scheme: pd.DataFrame | None = None, coach: pd.DataFrame | None = None,
                 plays: pd.DataFrame | None = None, overrides: pd.DataFrame | None = None,
-                flags: list[str] | None = None, market=None) -> str:
+                flags: list[str] | None = None, market=None, corners=None) -> str:
     lg_style = style.mean(numeric_only=True)
     lg_def = dprof.mean(numeric_only=True)
     out = [f"# Week {week} projections", "", settings_block(cfg, est, strength)]
@@ -144,6 +144,10 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
         cl = _coach_line(team, coach, plays)
         if cl:
             out.append(f"**Coach angle:** {cl}.")
+        if corners is not None:
+            cl2 = corners.describe(opp)
+            if cl2:
+                out.append(f"**{opp} secondary:** {cl2}.")
         sl = _scheme_line(opp, scheme)
         if sl:
             out.append(f"**{opp} defensive scheme (online/tagged):** {sl}.")

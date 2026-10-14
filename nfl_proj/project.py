@@ -51,8 +51,11 @@ def _pass_bucket(p: pd.DataFrame) -> pd.Series:
 class Projector:
     def __init__(self, plays: pd.DataFrame, player_games: pd.DataFrame, games: pd.DataFrame,
                  cfg: dict, labels: pd.DataFrame | None = None, overrides: pd.DataFrame | None = None,
-                 scheme: pd.DataFrame | None = None, coach: pd.DataFrame | None = None):
+                 scheme: pd.DataFrame | None = None, coach: pd.DataFrame | None = None,
+                 corners=None):
         self.cfg = cfg
+        self.corners = corners
+        self._cb_cache = {}
         self.scheme = scheme.set_index("team") if scheme is not None and not scheme.empty else None
         self.coach = coach.set_index("team") if coach is not None and not coach.empty else None
         self.k_coach = cfg.get("coach", {}).get("prior_games", 3.0)
@@ -227,6 +230,23 @@ class Projector:
                 f"{opp} blitzes {rb:.0%} of dropbacks (league {lb:.0%}, FTN charting); {team} gains "
                 f"x{s:.2f} as much per dropback vs the blitz as other offenses ({len(ob)} blitzed dropbacks) "
                 f"-> pass yards x{mult:.2f}")
+
+    def corner_factors(self, team: str, opp: str) -> tuple[dict, list[str]]:
+        """Per-receiver yards-per-target multipliers from the opponent's
+        available corners and shadow assignment (see corners.py)."""
+        key = (team, opp)
+        if key in self._cb_cache:
+            return self._cb_cache[key]
+        if self.corners is None or not self.corners.enabled:
+            self._cb_cache[key] = ({}, [])
+            return self._cb_cache[key]
+        act = self.active_players(team)
+        tp = self.passes[(self.passes["offense"] == team) & self.passes["target_id"].notna()]
+        share = tp.groupby("target_id")["w"].sum()
+        share = share / share.sum() if share.sum() else share
+        rec = act.assign(share=act["player_id"].map(share).fillna(0.0))
+        self._cb_cache[key] = self.corners.receiver_factors(opp, rec)
+        return self._cb_cache[key]
 
     # ---------------------------------------------------------- adjustments
     def adjustments(self, team: str, opp: str, week: int) -> dict:
@@ -445,7 +465,9 @@ class Projector:
         tp = self.passes[self.passes["offense"] == team]
         shares = self._shares(tp, "target_id", "pb", active, k_t, team, "target")
         eff, td = self._player_eff(tp, "target_id", "pb", peff, k_t)
+        cbf, cb_notes = self.corner_factors(team, opp)
         lg_td_t = self.lg_pass_td
+        rec_raw = rec_adj = 0.0
         for r in shares.itertuples():
             b, pid = r.pb, r.target_id
             tgts = vol["pass_att"] * pmix.get(b, 0) * r.share
@@ -455,7 +477,10 @@ class Projector:
             x = row(pid)
             x["targets"] = x.get("targets", 0) + tgts
             x["receptions"] = x.get("receptions", 0) + tgts * min(cr * peff[b]["m_cmp"], 0.98)
-            x["rec_yds"] = x.get("rec_yds", 0) + tgts * ypt * peff[b]["m_ypp"]
+            yds = tgts * ypt * peff[b]["m_ypp"]
+            rec_raw += yds
+            rec_adj += yds * cbf.get(pid, 1.0)
+            x["rec_yds"] = x.get("rec_yds", 0) + yds * cbf.get(pid, 1.0)
         for pid, x in rows.items():
             if pid in td.index:
                 rate = shrink(td.loc[pid, "td"] / td.loc[pid, "n"], td.loc[pid, "n"], lg_td_t, 60)
@@ -490,7 +515,10 @@ class Projector:
             x["pass_att"] = vol["pass_att"]
             x["completions"] = sum(vol["pass_att"] * pmix[b] * min(peff[b]["cmp"] * peff[b]["m_cmp"], 0.98)
                                    for b in pmix)
-            x["pass_yds"] = sum(vol["pass_att"] * pmix[b] * peff[b]["ypp"] * peff[b]["m_ypp"] for b in pmix)
+            # QB yards = the receivers' yards, so corner adjustments carry through
+            cb_ratio = rec_adj / rec_raw if rec_raw > 0 else 1.0
+            x["pass_yds"] = cb_ratio * sum(vol["pass_att"] * pmix[b] * peff[b]["ypp"] * peff[b]["m_ypp"]
+                                           for b in pmix)
             tp_td = _wmean(tp, "touchdown")
             tp_int = _wmean(tp, "interception")
             n = len(tp)
@@ -506,7 +534,7 @@ class Projector:
         context = {"team": team, "opp": opp, "volume": vol, "pass_mix": pmix, "run_mix": rmix,
                    "pass_signal": psig, "run_signal": rsig, "pass_eff": peff, "run_eff": reff,
                    "qb": names.get(qb, qb) if qb else None,
-                   "scheme_notes": self.scheme_effect(team, opp)["notes"],
+                   "scheme_notes": self.scheme_effect(team, opp)["notes"] + cb_notes,
                    "adjust": self.adjustments(team, opp, week) if self._market_on else None}
         return out, context
 

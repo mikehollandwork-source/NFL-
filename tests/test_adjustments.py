@@ -81,3 +81,27 @@ def test_ftn_join_marks_blitz():
     out = add_ftn(plays, ftn).set_index("play_id")
     assert out.at[1, "is_blitz"] == 1.0 and out.at[2, "is_blitz"] == 1.0
     assert np.isnan(out.at[3, "is_blitz"])
+
+
+def test_corners_out_and_shadow():
+    from nfl_proj.corners import Corners
+    cov = pd.DataFrame({
+        "week": [1, 1, 1, 2, 2, 2], "team": ["DEN"] * 6,
+        "player_id": ["s", "m", "b", "s", "m", "b"], "pfr_id": ["S", "M", "B", "S", "M", "B"],
+        "player": ["Pat Surtain II", "Riley Moss", "Jahdae Barron"] * 2, "pos": ["CB"] * 6,
+        "targets": [10, 10, 10, 10, 10, 10], "completions": [4, 6, 7] * 2,
+        "yards": [40, 80, 100, 40, 80, 100], "td": [0] * 6, "ints": [0] * 6})
+    pers = pd.DataFrame({"team": ["DEN"], "coordinator": ["VJ"], "coverage_lean": ["man"],
+                         "scheme_notes": [""], "shadow_cb": ["Pat Surtain II"], "shadow_notes": [""],
+                         "weak_spot": [""], "sources": [""], "as_of": [""], "confidence": ["medium"]})
+    rec = pd.DataFrame({"player_id": ["w1", "w2", "t1"], "player": ["WR One", "WR Two", "TE"],
+                        "pos": ["WR", "WR", "TE"], "share": [0.3, 0.2, 0.15]})
+    cfg = {"corners": {"shrink_targets": 0.001}}
+    healthy = Corners(cov, None, pers, set(), set(), cfg)
+    f, notes = healthy.receiver_factors("DEN", rec)
+    assert f["w1"] < 1 < f["w2"]          # WR1 draws the shadow; the rest face the weaker corners
+    assert any("shadows with Pat Surtain II" in n for n in notes)
+    hurt = Corners(cov, None, pers, {"s"}, set(), cfg)
+    f2, notes2 = hurt.receiver_factors("DEN", rec)
+    assert f2["w1"] > 1 and abs(f2["w1"] - f2["w2"]) < 1e-9 and 1 < f2["t1"] < f2["w1"]
+    assert any("is out: no shadow" in n for n in notes2)
