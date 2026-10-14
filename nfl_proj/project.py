@@ -58,7 +58,7 @@ class Projector:
         self.playview = None
         self._sig_cache = {}
         sc = cfg.get("streaks", {})
-        self.streak_cfg = {"enabled": sc.get("enabled", True),
+        self.streak_cfg = {"enabled": sc.get("enabled", True), "method": sc.get("method", "equal_weight"),
                            "cap": {"rec": sc.get("cap_rec_yards", 40.0), "rush": sc.get("cap_rush_yards", 30.0)}}
         self.streak = (tables or {}).get("_streaks", {}) or {}
         from .priors import Priors
@@ -505,7 +505,8 @@ class Projector:
         pb = pb.set_index([id_col, bucket_col]).reindex(grid).reset_index()
         pb["share"] = pb["share"].fillna(pb[id_col].map(players) * 0.5)
         # Volume streaks: keep only the measured share of a two-game run
-        vf = self._streak_factors(df, id_col, "rec" if id_col == "target_id" else "rush", "vol")
+        vf = (self._streak_factors(df, id_col, "rec" if id_col == "target_id" else "rush", "vol")
+              if self.streak_cfg["method"] == "factor" else {})
         if vf:
             pb["share"] = pb["share"] * pb[id_col].map(vf).fillna(1.0)
         pb["share"] = pb["share"] / pb.groupby(bucket_col)["share"].transform("sum")
@@ -532,6 +533,9 @@ class Projector:
         fam = "rec" if id_col == "target_id" else "rush"
         cap = self.streak_cfg["cap"][fam]
         dc = d.assign(yards=d["yards"].clip(upper=cap))
+        if self.streak_cfg["method"] == "equal_weight":
+            # Efficiency is noisy: every game counts the same (no recency boost for a hot stretch)
+            dc = dc.assign(w=1.0)
         g = bucket_rates(dc, [id_col, bucket_col])
         team_c = bucket_rates(dc, [bucket_col]).set_index(bucket_col)["ypp"]
         g["team_ypp"] = g[bucket_col].map(lambda b: team_eff.get(b, {}).get("ypp", np.nan))
@@ -540,7 +544,7 @@ class Projector:
         ratio = shrink(g["ypp"] / tc.replace(0, np.nan), g["n_raw"], 1.0, k)
         g["ypp_s"] = np.where(tc > 0, ratio * g["team_ypp"], shrink(g["ypp"], g["n_raw"], g["team_ypp"], k))
         g["cmp_s"] = shrink(g["cmp"], g["n_raw"], g["team_cmp"], k)
-        f = self._streak_factors(dc, id_col, fam, "eff")
+        f = self._streak_factors(dc, id_col, fam, "eff") if self.streak_cfg["method"] == "factor" else {}
         if f:
             g["ypp_s"] = g["ypp_s"] * g[id_col].map(f).fillna(1.0)
         td = d.groupby(id_col).agg(td=("touchdown", "sum"), n=("touchdown", "size"))

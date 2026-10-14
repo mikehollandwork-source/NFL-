@@ -183,7 +183,7 @@ volume_prior_games = 3.0     # plays per game: 2025 counts as this many games
 #   "assume"   -> cut = the value below (1.0 = cancel what failed)
 #   "measured" -> estimate the cut from this season's data
 #   "off"      -> no player-level adaptation
-mode = "assume"
+mode = "measured"
 cut = 1.0
 min_plays = 1                # plays of a type last game before it can be cut
 play_level = true            # judge kept plays by their exact kind (play action, screens) vs this defense
@@ -205,5 +205,9 @@ enabled = true
 # volume separately) and only that share is kept. Long plays are capped
 # when measuring a player's efficiency (they mostly don't repeat).
 enabled = true
+# "equal_weight": a player's efficiency weights every game the same (recent
+#                 hot games get no extra weight) with long plays capped
+# "factor":       keep only the measured share of the last two games' streak
+method = "equal_weight"
 cap_rec_yards = 40.0
 cap_rush_yards = 30.0
