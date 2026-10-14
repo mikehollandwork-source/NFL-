@@ -102,3 +102,27 @@ def test_scheme_and_coach_change_projection(tmp_path):
     tg = lambda df: df[(df["team"] == "BUF")].set_index("player")["targets"]
     assert tg(df1).max() > tg(df0).max()
     assert abs(tg(df1).sum() - tg(df0).sum()) < 0.5   # same team volume, redistributed
+
+
+def test_sharp_merge_keeps_old_source_for_kept_values():
+    import numpy as np
+    import pandas as pd
+    from nfl_proj.external import merge_keep_provenance
+    sharp = "https://www.sharpfootballanalysis.com/stats-nfl/nfl-defensive-tendencies/"
+    new = pd.DataFrame({"team": ["ARI"], "blitz_rate": [24.4], "man_rate": [10.5], "cover3": [np.nan],
+                        "source": [sharp], "confidence": ["high"]}).set_index("team")
+    old = pd.DataFrame({"team": ["ARI"], "blitz_rate": [16.0], "man_rate": [np.nan], "cover3": [26.0],
+                        "source": ["CBS Sports"], "confidence": ["low"]}).set_index("team")
+    m = merge_keep_provenance(new, old)
+    assert m.at["ARI", "blitz_rate"] == 24.4 and m.at["ARI", "cover3"] == 26.0
+    assert "cover3 from CBS Sports" in m.at["ARI", "source"] and m.at["ARI", "confidence"] == "low"
+
+
+def test_middle_of_field_shell_label():
+    # Real Sharp coverage-page values: CLE 71.3% middle closed, MIN 29.1%.
+    import pandas as pd
+    from nfl_proj.external import scheme_labels
+    ext = pd.DataFrame({"team": ["CLE", "MIN"], "mof_closed_rate": [71.3, 29.1],
+                        "mof_open_rate": [25.6, 62.6], "confidence": ["high", "high"]})
+    lab = scheme_labels(ext, None, {"scheme": {}}).set_index("team")
+    assert lab.at["CLE", "shell"] == "single_high" and lab.at["MIN", "shell"] == "two_high"

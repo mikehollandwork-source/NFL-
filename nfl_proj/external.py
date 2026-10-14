@@ -45,6 +45,9 @@ COLUMN_PATTERNS = {
     "blitz_rate": r"blitz", "man_rate": r"\bman\b", "zone_rate": r"zone",
     "cover0": r"cover\s*0", "cover1": r"cover\s*1", "cover2": r"cover\s*2(?!\s*man)",
     "cover3": r"cover\s*3", "cover4": r"cover\s*4|quarters", "cover6": r"cover\s*6",
+    # Sharp's coverage page reports middle-of-field closed (Cover 1/3, one
+    # deep safety) vs open (Cover 0/2/4/6) instead of individual shells.
+    "mof_closed_rate": r"middle\s*closed", "mof_open_rate": r"middle\s*open",
 }
 SCHEME_COLS = list(COLUMN_PATTERNS)
 
@@ -119,10 +122,29 @@ def scrape_sharp(out_path: Path, as_of: str, log=print) -> pd.DataFrame:
     for f in frames[1:]:
         new = new.combine_first(f.set_index("team"))
     old = load_external(out_path)
-    merged = new.combine_first(old.set_index("team")) if not old.empty else new
+    merged = merge_keep_provenance(new, old.set_index("team")) if not old.empty else new
     merged = merged.reset_index()
     merged.to_csv(out_path, index=False)
     log(f"updated {out_path}: {merged['team'].nunique()} teams")
+    return merged
+
+
+def merge_keep_provenance(new: pd.DataFrame, old: pd.DataFrame) -> pd.DataFrame:
+    """Fresh scraped values win. Values kept from an older row (a column the
+    scrape doesn't cover) keep their source in the row's ``source`` text, and
+    the row takes the lower of the two confidences."""
+    rank = {"low": 0, "medium": 1, "high": 2}
+    merged = new.combine_first(old)
+    for team in merged.index:
+        if team not in old.index or team not in new.index:
+            continue
+        kept = [c for c in SCHEME_COLS if c in old.columns and pd.notna(old.at[team, c])
+                and (c not in new.columns or pd.isna(new.at[team, c]))]
+        if not kept:
+            continue
+        merged.at[team, "source"] = f"{new.at[team, 'source']}; {','.join(kept)} from {old.at[team, 'source']}"
+        merged.at[team, "confidence"] = min(new.at[team, "confidence"], old.at[team, "confidence"],
+                                            key=lambda c: rank.get(c, 0))
     return merged
 
 
@@ -164,6 +186,11 @@ def scheme_labels(external: pd.DataFrame, manual: pd.DataFrame, cfg: dict) -> pd
                       if pd.notna(e.get(c))}
             if shells:
                 r["shell"] = max(shells, key=shells.get)
+            elif pd.notna(e.get("mof_closed_rate")) and pd.notna(e.get("mof_open_rate")):
+                # League average is roughly 60% closed; label clear leans only.
+                closed = e["mof_closed_rate"]
+                r["shell"] = ("single_high" if closed >= th.get("single_high_pct", 62.0)
+                              else "two_high" if closed <= th.get("two_high_pct", 50.0) else "")
             r["scheme_source"] = f"online ({e.get('confidence', '')})"
         if team in man.index:
             mrow = man.loc[team]

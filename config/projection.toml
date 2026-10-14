@@ -3,8 +3,14 @@
 
 season = 2026
 
+[source]
+# "nflverse" (default): public nflverse CSV releases, structured play-by-play.
+# "pfr": scrape Pro-Football-Reference HTML. PFR serves a Cloudflare bot check
+#        to cloud machines, so this only works from a home connection.
+provider = "nflverse"
+
 [scrape]
-delay_seconds = 4.0          # PFR bans clients above ~20 requests/minute
+delay_seconds = 4.0          # PFR only: PFR bans clients above ~20 requests/minute
 
 [filters]
 # Plays dropped before measuring tendencies (garbage time distorts play-calling).

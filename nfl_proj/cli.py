@@ -1,10 +1,10 @@
 """Command line entry point.
 
-  python -m nfl_proj scrape            download schedule + every completed box score
-  python -m nfl_proj build             parse cached HTML into data/nfl_<season>.db
+  python -m nfl_proj scrape            download nflverse play-by-play / stats (or PFR pages, see [source])
+  python -m nfl_proj build             turn the downloaded data into data/nfl_<season>.db
   python -m nfl_proj styles            coaching-style / defense report + adaptation test
   python -m nfl_proj external          refresh online defensive scheme data (Sharp Football)
-  python -m nfl_proj coaches           scrape play-caller history from PFR + coach report
+  python -m nfl_proj coaches           download play-caller history + coach report
   python -m nfl_proj project --week 7  projections for a week (prints choices first)
 """
 
@@ -35,7 +35,12 @@ def _paths(cfg):
         "lines": ROOT / "data" / "manual" / "prop_lines.csv",
         "external": ROOT / "data" / "external" / "defense_scheme.csv",
         "coaches": ROOT / "data" / "manual" / "coaches.csv",
+        "nflverse": ROOT / "data" / "raw" / "nflverse",
     }
+
+
+def _provider(cfg) -> str:
+    return cfg.get("source", {}).get("provider", "nflverse")
 
 
 def _analysis(cfg, paths):
@@ -59,8 +64,23 @@ def _scheme_and_coach(cfg, paths, plays, labels):
     coaches = load_coaches(paths["coaches"])
     if coaches.empty:
         return scheme, None
-    hist = history_table(coaches, Fetcher(paths["cache"].parent / "history"))
+    if _provider(cfg) == "nflverse":
+        from . import nflverse
+        hist = nflverse.history_table(coaches, paths["nflverse"])
+    else:
+        hist = history_table(coaches, Fetcher(paths["cache"].parent / "history"))
     return scheme, profiles(coaches, hist, cfg["season"])
+
+
+def _scrape_history(cfg, paths, coaches):
+    if _provider(cfg) == "nflverse":
+        from .coaches import parse_history
+        from .nflverse import download_history
+        download_history([y for h in coaches["caller_history"] for _, y in parse_history(h)], paths["nflverse"])
+        return
+    from .coaches import scrape_history
+    from .scrape import Fetcher
+    scrape_history(coaches, Fetcher(paths["cache"].parent / "history", delay=cfg["scrape"]["delay_seconds"]))
 
 
 def main(argv=None):
@@ -80,6 +100,10 @@ def main(argv=None):
     cfg = load_cfg(Path(args.config))
     paths = _paths(cfg)
 
+    if args.cmd == "scrape" and _provider(cfg) == "nflverse":
+        from .nflverse import download_season
+        download_season(cfg["season"], paths["nflverse"])
+        return
     if args.cmd == "scrape":
         from .scrape import scrape_season
         scrape_season(cfg["season"], paths["cache"], delay=cfg["scrape"]["delay_seconds"])
@@ -90,10 +114,12 @@ def main(argv=None):
         scrape_sharp(paths["external"], date.today().isoformat())
         return
     if args.cmd == "coaches" and not paths["db"].exists():
-        from .coaches import load_coaches, scrape_history
-        from .scrape import Fetcher
-        scrape_history(load_coaches(paths["coaches"]), Fetcher(paths["cache"].parent / "history",
-                                                                delay=cfg["scrape"]["delay_seconds"]))
+        from .coaches import load_coaches
+        _scrape_history(cfg, paths, load_coaches(paths["coaches"]))
+        return
+    if args.cmd == "build" and _provider(cfg) == "nflverse":
+        from .nflverse import build_season
+        build_season(cfg["season"], paths["nflverse"], paths["db"])
         return
     if args.cmd == "build":
         from .build import build_season
@@ -109,10 +135,8 @@ def main(argv=None):
     paths["out"].mkdir(parents=True, exist_ok=True)
 
     if args.cmd == "coaches":
-        from .coaches import load_coaches, scrape_history
-        from .scrape import Fetcher
-        scrape_history(load_coaches(paths["coaches"]), Fetcher(paths["cache"].parent / "history",
-                                                                delay=cfg["scrape"]["delay_seconds"]))
+        from .coaches import load_coaches
+        _scrape_history(cfg, paths, load_coaches(paths["coaches"]))
         scheme, coach = _scheme_and_coach(cfg, paths, plays, labels)
         coach.to_csv(paths["out"] / "coaches.csv", index=False)
         print(coach.to_markdown(index=False, floatfmt=".3f"))

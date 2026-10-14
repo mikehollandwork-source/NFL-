@@ -1,6 +1,7 @@
 # NFL player projections
 
-Scrapes box scores and play-by-play from Pro-Football-Reference (no API), profiles every
+Pulls play-by-play, box score stats and snap counts from the free public
+[nflverse](https://github.com/nflverse/nflverse-data) data releases, profiles every
 offense's play-calling and every defense's weaknesses, tests whether coaches really
 "cut what failed and call more of what worked," and projects player stat lines for the
 upcoming week.
@@ -9,11 +10,11 @@ upcoming week.
 
 ```bash
 pip install -r requirements.txt
-python -m nfl_proj scrape      # schedule + every completed box score (~4s/page, cached)
-python -m nfl_proj build       # parse cached pages -> data/nfl_2026.db
+python -m nfl_proj scrape      # download this season's nflverse files -> data/raw/nflverse/
+python -m nfl_proj build       # turn them into data/nfl_2026.db
 python -m nfl_proj styles      # coaching styles, defense labels, adaptation test -> output/2026/styles.md
 python -m nfl_proj external    # refresh online scheme data (blitz / man / zone / Cover N) from Sharp Football
-python -m nfl_proj coaches     # scrape each play-caller's past seasons from PFR -> coach profiles
+python -m nfl_proj coaches     # each play-caller's past seasons (nflverse stats) -> coach profiles
 python -m nfl_proj project     # next week's projections + props (shows your choices, asks y/N first)
 ```
 
@@ -41,7 +42,21 @@ To get over/under probabilities, add lines to `data/manual/prop_lines.csv`
 (`player,stat,line`, e.g. `Josh Allen,pass_yds,251.5`). Stat names match the `stat` column of
 `week_NN_props.csv`.
 
-Re-run `scrape` after each week; already-cached games are skipped.
+Re-run `scrape` after each week. nflverse updates the current season's files nightly during the
+season, so `scrape` always re-downloads them (about 7 MB).
+
+## Data source
+
+`[source] provider` in `config/projection.toml`:
+
+- `nflverse` (default): structured play-by-play from the NFL's game feed (play type, pass depth and
+  direction, run gap, shotgun / no-huddle, EPA, tacklers), weekly player stats, and snap counts.
+  Team codes are converted to PFR's (GNB, KAN, LVR, ...) and games keep PFR boxscore ids, so
+  `data/manual/` files work unchanged. Player ids are NFL GSIS ids.
+- `pfr`: the original Pro-Football-Reference HTML scraper (4s/page). PFR serves a Cloudflare bot
+  check to cloud machines (HTTP 403), so this only works from a home connection. It doesn't
+  provide the advanced-defense blitz table the nflverse path lacks either way; blitz data comes
+  from Sharp (below).
 
 ## Your choices: `config/projection.toml`
 
@@ -63,13 +78,13 @@ Every modeling decision is a setting. `project` prints the active choices and wa
   Coverage shells aren't in public play-by-play, so this is where your film or charting goes.
   Tags feed the matchup splits and the report notes.
 - `player_overrides.csv`: `team,player,status`. Use `out` to remove an injured player (his
-  volume is redistributed) and `starter` to set the QB. The `player` name must match PFR exactly.
+  volume is redistributed) and `starter` to set the QB. The `player` name must match the
+  `player` column of `week_NN_projections.csv` exactly.
 
 ## Coaching-style traits measured
 
 Pass rate by down and distance (1st & long; 2nd & short/medium/long; 3rd & short/medium/long/very
-long), neutral-script and early-down pass rate, shotgun and no-huddle rate (only if PFR's play text
-marks them; otherwise reported as blank), deep-pass share overall and on 3rd down, pass direction
+long), neutral-script and early-down pass rate, shotgun and no-huddle rate, deep-pass share overall and on 3rd down, pass direction
 mix, run direction and gap mix, 4th-down go rate, red-zone play mix (short pass / deep pass / run),
 red-zone EPA, 3rd-down conversion rate, sack rate, and explosive and negative play rates.
 
@@ -78,8 +93,9 @@ red-zone EPA, 3rd-down conversion rate, sack rate, and explosive and negative pl
 All 32 teams: head coach, years as an NFL head coach and with this team, who calls plays (HC or OC),
 whether the play-caller is new for 2026, and the seasons he called plays before (`caller_history`).
 Each row lists its source and confidence. The 2026 hires and play-callers come from 2026 web
-reporting; MIN's play-caller was not confirmed in 2026 sources. `coaches` scrapes each listed season
-from PFR and computes:
+reporting; MIN's play-caller was not confirmed in 2026 sources. `coaches` downloads nflverse weekly
+player stats for each listed season (pass rate = dropbacks incl. sacks / (dropbacks + carries)) and
+computes:
 
 - **Experience tiers**: first-year HC / new to team / young / veteran HC, and first-time / developing
   / veteran play-caller (counted in seasons actually calling plays).
@@ -130,7 +146,8 @@ play-by-play. A heavy-blitz team that isn't getting sacks shows up as a mismatch
 
 - PBP gives down, distance, depth (short/deep), direction, run gap, sacks, EPA, and score.
 - It does **not** give coverage shell or per-down blitz rate. The automatic `third_down_pressure`
-  label uses PFR's season blitz % when available, otherwise the 3rd-down sack rate as a proxy.
+  label uses PFR's season blitz % when available (PFR source only), otherwise the 3rd-down sack
+  rate as a proxy.
   Use `defense_tags.csv` for real coverage and blitz labels.
 - `styles.md` → "League: play family vs defense label" shows, for example, deep-pass EPA on
   3rd down against heavy-pressure defenses vs. light ones. That table is the evidence behind
@@ -139,7 +156,8 @@ play-by-play. A heavy-blitz team that isn't getting sacks shows up as a mismatch
 ## Layout
 
 ```
-nfl_proj/scrape.py      rate-limited downloader + HTML cache
+nfl_proj/nflverse.py    nflverse download + mapping to the tables below (default source)
+nfl_proj/scrape.py      rate-limited PFR downloader + HTML cache (PFR source)
 nfl_proj/parse_pfr.py   PFR tables (incl. ones hidden in HTML comments)
 nfl_proj/playparse.py   play text -> type, bucket, yards, passer/target/rusher
 nfl_proj/build.py       possession, field position, EPA, success -> SQLite
@@ -150,5 +168,5 @@ nfl_proj/sim.py         Monte Carlo game simulation -> every prop
 nfl_proj/coaches.py     coach experience, career pass lean, star reliance
 nfl_proj/external.py    online scheme data (Sharp scraper), scheme labels, PBP cross-check
 nfl_proj/report.py      markdown reports
-tests/                  parser tests + end-to-end run on synthetic PFR-format pages
+tests/                  parser + nflverse mapping tests, end-to-end run on synthetic pages
 ```
