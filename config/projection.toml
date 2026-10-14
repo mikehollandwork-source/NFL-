@@ -135,3 +135,31 @@ max_factor = 1.2
 # the team projected to lead passes less, the trailing team passes more.
 enabled = true
 pass_rate_per_point = 0.004
+
+[defense]
+# Position-group weakness (WR / TE / RB) and struggle-week diagnosis.
+shrink_targets = 40.0        # targets vs a position group before the split is trusted at 50%
+struggle_epa = 0.12          # a "struggle" = EPA/play allowed this much above the defense's other games
+absent_game_weight = 0.5     # weight of a struggle game played without starters who are back now
+min_factor = 0.8
+max_factor = 1.25
+
+[comps]
+# Similar offenses (structure, not results) and how they fared vs this defense.
+enabled = true
+bandwidth = 0.6              # smaller = only very close offenses count
+shrink_games = 2.0           # weighted games of evidence before the effect is trusted at 50%
+min_factor = 0.88
+max_factor = 1.12
+
+[picks]
+min_games = 3                # games played this season to qualify
+min_prob = 0.55              # simulated chance of beating the baseline in the pick's direction
+min_edge = 0.06              # ...and how much of that comes from the projection (skew removed)
+min_targets = 4.0            # usage floor per game for receiving picks
+min_carries = 8.0            # usage floor per game for rushing picks
+min_signals = 2              # independent signals that must agree
+per_game = 5
+star_target_share = 0.25     # "consistent action" exemption from the usage-trend rule
+star_carry_share = 0.55
+star_cv = 0.35               # max game-to-game variation in usage for the exemption

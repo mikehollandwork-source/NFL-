@@ -6,6 +6,7 @@
   python -m nfl_proj external          refresh online defensive scheme data (Sharp Football)
   python -m nfl_proj coaches           download play-caller history + coach report
   python -m nfl_proj project --week 7  projections for a week (prints choices first)
+  python -m nfl_proj backtest --weeks 2-5   replay past weeks with only the data known then
 """
 
 from __future__ import annotations
@@ -93,6 +94,9 @@ def main(argv=None):
     sub.add_parser("styles")
     sub.add_parser("external")
     sub.add_parser("coaches")
+    bt = sub.add_parser("backtest")
+    bt.add_argument("--weeks", default="2-5", help="e.g. 2-5")
+    bt.add_argument("--sims", type=int, default=2000)
     pj = sub.add_parser("project")
     pj.add_argument("--week", type=int, help="defaults to the next week with unplayed games")
     pj.add_argument("--yes", action="store_true", help="skip the confirmation prompt")
@@ -159,7 +163,18 @@ def main(argv=None):
         print(md)
         return
 
-    from .project import Projector
+    if args.cmd == "backtest":
+        from .backtest import run as run_backtest
+        a_, _, b_ = args.weeks.partition("-")
+        weeks = list(range(int(a_), int(b_ or a_) + 1))
+        res = run_backtest(t, cfg, paths, weeks, n_sims=args.sims)
+        (paths["out"] / "backtest.md").write_text(res["report"])
+        for k in ("picks", "calls", "totals", "proj_err"):
+            if not res[k].empty:
+                res[k].to_csv(paths["out"] / f"backtest_{k}.csv", index=False)
+        print(res["report"])
+        return
+
     games = t["games"]
     week = args.week or int(games[games["boxscore_id"].isna()]["week"].min())
     print(settings_block(cfg, est, strength))
@@ -167,48 +182,42 @@ def main(argv=None):
         if input(f"Project week {week} with these choices? [y/N] ").strip().lower() != "y":
             print("Stopped. Edit config/projection.toml and re-run.")
             return
-    overrides = pd.read_csv(paths["overrides"], dtype=str).fillna("") if paths["overrides"].exists() else None
-    from .availability import auto_overrides, merge_overrides
-    wk = games[games["week"] == week]
-    auto, avail_flags = auto_overrides(week, t.get("injuries"), t.get("depth_qb"), t["player_games"],
-                                       sorted(set(wk["home"]) | set(wk["away"])), cfg)
-    overrides = merge_overrides(overrides, auto)
-    auto.to_csv(paths["out"] / f"week_{week:02d}_availability.csv", index=False)
-    for f in avail_flags:
+    from .pipeline import run_week
+    from .sim import apply_lines, wide_means
+    r = run_week(t, cfg, paths, week)
+    for f in r["flags"]:
         print("availability:", f)
-    from .sim import Simulator, apply_lines, wide_means
-    from .corners import Corners, load_personnel
-    outs = overrides[overrides["status"].str.lower() == "out"] if overrides is not None else pd.DataFrame()
-    corners = Corners(t.get("coverage"), t.get("depth_db"), load_personnel(paths["personnel"]),
-                      set(outs.get("player_id", pd.Series(dtype=str))) - {""},
-                      set(outs.get("player", pd.Series(dtype=str))), cfg)
-    proj = Projector(plays, t["player_games"], games, cfg, labels, overrides, scheme, coach, corners=corners)
-    _, ctx = proj.project_week(week)
-    sim = Simulator(proj, t["player_games"], t.get("defenders"), t.get("kickers"),
-                    n_sims=cfg["sim"]["n_sims"], seed=cfg["sim"]["seed"])
-    props = sim.run_week(week)
+    r["auto_overrides"].to_csv(paths["out"] / f"week_{week:02d}_availability.csv", index=False)
     lines = pd.read_csv(paths["lines"], dtype=str) if paths["lines"].exists() else None
-    props = apply_lines(props, lines)
-    wide = wide_means(props)
+    props = apply_lines(r["props"], lines)
+    if lines is not None and not lines.empty:
+        from .picks import pick_week
+        r["picks"] = pick_week(r["proj"], props, r["tables"]["player_games"], week, cfg, lines)
+    wide = r["wide"]
     props_out = props.drop(columns="_samples").round(3)
 
     stem = paths["out"] / f"week_{week:02d}"
     wide.to_csv(f"{stem}_projections.csv", index=False)
     props_out.to_csv(f"{stem}_props.csv", index=False)
+    r["totals"].round(2).to_csv(f"{stem}_team_totals.csv", index=False)
+    if not r["picks"].empty:
+        r["picks"].to_csv(f"{stem}_picks.csv", index=False)
     import sqlite3
     with sqlite3.connect(paths["db"]) as con:
         for name, df in ((f"projections_week_{week:02d}", wide), (f"props_week_{week:02d}", props_out)):
             df.to_sql(name, con, if_exists="replace", index=False)
-    md = week_report(week, wide, ctx, style, dprof, labels, cfg, est, strength, scheme, coach, plays,
-                     overrides=overrides, flags=avail_flags, market=proj.market, corners=corners)
+    md = week_report(week, wide, r["ctx"], r["style"], r["dprof"], r["labels"], cfg, r["est"], r["strength"],
+                     r["scheme"], r["coach"], r["plays"], overrides=r["overrides"], flags=r["flags"],
+                     market=r["proj"].market, corners=r["corners"], picks=r["picks"], projector=r["proj"],
+                     totals=r["totals"])
     if "p_over" in props_out:
         edge = props_out[props_out["line"].notna()].assign(
             best=lambda d: d[["p_over", "p_under"]].max(axis=1)).sort_values("best", ascending=False)
         md += "\n## Your prop lines\n\n" + edge[["player", "stat", "line", "median", "p_over", "p_under"]] \
             .to_markdown(index=False, floatfmt=".2f") + "\n"
     Path(f"{stem}_report.md").write_text(md)
-    print(f"wrote {stem}_projections.csv, _props.csv, _report.md "
-          f"({wide['player'].nunique()} players, {len(ctx) // 2} games)")
+    print(f"wrote {stem}_projections.csv, _props.csv, _team_totals.csv, _picks.csv, _report.md "
+          f"({wide['player'].nunique()} players, {len(r['ctx']) // 2} games)")
 
 
 if __name__ == "__main__":

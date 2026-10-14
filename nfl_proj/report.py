@@ -109,12 +109,29 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
                 dprof: pd.DataFrame, labels: pd.DataFrame, cfg: dict, est: dict, strength: float,
                 scheme: pd.DataFrame | None = None, coach: pd.DataFrame | None = None,
                 plays: pd.DataFrame | None = None, overrides: pd.DataFrame | None = None,
-                flags: list[str] | None = None, market=None, corners=None) -> str:
+                flags: list[str] | None = None, market=None, corners=None,
+                picks: pd.DataFrame | None = None, projector=None, totals: pd.DataFrame | None = None) -> str:
     lg_style = style.mean(numeric_only=True)
     lg_def = dprof.mean(numeric_only=True)
     out = [f"# Week {week} projections", "", settings_block(cfg, est, strength)]
     if flags:
         out += ["## Availability flags", ""] + [f"- {f}" for f in flags] + [""]
+    if picks is not None and not picks.empty:
+        out += ["## Top 5 data-led projections per game", "",
+                "Direction vs the baseline (your line if entered, otherwise the player's own season "
+                "average). Overs need rising carries/targets, unders falling ones, unless the player is a "
+                "consistent-volume star or a starting QB. Ranked by score = edge x sample x signal agreement.", ""]
+        for game, g in picks.groupby("game", sort=False):
+            out.append(f"**{game}**")
+            out.append("")
+            out.append(g[["rank", "player", "team", "stat", "direction", "baseline", "projected_median", "prob",
+                          "signals"]].to_markdown(index=False, floatfmt=".2f"))
+            out.append("")
+    if totals is not None and not totals.empty:
+        out += ["## Projected team totals (model)", "",
+                "`model_points` = simulated 6 x TD + extra points + 3 x field goals before game script; "
+                "`final_points` = after game script (and the market blend for qualifying teams).", "",
+                totals[["team", "opp", "model_points", "final_points"]].to_markdown(index=False, floatfmt=".1f"), ""]
     if market is not None and market.enabled:
         mm = market.misses(week)
         if not mm.empty:
@@ -150,6 +167,18 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
             cl2 = corners.describe(opp)
             if cl2:
                 out.append(f"**{opp} secondary:** {cl2}.")
+        if projector is not None:
+            weak = projector.defan.weaknesses(opp)
+            if weak:
+                out.append(f"**{opp} defensive weak spots:** " + "; ".join(weak) + ".")
+            for line in projector.defan.describe_struggles(opp):
+                out.append(f"- {opp} struggle: {line}")
+            cm = projector.comps.effect(team, opp)
+            if cm["comps"]:
+                sims = ", ".join(f"{o} (similarity {s:.2f}: {p:+.1f} pass / {r_:+.1f} run yds/play vs their norm)"
+                                 for o, s, p, r_ in cm["comps"])
+                out.append(f"**Offenses like {team} that faced {opp}:** {sims} → {team} pass x{cm['pass']:.2f}, "
+                           f"run x{cm['run']:.2f}.")
         sl = _scheme_line(opp, scheme)
         if sl:
             out.append(f"**{opp} defensive scheme (online/tagged):** {sl}.")

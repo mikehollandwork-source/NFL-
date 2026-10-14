@@ -51,6 +51,8 @@ class Simulator:
         self.comp_all = comp["yards"].dropna().to_numpy(float)
         self.run_pool = {b: g["yards"].dropna().to_numpy(float) for b, g in proj.runs.groupby("bucket")}
         sc = p[p["play_type"] == "scramble"]["yards"].dropna().to_numpy(float)
+        self.team_points = {}
+        self.team_point_samples = {}
         self.scramble_pool = sc if len(sc) >= 30 else np.clip(np.random.default_rng(1).normal(6, 5, 400), -3, 40)
 
     # ------------------------------------------------------------ offense
@@ -144,6 +146,7 @@ class Simulator:
             syds, slong = _draw_sum_max(rng, scr, self.scramble_pool)
             acc(qb, "carries", scr)
             acc(qb, "rush_yds", syds)
+            acc(qb, "rush_td", rng.binomial(scr, min(P.scramble_td_rate(team) * tm["run_td"], 0.5)))
             acc(qb, "longest_rush", slong, "max")
 
         # --- rushing
@@ -269,6 +272,11 @@ class Simulator:
                 kk = self.kicker(team, opp, s["team"]["td"], week)
                 if kk:
                     rows += _summ(week, team, opp, kk["player_id"], kk["player"], "K", kk["stats"])
+                    pts = 6 * s["team"]["td"] + kk["stats"]["xp_made"] + 3 * kk["stats"]["fg_made"]
+                else:
+                    pts = 6.95 * s["team"]["td"]
+                self.team_points[(team, opp)] = float(np.mean(pts))
+                self.team_point_samples[(team, opp)] = pts
                 for dp in self.defense(team, sims[opp]["team"]):
                     rows += _summ(week, team, opp, dp["player_id"], dp["player"], dp["pos"], dp["stats"])
         return pd.DataFrame(rows)

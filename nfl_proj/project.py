@@ -52,7 +52,7 @@ class Projector:
     def __init__(self, plays: pd.DataFrame, player_games: pd.DataFrame, games: pd.DataFrame,
                  cfg: dict, labels: pd.DataFrame | None = None, overrides: pd.DataFrame | None = None,
                  scheme: pd.DataFrame | None = None, coach: pd.DataFrame | None = None,
-                 corners=None):
+                 corners=None, tables: dict | None = None):
         self.cfg = cfg
         self.corners = corners
         self._cb_cache = {}
@@ -75,8 +75,22 @@ class Projector:
 
         self.lg_pass = bucket_rates(self.passes, ["pb"]).set_index("pb")
         self.lg_run = bucket_rates(self.runs, ["bucket"]).set_index("bucket")
-        self.def_pass = bucket_rates(self.passes, ["defense", "pb"]).set_index(["defense", "pb"])
-        self.def_run = bucket_rates(self.runs, ["defense", "bucket"]).set_index(["defense", "bucket"])
+        from .defense import Comps, DefenseAnalysis
+        tables = tables or {}
+        ov = self.overrides
+        out_names = set(ov[ov["status"].str.lower() == "out"]["player"]) if not ov.empty else set()
+        self.defan = DefenseAnalysis(plays, player_games, tables.get("def_snaps"), cfg, out_names=out_names)
+        self.comps = Comps(plays, cfg)
+        # A defense's struggle games played without starters who are back now count less.
+        gw = self.defan.game_weight
+
+        def dweight(df):
+            if not gw:
+                return df
+            f = pd.Series([gw.get(k, 1.0) for k in zip(df["defense"], df["boxscore_id"])], index=df.index)
+            return df.assign(w=df["w"] * f)
+        self.def_pass = bucket_rates(dweight(self.passes), ["defense", "pb"]).set_index(["defense", "pb"])
+        self.def_run = bucket_rates(dweight(self.runs), ["defense", "bucket"]).set_index(["defense", "bucket"])
         self.off_pass = bucket_rates(self.passes, ["offense", "pb"]).set_index(["offense", "pb"])
         self.off_run = bucket_rates(self.runs, ["offense", "bucket"]).set_index(["offense", "bucket"])
 
@@ -98,6 +112,8 @@ class Projector:
         self.market = Market(games, cfg)
         self._market_on = True
         self._adj_cache = {}
+        self.base_mode = False      # True: SOS only (first pass for model team totals)
+        self.pts_override = {}      # (team, opp) -> simulated model points
         pts = games.dropna(subset=["boxscore_id"])
         lg_pts = (pts[["home_score", "away_score"]].stack().mean()
                   if {"home_score", "away_score"} <= set(pts.columns) and len(pts) else np.nan)
@@ -231,21 +247,42 @@ class Projector:
                 f"x{s:.2f} as much per dropback vs the blitz as other offenses ({len(ob)} blitzed dropbacks) "
                 f"-> pass yards x{mult:.2f}")
 
+    def scramble_td_rate(self, team: str) -> float:
+        """QB scramble TD rate, shrunk toward the league scramble TD rate."""
+        sc = self.all[(self.all["play_type"] == "scramble") & ~self.all["no_play"].astype(bool)]
+        lg = float(sc["touchdown"].astype(float).mean()) if len(sc) else 0.03
+        t = sc[sc["offense"] == team]
+        return float(shrink(t["touchdown"].astype(float).mean() if len(t) else np.nan, len(t), lg, 40))
+
+    def reset_adjustments(self):
+        self._adj_cache = {}
+
     def corner_factors(self, team: str, opp: str) -> tuple[dict, list[str]]:
-        """Per-receiver yards-per-target multipliers from the opponent's
-        available corners and shadow assignment (see corners.py)."""
+        """Per-receiver yards-per-target multipliers: the opponent's available
+        corners and shadow assignment (corners.py) times how the defense does
+        against this receiver's position group (defense.py)."""
         key = (team, opp)
         if key in self._cb_cache:
-            return self._cb_cache[key]
-        if self.corners is None or not self.corners.enabled:
-            self._cb_cache[key] = ({}, [])
             return self._cb_cache[key]
         act = self.active_players(team)
         tp = self.passes[(self.passes["offense"] == team) & self.passes["target_id"].notna()]
         share = tp.groupby("target_id")["w"].sum()
         share = share / share.sum() if share.sum() else share
         rec = act.assign(share=act["player_id"].map(share).fillna(0.0))
-        self._cb_cache[key] = self.corners.receiver_factors(opp, rec)
+        f, notes = ({}, [])
+        if self.corners is not None and self.corners.enabled:
+            f, notes = self.corners.receiver_factors(opp, rec)
+        f = dict(f)
+        moved = []
+        for r in rec.itertuples():
+            pf = self.defan.position_factor(opp, r.pos)
+            if pf != 1.0:
+                f[r.player_id] = f.get(r.player_id, 1.0) * pf
+                if abs(pf - 1) >= 0.05 and r.share >= 0.08:
+                    moved.append(f"{r.player} x{pf:.2f}")
+        if moved:
+            notes = notes + [f"{opp} vs position groups: " + ", ".join(moved)]
+        self._cb_cache[key] = (f, notes)
         return self._cb_cache[key]
 
     # ---------------------------------------------------------- adjustments
@@ -264,7 +301,7 @@ class Projector:
                      "def_pts": 1 + dw * (f("points", "def", opp) - 1)},
              "market": None, "td_factor": 1.0, "ypp_factor": 1.0, "dropback_shift": 0.0}
         self._adj_cache[key] = a  # provisional, so the base projections below see no adjustment
-        if not self._market_on:
+        if not self._market_on or self.base_mode:
             return a
         line = self.market.line(team, week)
         script = self.cfg.get("script", {})
@@ -289,7 +326,12 @@ class Projector:
         return a
 
     def model_points(self, team: str, opp: str, week: int) -> float:
-        """Projected points from the model alone: projected TDs x points per TD."""
+        """Projected points from the model alone. Uses the simulated team total
+        (6 x TD + extra points + 3 x field goals, from a first simulation pass
+        without game script or market) when available; otherwise projected
+        TDs x league points per TD."""
+        if (team, opp) in self.pts_override:
+            return self.pts_override[(team, opp)]
         base, _ = self.project_team(team, opp, week)
         tds = float(base.get("pass_td", pd.Series(dtype=float)).sum()
                     + base.get("rush_td", pd.Series(dtype=float)).sum())
@@ -382,6 +424,7 @@ class Projector:
         m_cmp = self._ratio(d["cmp"], lgr["cmp"], d["n_raw"]) if d is not None and family == "pass" else 1.0
         fam = "run" if family == "run" else ("deep" if "_deep_" in b else "short")
         m_ypp *= self.scheme_effect(team, opp)["ypp"][fam]
+        m_ypp *= self.comps.effect(team, opp)["pass" if family == "pass" else "run"]
         if week is not None:
             a = self.adjustments(team, opp, week)
             side = "pass" if family == "pass" else "run"
@@ -544,6 +587,7 @@ class Projector:
             x["interceptions"] = vol["pass_att"] * shrink(tp_int, n, self.lg_int, 200) * m_int
             sc = self.p[(self.p["offense"] == team) & (self.p["play_type"] == "scramble")]
             sc_ypc = sc["yards"].mean() if len(sc) else 6.0
+            x["rush_td"] = x.get("rush_td", 0) + vol["scrambles"] * self.scramble_td_rate(team) * m_run_td
             x["carries"] = x.get("carries", 0) + vol["scrambles"]
             x["rush_yds"] = x.get("rush_yds", 0) + vol["scrambles"] * sc_ypc
             x["sacks"] = vol["sacks"]

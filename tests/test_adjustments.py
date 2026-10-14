@@ -122,3 +122,35 @@ def test_market_only_for_consistent_teams():
     assert ten["target"] == 23.5 and ten["hit_rate"] == 1.0
     b = m.blend(ten, 20.0)
     assert abs(b["blended_pts"] - (0.6 * 23.5 + 0.4 * 20.0)) < 1e-9 and "dropback_shift" not in b
+
+
+def test_usage_trend_directions():
+    from nfl_proj.picks import usage_trend
+    assert usage_trend(pd.Series([4, 5, 8, 9]))["dir"] == "up"
+    assert usage_trend(pd.Series([9, 8, 5, 4]))["dir"] == "down"
+    assert usage_trend(pd.Series([6, 6]))["dir"] == "flat"      # too few games to call a trend
+    t = usage_trend(pd.Series([8, 8, 8, 8]))
+    assert t["dir"] == "flat" and t["cv"] == 0
+
+
+def test_comps_weight_similar_offenses():
+    from nfl_proj.defense import Comps
+    rng = np.random.default_rng(0)
+    rows = []
+    # Two pass-heavy offenses (A, B) and two run-heavy (C, D). Defense X is
+    # torched by pass-heavy offenses only; everyone also plays Y normally.
+    style = {"A": 0.75, "B": 0.72, "C": 0.35, "D": 0.38}
+    for off, pr in style.items():
+        for opp, box in (("X", f"{off}x"), ("Y", f"{off}y"), ("Z", f"{off}z")):
+            for i in range(60):
+                drop = rng.random() < pr
+                yards = 6.0 + (4.0 if (opp == "X" and pr > 0.5 and drop) else 0.0)
+                rows.append({"offense": off, "defense": opp, "boxscore_id": box, "garbage": False,
+                             "dropback": drop, "is_pass": drop, "is_run": not drop, "neutral": True,
+                             "early": True, "deep": False, "shotgun": drop, "no_huddle": False,
+                             "play_type": "pass" if drop else "run", "bucket": None, "yards": yards})
+    c = Comps(pd.DataFrame(rows), {"matchup": {"defense_weight": 1.0}, "comps": {"shrink_games": 0.5}})
+    # A's closest comp is B, who gained more vs X than in its other games
+    assert c.most_similar("A", 1)[0][0] == "B"
+    assert c.effect("A", "X")["pass"] > 1.0
+    assert c.effect("C", "X")["pass"] < c.effect("A", "X")["pass"]

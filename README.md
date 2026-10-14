@@ -166,6 +166,37 @@ play-by-play. A heavy-blitz team that isn't getting sacks shows up as a mismatch
    When `defense_personnel.csv` names a shadow corner and he plays, the offense's top WR spends
    70% of his routes against him; the other WRs face the group without him. Capped at ±20%.
 
+10. **Team totals** are simulated: 6 x touchdowns + extra points (the kicker's own rate) + 3 x field
+    goals (the kicker's own volume and accuracy), QB scramble TDs included. A first simulation pass
+    without game script gives each team's model total; the projected margin then sets game script.
+11. **Defensive weak spots** (`[defense]`): how each defense does against WRs, TEs and RBs relative to
+    its own average (feeds receiver projections), plus persistent weak spots (deep, short, inside /
+    outside runs, 3rd down, red zone, play action, explosives) in the report.
+12. **Struggle weeks**: games where a defense allowed clearly more EPA/play than its norm, each with a
+    diagnosis (which plays and positions broke down, 3rd down / red zone, the blitz, explosives, the
+    opponent's quality, and which regular starters didn't play, from snap counts). A struggle played
+    without starters who are available now counts half toward that defense's allowed rates.
+13. **Comparable offenses** (`[comps]`): offenses described by structure (neutral and early-down pass
+    rate, deep share, shotgun, no-huddle, play action, screens, motion, scrambles, outside runs, box
+    faced). How structurally similar offenses did against this defense, relative to their own norms
+    and beyond how every offense did against it, moves pass and run efficiency (capped at ±12%).
+
+## Top 5 picks per game (`week_NN_picks.csv`, `[picks]`)
+
+Over / under calls against your line (`prop_lines.csv`) or, without one, the player's own season
+average. To qualify: 3+ games, real volume (4+ targets or 8+ carries a game; QB rushing excluded),
+usage trending the pick's way (rising carries / targets for overs, falling for unders) unless the
+player is a consistent-volume star or the starting QB, a 55%+ simulated chance with at least a 6-point
+edge from the projection itself (the stat's skew removed), and 2+ agreeing signals (bucket matchup,
+coverage / position factor, comparable offenses, usage trend, game script, team total). Ranked by
+edge x sample x signal agreement; one pick per player.
+
+## Backtest (`python -m nfl_proj backtest --weeks 2-5` → `backtest.md`)
+
+Replays each week with only what was known before it (play-by-play, stats, injury report, depth chart
+as of that week) and scores the picks, every unfiltered call, player projections vs a naive season
+average, and team totals vs actual (with the market's implied totals for reference).
+
 ## Researched defensive personnel (`data/external/defense_personnel.csv`)
 
 Web research on each defense: coordinator, man / zone lean, scheme notes, shadow corner, and the
@@ -206,6 +237,10 @@ nfl_proj/ratings.py     strength of schedule (opponent-adjusted ratings)
 nfl_proj/market.py      implied team totals, teams missing them, market blend
 nfl_proj/availability.py injury report + depth chart -> outs and starting QB
 nfl_proj/corners.py     cornerback coverage quality, injuries, shadow assignments
+nfl_proj/defense.py     position-group weakness, struggle-week diagnosis, comparable offenses
+nfl_proj/picks.py       usage-trend gate and the top 5 picks per game
+nfl_proj/pipeline.py    one week's run, live or replayed as of a past week
+nfl_proj/backtest.py    replay and score past weeks
 nfl_proj/external.py    online scheme data (Sharp scraper), scheme labels, PBP cross-check
 nfl_proj/report.py      markdown reports
 tests/                  parser + nflverse mapping tests, end-to-end run on synthetic pages

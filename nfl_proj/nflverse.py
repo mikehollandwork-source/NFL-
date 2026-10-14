@@ -369,6 +369,7 @@ def build_season(season: int, cache_dir: Path, db_path: Path, log=print) -> dict
     tables = {
         "games": games.drop(columns="nv_game_id"),
         "plays": plays,
+        "def_snaps": def_snaps(pd.read_csv(paths["snaps"]), games),
         "player_games": build_player_games(stats, pd.read_csv(paths["snaps"]),
                                            pd.read_csv(paths["rosters"], low_memory=False), plays, games),
         "defenders": build_defenders(stats, games),
@@ -383,11 +384,11 @@ def build_season(season: int, cache_dir: Path, db_path: Path, log=print) -> dict
         tables["injuries"] = injuries_table(pd.read_csv(opt["injuries"], low_memory=False))
     if "depth" in opt:
         depth = pd.read_csv(opt["depth"], low_memory=False)
-        tables["depth_qb"] = depth_qbs(depth)
-        tables["depth_db"] = depth_dbs(depth)
+        tables["depth_qb"] = by_week(depth, games, depth_qbs)
+        tables["depth_db"] = by_week(depth, games, depth_dbs)
     db_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(db_path) as con:
-        for name in ("team_defense", "injuries", "depth_qb", "depth_db", "coverage"):
+        for name in ("team_defense", "injuries", "depth_qb", "depth_db", "coverage", "def_snaps"):
             con.execute(f"drop table if exists {name}")
         for name, df in tables.items():
             df.to_sql(name, con, if_exists="replace", index=False)
@@ -447,8 +448,34 @@ def injuries_table(inj: pd.DataFrame) -> pd.DataFrame:
                          "practice_status": i["practice_status"]})
 
 
+def by_week(depth: pd.DataFrame, games: pd.DataFrame, fn) -> pd.DataFrame:
+    """Depth chart as it stood before each week: for week W, the last
+    snapshot taken before W's first game (``for_week`` column). Lets past
+    weeks be replayed without using later information."""
+    first = pd.to_datetime(games.groupby("week")["date"].min())
+    snaps = pd.Series(sorted(depth["dt"].unique()))
+    snap_t = pd.to_datetime(snaps).dt.tz_localize(None)
+    out = []
+    for wk, day in first.items():
+        before = snaps[snap_t < day]
+        if before.empty:
+            continue
+        frame = fn(depth[depth["dt"] == before.iloc[-1]])
+        out.append(frame.assign(for_week=int(wk)))
+    return pd.concat(out, ignore_index=True) if out else pd.DataFrame()
+
+
+def def_snaps(snaps: pd.DataFrame, games: pd.DataFrame) -> pd.DataFrame:
+    """Defensive snaps per player per game (who actually played)."""
+    box = dict(zip(games["nv_game_id"], games["boxscore_id"]))
+    s = snaps[(snaps["game_type"] == "REG") & (snaps["defense_snaps"] > 0)]
+    return pd.DataFrame({"boxscore_id": s["game_id"].map(box), "week": s["week"], "team": s["team"].map(team),
+                         "pfr_id": s["pfr_player_id"], "player": s["player"], "pos": s["position"],
+                         "snaps": s["defense_snaps"], "pct": s["defense_pct"]})
+
+
 def depth_qbs(depth: pd.DataFrame) -> pd.DataFrame:
-    """Latest depth-chart snapshot, quarterbacks only, ranked."""
+    """One depth-chart snapshot, quarterbacks only, ranked."""
     last = depth[depth["dt"] == depth["dt"].max()]
     q = last[last["pos_abb"] == "QB"].sort_values(["team", "pos_rank"]).drop_duplicates(["team", "gsis_id"])
     return pd.DataFrame({"as_of": q["dt"], "team": q["team"].map(team), "player_id": q["gsis_id"],
@@ -460,7 +487,7 @@ DB_SLOTS = {"LCB": "outside", "RCB": "outside", "CB": "outside", "NB": "slot",
 
 
 def depth_dbs(depth: pd.DataFrame) -> pd.DataFrame:
-    """Latest depth-chart snapshot, defensive backs with their alignment
+    """One depth-chart snapshot, defensive backs with their alignment
     (LCB / RCB outside, NB nickel = slot, SS / FS safeties)."""
     last = depth[(depth["dt"] == depth["dt"].max()) & depth["pos_abb"].isin(list(DB_SLOTS))]
     last = last.sort_values(["team", "pos_abb", "pos_rank"])
