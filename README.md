@@ -181,17 +181,22 @@ play-by-play. A heavy-blitz team that isn't getting sacks shows up as a mismatch
     faced). How structurally similar offenses did against this defense, relative to their own norms
     and beyond how every offense did against it, moves pass and run efficiency (capped at ±12%).
 
-14. **Player-level adaptation** (`[player_adaptation]`): for each player, the play types (e.g. short
-    right, deep left, inside-left run) that failed for him last game are cut by their failure rate
-    (custom rule: netted zero or less, a turnover, or a failed 3rd/4th down). The volume he loses
-    moves to the play types that worked for him last game (to the uncut ones if nothing worked); his
-    total volume stays the same. The team's play mix is rebuilt from the players' plans, and this
-    week's defense's numbers on those play types decide what they're worth. `mode = "assume"` (cut
-    = 1.0 cancels what failed), `"measured"` (cut estimated from this season), or `"off"`. The report
-    shows, per player: what was cut, what he does more of, what this defense allows there, and the
-    effect in yards.
+14. **Player-level adaptation** (`[player_adaptation]`): each player's individual plays from last game
+    are listed (`week_NN_player_plays.md`). Plays that netted zero or less, turned it over or failed
+    on 3rd/4th down are cancelled; the rest are kept. Next week his volume shifts out of the kinds of
+    plays that failed and into the kinds he was kept on (his total volume is unchanged), the team's
+    play mix is rebuilt from those plans, and each kept play is judged against this week's defense by
+    its exact kind (direction, depth, play action, screen). How hard to shift: `mode = "measured"`
+    (default) uses the size measured from the data: after a player's plays of one kind all failed,
+    his share of that kind drops about 16% next game (2025: 13,741 cases, t = -9.4; 2026: t = -4.4).
+    `mode = "assume"` with `cut = 1.0` cancels failed kinds outright; in the backtest that made
+    receiving projections slightly worse.
 15. **2025 priors** (`[priors]`): small samples are pulled toward the team's own 2025 rates
     (regressed toward league; more for offenses with a new play-caller) instead of league average.
+15b. **Streak regression** (`[streaks]`): a player's efficiency weighs every game equally (a hot
+    stretch gets no recency boost) and long plays are capped (40 yds receiving, 30 rushing) when
+    measuring him. Measured on 2025-26: only 32% of a two-game yards-per-target streak carries into
+    the next game (29% for yards per carry; 42% / 48% for targets / carries).
 16. **Weather** (`[weather]`): wind, cold and rain effects measured from 2025-26 outdoor games and
     applied from the National Weather Service hourly forecast at kickoff (Open-Meteo abroad).
 17. **Offensive line** (`[oline]`): per-missing-starter effects measured from 2025-26 team-games,
