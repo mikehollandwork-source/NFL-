@@ -32,6 +32,7 @@ class Priors:
         self.new_caller = set()
         if coach is not None and not coach.empty:
             self.new_caller = set(coach[coach["new_caller_2026"].astype(bool)]["team"])
+        self.plays_prev = plays_prev
         if not self.enabled:
             return
         p = plays_prev[~plays_prev["garbage"]]

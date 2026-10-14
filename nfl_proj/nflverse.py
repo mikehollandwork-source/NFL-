@@ -218,7 +218,19 @@ PBP_COLS = ["game_id", "play_id", "week", "qtr", "time", "down", "ydstogo", "yar
             "pass_length", "pass_location", "run_location", "run_gap", "kick_distance",
             "field_goal_result", "extra_point_result", "passer_player_id", "receiver_player_id",
             "rusher_player_id", "kicker_player_id", "interception_player_id",
-            "fixed_drive", "fixed_drive_result", *TACKLE_COLS, *SACK_COLS]
+            "fixed_drive", "fixed_drive_result", "game_seconds_remaining", "drive_time_of_possession",
+            "drive_play_count", *TACKLE_COLS, *SACK_COLS]
+
+
+def _mmss(v):
+    """'6:11' -> 371 seconds."""
+    if not isinstance(v, str) or ":" not in v:
+        return None
+    m, _, sec = v.partition(":")
+    try:
+        return int(m) * 60 + int(sec)
+    except ValueError:
+        return None
 
 
 def build_plays(pbp: pd.DataFrame, games: pd.DataFrame, season: int) -> pd.DataFrame:
@@ -242,6 +254,8 @@ def build_plays(pbp: pd.DataFrame, games: pd.DataFrame, season: int) -> pd.DataF
                 "detail": r["desc"] if isinstance(r["desc"], str) else "",
                 "epa": r["epa"] if pd.notna(r["epa"]) else None,
                 "drive": r.get("fixed_drive"), "drive_result": r.get("fixed_drive_result"),
+                "game_secs_left": r.get("game_seconds_remaining"),
+                "drive_top": _mmss(r.get("drive_time_of_possession")), "drive_plays": r.get("drive_play_count"),
                 "success": is_success(down, ytg, parsed["yards"])
                 if parsed["play_type"] in ("pass", "run", "sack", "scramble") else None,
                 **parsed,

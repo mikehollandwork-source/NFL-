@@ -55,6 +55,8 @@ class Projector:
                  corners=None, tables: dict | None = None, priors=None):
         self.cfg = cfg
         self.corners = corners
+        from .clock import Clock
+        self.clock = Clock(plays, cfg, getattr(priors, "plays_prev", None))
         self.playview = None
         self._sig_cache = {}
         sc = cfg.get("streaks", {})
@@ -381,6 +383,10 @@ class Projector:
         own = (g_n * off_games.mean() + k * self.lg_ppg * self.priors.plays_factor(team)) / (g_n + k) \
             if g_n + k > 0 else self.lg_ppg
         plays = own * (1 + self.dw * (def_games.mean() / self.lg_ppg - 1))
+        clock = None
+        if self.clock is not None and self.clock.enabled:
+            clock = self.clock.game(team, opp)
+            plays = clock["plays"]
 
         t, d = p[p["offense"] == team], p[p["defense"] == opp]
         db_rate = _wmean(t, "dropback")
@@ -402,7 +408,7 @@ class Projector:
         scramble_rate = _wmean(tdb, "play_type", fn=lambda s: s == "scramble")
         sacks = dropbacks * sack_rate
         scrambles = dropbacks * scramble_rate
-        return {"plays": plays, "dropback_rate": db_rate, "pass_att": dropbacks - sacks - scrambles,
+        return {"plays": plays, "clock": clock, "dropback_rate": db_rate, "pass_att": dropbacks - sacks - scrambles,
                 "sacks": sacks, "scrambles": scrambles, "runs": plays - dropbacks}
 
     def mix(self, team: str, family: str, opp: str | None = None) -> tuple[dict, dict]:

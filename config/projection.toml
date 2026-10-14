@@ -211,3 +211,14 @@ enabled = true
 method = "equal_weight"
 cap_rec_yards = 40.0
 cap_rush_yards = 30.0
+
+[volume]
+# How each team's plays are projected.
+#   "clock" (default): drives come from the shared game clock (both teams'
+#           pace and plays per drive); plays = drives x plays per drive.
+#           Possession share falls out of it. See nfl_proj/clock.py.
+#   "average": the team's plays per game x the opponent's plays allowed.
+method = "clock"
+ppd_shrink_games = 8.0       # plays per drive barely repeats: shrink hard
+pace_shrink_games = 3.0
+pace_prior_regress = 0.7     # 2025 pace kept at 70% as the starting point

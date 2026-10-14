@@ -154,3 +154,27 @@ def test_comps_weight_similar_offenses():
     assert c.most_similar("A", 1)[0][0] == "B"
     assert c.effect("A", "X")["pass"] > 1.0
     assert c.effect("C", "X")["pass"] < c.effect("A", "X")["pass"]
+
+
+def test_clock_model_slow_team_takes_possession():
+    from nfl_proj.clock import Clock
+    rows = []
+    seq = 0
+    # SLOW: long drives at 45 s per clock play; FAST: short drives at 25 s
+    for box, (a, b) in enumerate([("SLOW", "X"), ("FAST", "X"), ("X", "SLOW"), ("X", "FAST")] * 3):
+        for team, opp in ((a, b), (b, a)):
+            n_drives, ppd, spp = (8, 8, 45) if team == "SLOW" else (8, 4, 25) if team == "FAST" else (8, 6, 35)
+            secs = 3600
+            for dr in range(n_drives):
+                for i in range(ppd):
+                    seq += 1
+                    rows.append({"boxscore_id": f"g{box}", "seq": seq, "offense": team, "defense": opp,
+                                 "play_type": "run", "no_play": False, "drive": f"{team}{dr}", "drive_top": ppd * spp,
+                                 "game_secs_left": secs, "complete": False, "quarter": 1, "score_diff": 0})
+                    secs -= spp
+    c = Clock(pd.DataFrame(rows), {"volume": {"method": "clock", "ppd_shrink_games": 0.01, "pace_shrink_games": 0.01}})
+    g = c.game("SLOW", "FAST")
+    assert g["top_share"] > 0.6                      # the slow, long-drive team holds the ball
+    assert g["plays"] > g["opp_plays"]
+    # A slow opponent cuts this team's drives (and plays) vs a fast one
+    assert c.game("X", "SLOW")["drives"] < c.game("X", "FAST")["drives"]

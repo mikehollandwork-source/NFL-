@@ -153,6 +153,11 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
         team, opp = ctx["team"], ctx["opp"]
         v = ctx["volume"]
         out.append(f"## {team} vs {opp}")
+        ck = v.get("clock")
+        if ck:
+            out.append(f"**Clock:** {ck['drives']:.1f} drives each; {team} {ck['ppd']:.2f} plays/drive at "
+                       f"{ck['pace']:.1f} s per clock-running play vs {opp} {ck['opp_ppd']:.2f} at {ck['opp_pace']:.1f} s "
+                       f"→ projected possession {ck['top_share']:.0%}, {ck['plays']:.0f} plays to {ck['opp_plays']:.0f}.")
         out.append(f"Projected {v['plays']:.0f} plays, {v['dropback_rate']:.0%} dropbacks, "
                    f"{v['pass_att']:.1f} pass att, {v['runs']:.1f} runs, {v['sacks']:.1f} sacks. "
                    f"QB: {ctx['qb'] or 'unknown'}")

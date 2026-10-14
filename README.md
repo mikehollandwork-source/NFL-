@@ -197,6 +197,13 @@ play-by-play. A heavy-blitz team that isn't getting sacks shows up as a mismatch
     stretch gets no recency boost) and long plays are capped (40 yds receiving, 30 rushing) when
     measuring him. Measured on 2025-26: only 32% of a two-game yards-per-target streak carries into
     the next game (29% for yards per carry; 42% / 48% for targets / carries).
+15c. **Clock / possession** (`[volume]`): play volume comes from the shared game clock. Time of
+    possession is NOT a stable team trait (2025 first half vs second half r = 0.06; it follows the
+    scoreboard), but pace is (seconds per clock-running play, r = 0.70). Drives in the game come from
+    both teams' pace and plays per drive (shrunk hard: it barely repeats); each team's plays = drives
+    x its plays per drive vs this defense. A slow, drive-sustaining opponent therefore cuts your plays
+    too, and projected possession falls out of the model (shown per game in the report). Walk-forward
+    test on projected team plays: MAE 6.80 vs 6.91 for the old method (2025), 6.66 vs 6.86 (2026).
 16. **Weather** (`[weather]`): wind, cold and rain effects measured from 2025-26 outdoor games and
     applied from the National Weather Service hourly forecast at kickoff (Open-Meteo abroad).
 17. **Offensive line** (`[oline]`): per-missing-starter effects measured from 2025-26 team-games,
