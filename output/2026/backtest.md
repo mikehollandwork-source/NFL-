@@ -1,0 +1,105 @@
+# Backtest
+
+Weeks 2-5 replayed with only the data available before each week (play-by-play, stats, injury report, depth chart as of that week). Left out because they were gathered later: the Sharp scheme scrape, the researched defensive personnel file and manual overrides. Week 1 can't be replayed (no prior 2026 games). Picks need 3 games played, so weeks 2-3 produce none.
+
+## Picks (top 5 per game)
+
+- **Overall: 65/107 (61%)** (voids: 6, pushes: 4)
+- Week 4: 34/58 (59%)
+- Week 5: 31/49 (63%)
+- overs: 36/66 (55%)
+- unders: 29/41 (71%)
+- Rank 1 picks only: 18/27 (67%)
+
+By stat:
+
+| stat        | hit rate    |
+|:------------|:------------|
+| carries     | 15/17 (88%) |
+| completions | 3/3 (100%)  |
+| pass_yds    | 8/13 (62%)  |
+| rec_yds     | 17/27 (63%) |
+| receptions  | 9/18 (50%)  |
+| rush_yds    | 6/11 (55%)  |
+| targets     | 7/18 (39%)  |
+
+## Every call, no filters (for comparison)
+
+All over/under calls on players above the usage floor, before the trend gate, signal count and top-5 cut: **165/255 (65%)**. If the picks above beat this, the filters are adding value.
+
+Hit rate by model edge (quartiles): does a bigger edge win more often?
+
+| edge_bin        | hit rate    |
+|:----------------|:------------|
+| (-0.001, 0.146] | 39/64 (61%) |
+| (0.146, 0.202]  | 46/67 (69%) |
+| (0.202, 0.272]  | 36/60 (60%) |
+| (0.272, 0.522]  | 44/64 (69%) |
+
+## Does each filter add anything? (lift over a no-information call)
+
+`no-info rate` = how often a call on that side of the baseline would hit with no model at all (yardage stats land under their own average more often than not, so unders start ahead). `lift` = hit rate minus that. Subgroups of 20-130 calls: differences under ~10 points are noise.
+
+Unfiltered calls overall:
+
+| all   |   calls |   hit rate |   no-info rate |   lift |
+|:------|--------:|-----------:|---------------:|-------:|
+| all   |  255.00 |       0.65 |           0.50 |   0.14 |
+
+Usage trend agrees with the call (the qualification rule):
+
+| usage trend agrees   |   calls |   hit rate |   no-info rate |   lift |
+|:---------------------|--------:|-----------:|---------------:|-------:|
+| False                |  144.00 |       0.65 |           0.52 |   0.13 |
+| True                 |  111.00 |       0.65 |           0.48 |   0.16 |
+
+Number of agreeing signals:
+
+|   n_signals |   calls |   hit rate |   no-info rate |   lift |
+|------------:|--------:|-----------:|---------------:|-------:|
+|           0 |   23.00 |       0.74 |           0.54 |   0.20 |
+|           1 |   79.00 |       0.68 |           0.51 |   0.17 |
+|           2 |   87.00 |       0.66 |           0.50 |   0.16 |
+|           3 |   50.00 |       0.56 |           0.49 |   0.07 |
+|           4 |   13.00 |       0.69 |           0.49 |   0.20 |
+|           5 |    3.00 |       0.00 |           0.54 |  -0.54 |
+
+Top-5 picks:
+
+| all   |   calls |   hit rate |   no-info rate |   lift |
+|:------|--------:|-----------:|---------------:|-------:|
+| picks |  107.00 |       0.61 |           0.48 |   0.13 |
+
+## Player projections vs a naive season average
+
+Mean absolute error on players who got the ball (lower is better).
+
+| stat        |      n |   model_mae |   naive_mae | model_better   |
+|:------------|-------:|------------:|------------:|:---------------|
+| carries     | 453.00 |        2.88 |        2.88 | False          |
+| completions | 127.00 |        5.29 |        5.51 | True           |
+| pass_yds    | 127.00 |       63.67 |       72.25 | True           |
+| rec_yds     | 904.00 |       21.27 |       22.05 | True           |
+| receptions  | 904.00 |        1.60 |        1.64 | True           |
+| rush_yds    | 453.00 |       17.78 |       18.17 | True           |
+| targets     | 904.00 |        2.13 |        2.05 | False          |
+
+## Team totals
+
+Mean absolute error in points per team-game (lower is better).
+
+| source                |   MAE |
+|:----------------------|------:|
+| model (final)         |  8.19 |
+| model (before script) |  8.27 |
+| market implied total  |  7.02 |
+| team's season average |  8.85 |
+
+By week:
+
+|   week |   model |   market |   season_avg |
+|-------:|--------:|---------:|-------------:|
+|      2 |   10.23 |     8.28 |        12.06 |
+|      3 |    8.94 |     7.36 |         8.03 |
+|      4 |    5.69 |     5.58 |         7.35 |
+|      5 |    7.89 |     6.85 |         7.91 |

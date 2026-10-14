@@ -25,8 +25,8 @@ Direction vs the baseline (your line if entered, otherwise the player's own seas
 |      1 | Kyren Williams | LAR    | carries    | over        |      14.50 |              17.00 |   0.78 | usage trending up (12.7 → 16.0); game script -4.8% dropbacks; team total +10.9 vs its average |
 |      2 | Tyler Higbee   | LAR    | receptions | under       |       5.20 |               3.00 |   0.87 | usage trending down (6.5 → 6.0); game script -4.8% dropbacks                                  |
 |      3 | Jeremiyah Love | ARI    | carries    | under       |      13.60 |              12.00 |   0.71 | usage trending down (13.7 → 13.0); game script +4.8% dropbacks                                |
-|      4 | Trey McBride   | ARI    | receptions | under       |       8.40 |               8.00 |   0.64 | matchup pass x0.95; coverage x0.82; similar offenses x0.95; usage trending down (11.3 → 11.0) |
-|      5 | Davante Adams  | LAR    | receptions | under       |       5.40 |               4.00 |   0.68 | usage trending down (9.7 → 8.0); game script -4.8% dropbacks                                  |
+|      4 | Davante Adams  | LAR    | receptions | under       |       5.40 |               4.00 |   0.68 | usage trending down (9.7 → 8.0); game script -4.8% dropbacks                                  |
+|      5 | Trey McBride   | ARI    | receptions | under       |       8.40 |               8.00 |   0.64 | matchup pass x0.95; coverage x0.82; similar offenses x0.95                                    |
 
 **ATL @ CHI**
 
@@ -67,11 +67,10 @@ Direction vs the baseline (your line if entered, otherwise the player's own seas
 
 **DAL @ GNB**
 
-|   rank | player           | team   | stat       | direction   |   baseline |   projected_median |   prob | signals                                                                          |
-|-------:|:-----------------|:-------|:-----------|:------------|-----------:|-------------------:|-------:|:---------------------------------------------------------------------------------|
-|      1 | MarShawn Lloyd   | GNB    | rush_yds   | over        |      22.00 |              46.30 |   0.90 | matchup run x1.04; usage trending up (7.7 → 8.5); team total +7.7 vs its average |
-|      2 | Javonte Williams | DAL    | receptions | under       |       3.30 |               3.00 |   0.71 | matchup pass x0.97; usage trending down (4.0 → 4.0)                              |
-|      3 | Ryan Flournoy    | DAL    | rec_yds    | under       |      44.30 |              30.10 |   0.71 | matchup pass x0.97; coverage x0.97; usage trending down (6.0 → 4.5)              |
+|   rank | player         | team   | stat     | direction   |   baseline |   projected_median |   prob | signals                                                                          |
+|-------:|:---------------|:-------|:---------|:------------|-----------:|-------------------:|-------:|:---------------------------------------------------------------------------------|
+|      1 | MarShawn Lloyd | GNB    | rush_yds | over        |      22.00 |              46.30 |   0.90 | matchup run x1.04; usage trending up (7.7 → 8.5); team total +7.7 vs its average |
+|      2 | Ryan Flournoy  | DAL    | rec_yds  | under       |      44.30 |              30.10 |   0.71 | matchup pass x0.97; coverage x0.97; usage trending down (6.0 → 4.5)              |
 
 **DEN @ SEA**
 
@@ -107,8 +106,8 @@ Direction vs the baseline (your line if entered, otherwise the player's own seas
 |      1 | Patrick Mahomes    | KAN    | completions | under       |      20.20 |              18.00 |   0.75 | matchup pass x0.94; game script -3.1% dropbacks; team total -3.6 vs its average                                  |
 |      2 | Travis Kelce       | KAN    | rec_yds     | under       |      56.70 |              34.80 |   0.76 | matchup pass x0.94; usage trending down (8.0 → 3.0); game script -3.1% dropbacks; team total -3.6 vs its average |
 |      3 | Ladd McConkey      | LAC    | rec_yds     | under       |      41.10 |              22.20 |   0.76 | coverage x0.93; usage trending down (5.0 → 3.5)                                                                  |
-|      4 | Xavier Worthy      | KAN    | targets     | over        |       5.50 |               6.00 |   0.57 | coverage x1.06; usage trending up (6.5 → 4.5)                                                                    |
-|      5 | Kenneth Walker III | KAN    | rush_yds    | under       |     134.10 |             117.90 |   0.67 | usage trending down (23.5 → 20.0); team total -3.6 vs its average                                                |
+|      4 | Kenneth Walker III | KAN    | rush_yds    | under       |     134.10 |             117.90 |   0.67 | usage trending down (23.5 → 20.0); team total -3.6 vs its average                                                |
+|      5 | Omarion Hampton    | LAC    | carries     | under       |      14.20 |              13.00 |   0.67 | usage trending down (16.7 → 11.5); game script +3.1% dropbacks                                                   |
 
 **NOR @ NYG**
 
