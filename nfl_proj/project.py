@@ -250,8 +250,8 @@ class Projector:
 
     # ---------------------------------------------------------- adjustments
     def adjustments(self, team: str, opp: str, week: int) -> dict:
-        """Strength-of-schedule factors and game script for one matchup. The
-        betting-market blend only runs if [market] enabled = true (off by default)."""
+        """Strength of schedule, game script (model margin) and, for teams the
+        market reads consistently, a blend with the implied team total."""
         key = (team, opp, week, self._market_on)
         if key in self._adj_cache:
             return self._adj_cache[key]
@@ -268,23 +268,24 @@ class Projector:
             return a
         line = self.market.line(team, week)
         script = self.cfg.get("script", {})
-        if line is not None or script.get("enabled", True):
-            self._market_on = False
-            try:
-                pts = self.model_points(team, opp, week)
-                opp_pts = self.model_points(opp, team, week) if line is None else None
-            finally:
-                self._market_on = True
-            if line is not None:
-                m = self.market.blend(line, pts)
-                a.update(market=m, td_factor=m["td_factor"], ypp_factor=m["ypp_factor"],
-                         dropback_shift=m["dropback_shift"])
-            else:
-                # Game script from our own projected margin: the team we project
-                # to lead runs more, the trailing team throws more.
-                margin = pts - opp_pts
-                a["script"] = {"model_pts": pts, "opp_model_pts": opp_pts, "margin": margin}
-                a["dropback_shift"] = -script.get("pass_rate_per_point", 0.004) * margin
+        if line is None and not script.get("enabled", True):
+            return a
+        self._market_on = False
+        try:
+            pts = self.model_points(team, opp, week)
+            opp_pts = self.model_points(opp, team, week) if script.get("enabled", True) else None
+        finally:
+            self._market_on = True
+        if opp_pts is not None:
+            # Game script from our own projected margin: the team we project
+            # to lead runs more, the trailing team throws more.
+            margin = pts - opp_pts
+            a["script"] = {"model_pts": pts, "opp_model_pts": opp_pts, "margin": margin}
+            a["dropback_shift"] = -script.get("pass_rate_per_point", 0.004) * margin
+        if line is not None:
+            # Implied team total, only for teams the market has read consistently.
+            m = self.market.blend(line, pts)
+            a.update(market=m, td_factor=m["td_factor"], ypp_factor=m["ypp_factor"])
         return a
 
     def model_points(self, team: str, opp: str, week: int) -> float:

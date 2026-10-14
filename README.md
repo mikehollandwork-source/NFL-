@@ -147,9 +147,12 @@ play-by-play. A heavy-blitz team that isn't getting sacks shows up as a mismatch
    numbers against soft defenses is scaled down; a defense that faced strong offenses gets credit.
 7. **Game script** (`[script]`): the model projects both teams' points on its own, and the team
    it projects to lead passes less (0.4% dropback rate per point of projected margin), the
-   trailing team more. **No betting-market input**: `[market]` is off by default. Turning it on
-   blends Vegas implied team totals into scoring and uses the spread for game script instead;
-   it's kept only for comparison runs.
+   trailing team more. The betting spread is never used.
+   **Market team totals** (`[market]`): the only market input is the implied team total, and only
+   for teams that consistently land on it (within 4 points in at least 60% of at least 4 games).
+   For those teams 60% of projected points come from the implied total and TD rates (and a little
+   yardage) scale to match; every other team is projected from the model alone. The report lists
+   which teams qualify and why.
 8. **Availability** (`[availability]`): the injury report marks Out (and Doubtful) players out.
    Before the week's report posts (Wed-Fri), players Out last week who also missed last week's
    game are carried as out. The starting QB is the depth chart's QB1 unless he's out or hasn't

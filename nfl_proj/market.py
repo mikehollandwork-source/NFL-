@@ -1,4 +1,4 @@
-"""Betting-market team totals.
+"""Betting-market team totals (used only for teams the market reads well).
 
 nflverse's schedule carries the closing spread and over/under for every
 game. From them:
@@ -11,10 +11,14 @@ game. From them:
                   by ``market.miss_shrink_games`` because a few games of
                   misses are mostly noise and the market already adjusts.
 
-The projector blends the corrected market total with its own model total
+Only the implied team total is used, and only for teams that consistently
+land on it: within ``market.hit_tolerance`` points in at least
+``market.min_hit_rate`` of at least ``market.min_games`` games. For those
+teams the projector blends the implied total with its own model total
 (``market.weight``) and scales touchdown rates, and a little of the yardage,
-so the simulated team total lands on the blend. The spread also shifts the
-dropback rate: favorites run more to protect leads.
+so the simulated team total lands on the blend. Everyone else is projected
+from the model alone. The spread is never used (game script comes from the
+model's own projected margin).
 """
 
 from __future__ import annotations
@@ -38,14 +42,16 @@ def implied_totals(games: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def team_misses(totals: pd.DataFrame, before_week: int, k: float) -> pd.DataFrame:
+def team_misses(totals: pd.DataFrame, before_week: int, k: float, tol: float = 4.0) -> pd.DataFrame:
     """Per team: games, average miss vs implied, how often they fell short,
     and the shrunk correction used in projections."""
     h = totals[totals["played"] & (totals["week"] < before_week)]
     g = h.groupby("team").agg(games=("miss", "size"), avg_miss=("miss", "mean"),
+                              abs_miss=("miss", lambda s: s.abs().mean()),
                               under_rate=("miss", lambda s: (s < 0).mean()),
                               implied_avg=("implied", "mean"), scored_avg=("points", "mean"))
     g["correction"] = g["avg_miss"] * g["games"] / (g["games"] + k)
+    g["hit_rate"] = h.groupby("team")["miss"].apply(lambda s: (s.abs() <= tol).mean()).reindex(g.index)
     return g.reset_index()
 
 
@@ -54,16 +60,21 @@ class Market:
         c = cfg.get("market", {})
         self.enabled = c.get("enabled", True) and {"spread_line", "total_line"} <= set(games.columns)
         self.weight = c.get("weight", 0.6)
+        self.tol = c.get("hit_tolerance", 4.0)
+        self.min_hit_rate = c.get("min_hit_rate", 0.6)
+        self.min_games = c.get("min_games", 4)
         self.k = c.get("miss_shrink_games", 6.0)
         self.yards_elasticity = c.get("yards_elasticity", 0.3)
-        self.script = c.get("pass_rate_per_point", 0.004)
         self.clip = (c.get("min_factor", 0.6), c.get("max_factor", 1.6))
         self.totals = implied_totals(games) if self.enabled else pd.DataFrame()
         self._miss = {}
 
     def misses(self, week: int) -> pd.DataFrame:
         if week not in self._miss:
-            self._miss[week] = team_misses(self.totals, week, self.k) if self.enabled else pd.DataFrame()
+            m = team_misses(self.totals, week, self.k, self.tol) if self.enabled else pd.DataFrame()
+            if not m.empty:
+                m["qualifies"] = (m["games"] >= self.min_games) & (m["hit_rate"] >= self.min_hit_rate)
+            self._miss[week] = m
         return self._miss[week]
 
     def line(self, team: str, week: int) -> dict | None:
@@ -74,9 +85,11 @@ class Market:
             return None
         m = self.misses(week)
         mrow = m[m["team"] == team]
-        corr = float(mrow["correction"].iloc[0]) if len(mrow) else 0.0
+        if mrow.empty or not bool(mrow["qualifies"].iloc[0]):
+            return None  # market hasn't read this team consistently: model only
         return {"implied": float(r["implied"].iloc[0]), "spread": float(r["spread"].iloc[0]),
-                "correction": corr, "target": float(r["implied"].iloc[0]) + corr,
+                "correction": 0.0, "target": float(r["implied"].iloc[0]),
+                "hit_rate": float(mrow["hit_rate"].iloc[0]), "abs_miss": float(mrow["abs_miss"].iloc[0]),
                 "avg_miss": float(mrow["avg_miss"].iloc[0]) if len(mrow) else np.nan,
                 "under_rate": float(mrow["under_rate"].iloc[0]) if len(mrow) else np.nan,
                 "games": int(mrow["games"].iloc[0]) if len(mrow) else 0}
@@ -86,6 +99,4 @@ class Market:
         target = self.weight * line["target"] + (1 - self.weight) * model_pts
         td = float(np.clip(target / model_pts, *self.clip)) if model_pts > 0 else 1.0
         return {**line, "model_pts": model_pts, "blended_pts": target, "td_factor": td,
-                "ypp_factor": td ** self.yards_elasticity,
-                # Positive spread = this team favored: lower its dropback rate.
-                "dropback_shift": -self.script * line["spread"]}
+                "ypp_factor": td ** self.yards_elasticity}

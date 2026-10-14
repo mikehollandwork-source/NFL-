@@ -14,6 +14,45 @@
 - CHI: depth chart lists Caleb Williams as QB1 but he hasn't played in the team's last two games; projecting Tyson Bagent. Check the week 6 report.
 - TAM: depth chart lists Baker Mayfield as QB1 but he is listed out; projecting Jalon Daniels. Check the week 6 report.
 
+## Market team totals: which teams qualify
+
+Only teams that landed within 4 points of their implied team total in at least 60% of their games (min 4) get the market blended in (60% market). Everyone else is model only. No spreads are used.
+
+| team   |   games |   hit_rate |   abs_miss |   implied_avg |   scored_avg | qualifies   |
+|:-------|--------:|-----------:|-----------:|--------------:|-------------:|:------------|
+| PHI    |       5 |       0.80 |       3.60 |         21.50 |        18.40 | True        |
+| NYJ    |       5 |       0.80 |       4.35 |         20.25 |        18.60 | True        |
+| IND    |       5 |       0.60 |       3.65 |         21.55 |        24.80 | True        |
+| TAM    |       5 |       0.60 |       4.35 |         21.35 |        20.00 | True        |
+| GNB    |       5 |       0.60 |       5.35 |         22.75 |        20.80 | True        |
+| DET    |       5 |       0.60 |       5.80 |         28.00 |        32.80 | True        |
+| KAN    |       4 |       0.50 |       5.75 |         25.62 |        29.50 | False       |
+| NOR    |       5 |       0.40 |       4.95 |         21.45 |        23.60 | False       |
+| CIN    |       5 |       0.40 |       5.30 |         24.80 |        25.60 | False       |
+| LAR    |       5 |       0.40 |       6.00 |         25.20 |        23.80 | False       |
+| DEN    |       5 |       0.40 |       6.05 |         22.45 |        19.40 | False       |
+| ARI    |       5 |       0.40 |       6.40 |         21.40 |        21.60 | False       |
+| WAS    |       5 |       0.40 |       7.35 |         20.45 |        23.00 | False       |
+| MIN    |       5 |       0.40 |       7.65 |         22.65 |        21.80 | False       |
+| TEN    |       5 |       0.40 |       7.95 |         17.05 |        11.60 | False       |
+| PIT    |       5 |       0.40 |       8.95 |         20.85 |        22.20 | False       |
+| ATL    |       5 |       0.40 |      12.00 |         20.80 |        23.80 | False       |
+| CAR    |       4 |       0.25 |       9.44 |         22.81 |        30.25 | False       |
+| MIA    |       5 |       0.20 |       5.20 |         17.10 |        14.00 | False       |
+| CLE    |       5 |       0.20 |       5.80 |         17.60 |        18.60 | False       |
+| SFO    |       5 |       0.20 |       6.30 |         25.20 |        30.80 | False       |
+| JAX    |       5 |       0.20 |       7.25 |         23.95 |        24.60 | False       |
+| LVR    |       5 |       0.20 |       7.45 |         20.55 |        26.40 | False       |
+| LAC    |       5 |       0.20 |       7.70 |         22.40 |        16.80 | False       |
+| HOU    |       5 |       0.20 |       8.10 |         23.00 |        22.00 | False       |
+| BUF    |       5 |       0.20 |       8.40 |         27.20 |        32.80 | False       |
+| BAL    |       5 |       0.20 |       8.70 |         25.70 |        29.20 | False       |
+| NWE    |       5 |       0.20 |      11.55 |         22.25 |        22.00 | False       |
+| CHI    |       5 |       0.20 |      16.25 |         23.55 |        23.80 | False       |
+| SEA    |       5 |       0.00 |       7.15 |         23.95 |        26.80 | False       |
+| DAL    |       5 |       0.00 |       9.05 |         26.05 |        27.60 | False       |
+| NYG    |       5 |       0.00 |      10.25 |         20.55 |        21.80 | False       |
+
 ## DEN vs SEA
 Projected 56 plays, 62% dropbacks, 32.3 pass att, 21.2 runs, 1.2 sacks. QB: Bo Nix
 **Coaching style:** Deep-pass share low: 12% (league 19%); 3rd-down deep share low: 14% (league 21%); 4th-down go rate low: 8% (league 19%); Sack rate low: 3% (league 6%); Pass rate on 2nd & short low: 0% (league 31%); EPA/dropback low: -0.08 (league +0.06); Favors run middle (35%).
@@ -378,6 +417,7 @@ Projected 62 plays, 51% dropbacks, 26.2 pass att, 30.4 runs, 2.9 sacks. QB: Tyle
 ## IND vs TEN
 Projected 65 plays, 56% dropbacks, 33.8 pass att, 28.6 runs, 1.5 sacks. QB: Daniel Jones
 **Coaching style:** Red-zone pass rate low: 44% (league 53%); 4th-down go rate high: 28% (league 19%); Sack rate low: 4% (league 6%); Pass rate on 3rd & short low: 29% (league 41%); Red-zone run share high: 55% (league 46%); EPA/dropback low: -0.15 (league +0.06); EPA/run high: +0.10 (league -0.09).
+**Market team total:** implied 25.8 (this team landed within the tolerance in 60% of its games, avg miss 3.6). Model 19.0 → blended 23.0: TD rates x1.21, yards x1.06.
 **Model game script:** projected 19.0 – 16.4 (margin +2.5) → dropback rate -1.0%.
 **Strength of schedule:** own pass yds x0.97, own run yds x1.04, opp run D x1.03, opp scoring D x1.03 (raw stats re-rated against the opponents actually faced).
 **Out:** Arden Key (carried from week 5 report: Out (Hamstring)), Ashton Dulin (carried from week 5 report: Out (Hamstring)), Will Mallory (carried from week 5 report: Out (Thumb)), Jaylon Carlies (carried from week 5 report: Out (Ribs)).
@@ -385,7 +425,7 @@ Projected 65 plays, 56% dropbacks, 33.8 pass att, 28.6 runs, 1.5 sacks. QB: Dani
 **TEN secondary:** DC Robert Saleh, zone-leaning: 4-3 wide-9; rushes four with stunts; zone-dominant (Cover 3 / quarters); blitz about 23%; outside Cor'Dale Flott / Alontae Taylor; nickel Marcus Harris; weak spot: Corners struggled in camp; [research confidence medium, 2026-10-14].
 **TEN defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy, shell: two_high [online (high)].
 - TEN is soft deep (+0.94 EPA/deep att vs league +0.43); IND throws deep 17%.
-- Best matchups: run_inside_right (x1.23), run_inside_left (x1.16); worst: pass_deep_middle (x0.93).
+- Best matchups: run_inside_right (x1.30), run_inside_left (x1.23); worst: pass_deep_middle (x0.98).
 - Last game — worked: none; failed: pass_deep_left, run_inside_right.
 - IND deep plays vs zone heavy coverage defenses: x0.90 vs how other offenses fare (23 plays)
 - IND run plays vs two high shell defenses: x1.15 vs how other offenses fare (77 plays)
@@ -394,32 +434,32 @@ Projected 65 plays, 56% dropbacks, 33.8 pass att, 28.6 runs, 1.5 sacks. QB: Dani
 
 | player           | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-----------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Daniel Jones     | QB    |     196.21 |      1.07 |            0.51 |      2.65 |      13.77 |      0.00 |         0.00 |      0.00 |         0.08 |
-| Jonathan Taylor  | RB    |       0.00 |      0.00 |            0.00 |     21.06 |      99.03 |      4.01 |         2.78 |     23.40 |         0.68 |
-| Tyler Warren     | TE    |       0.00 |      0.00 |            0.00 |      0.67 |       2.87 |      7.92 |         5.81 |     48.26 |         0.27 |
-| Josh Downs       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.42 |         4.28 |     42.62 |         0.16 |
-| Keenan Allen     | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.66 |         3.76 |     32.54 |         0.20 |
-| Laquon Treadwell | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.30 |         2.87 |     28.25 |         0.12 |
-| Seth McGowan     | RB    |       0.00 |      0.00 |            0.00 |      4.61 |      21.60 |      0.98 |         0.69 |      5.47 |         0.17 |
+| Daniel Jones     | QB    |     207.96 |      1.28 |            0.51 |      2.65 |      14.30 |      0.00 |         0.00 |      0.00 |         0.10 |
+| Jonathan Taylor  | RB    |       0.00 |      0.00 |            0.00 |     21.06 |     104.98 |      4.01 |         2.78 |     24.80 |         0.74 |
+| Tyler Warren     | TE    |       0.00 |      0.00 |            0.00 |      0.67 |       3.05 |      7.92 |         5.81 |     51.16 |         0.31 |
+| Josh Downs       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.42 |         4.28 |     45.17 |         0.19 |
+| Keenan Allen     | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.66 |         3.76 |     34.49 |         0.23 |
+| Laquon Treadwell | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.30 |         2.87 |     29.94 |         0.15 |
+| Seth McGowan     | RB    |       0.00 |      0.00 |            0.00 |      4.61 |      22.91 |      0.98 |         0.69 |      5.80 |         0.20 |
 
 **IND kicker**
 
 | player          |   fg_made |   xp_made |   kicking_points |
 |:----------------|----------:|----------:|-----------------:|
-| Spencer Shrader |      4.39 |      2.21 |            15.38 |
+| Spencer Shrader |      4.66 |      2.65 |            16.64 |
 
 **IND defenders (vs TEN offense)**
 
 | player              |   tackles |   sacks |   def_int |
 |:--------------------|----------:|--------:|----------:|
-| Akeem Davis-Gaither |      7.57 |    0.00 |      0.00 |
-| Justin Walley       |      5.09 |    0.13 |      0.00 |
-| DeForest Buckner    |      4.45 |    0.44 |      0.00 |
-| A.J. Haulcy         |      3.75 |    0.00 |      0.00 |
-| Bryce Boettcher     |      3.48 |    0.00 |      0.00 |
-| Camryn Bynum        |      3.45 |    0.00 |      0.00 |
-| Grover Stewart      |      3.38 |    0.04 |      0.00 |
-| Charvarius Ward     |      3.10 |    0.00 |      0.00 |
+| Akeem Davis-Gaither |      7.58 |    0.00 |      0.00 |
+| Justin Walley       |      5.06 |    0.13 |      0.00 |
+| DeForest Buckner    |      4.47 |    0.45 |      0.00 |
+| A.J. Haulcy         |      3.74 |    0.00 |      0.00 |
+| Bryce Boettcher     |      3.50 |    0.00 |      0.00 |
+| Camryn Bynum        |      3.42 |    0.00 |      0.00 |
+| Grover Stewart      |      3.36 |    0.04 |      0.00 |
+| Charvarius Ward     |      3.09 |    0.00 |      0.00 |
 
 ## TEN vs IND
 Projected 54 plays, 63% dropbacks, 30.4 pass att, 20.3 runs, 1.0 sacks. QB: Cam Ward
@@ -450,20 +490,20 @@ Projected 54 plays, 63% dropbacks, 30.4 pass att, 20.3 runs, 1.0 sacks. QB: Cam 
 
 | player    |   fg_made |   xp_made |   kicking_points |
 |:----------|----------:|----------:|-----------------:|
-| Joey Slye |      1.15 |      1.89 |             5.32 |
+| Joey Slye |      1.15 |      1.89 |             5.33 |
 
 **TEN defenders (vs IND offense)**
 
 | player            |   tackles |   sacks |   def_int |
 |:------------------|----------:|--------:|----------:|
-| Anthony Hill Jr.  |      8.52 |    0.00 |      0.00 |
-| Cody Barton       |      5.53 |    0.00 |      0.00 |
-| Jeffery Simmons   |      5.51 |    0.27 |      0.00 |
-| Kevin Winston Jr. |      5.10 |    0.00 |      0.00 |
-| Alontae Taylor    |      4.92 |    0.14 |      0.00 |
+| Anthony Hill Jr.  |      8.53 |    0.00 |      0.00 |
+| Cody Barton       |      5.51 |    0.00 |      0.00 |
+| Jeffery Simmons   |      5.50 |    0.25 |      0.00 |
+| Kevin Winston Jr. |      5.11 |    0.00 |      0.00 |
+| Alontae Taylor    |      4.93 |    0.14 |      0.00 |
 | Amani Hooker      |      4.88 |    0.00 |      0.25 |
-| Cedric Gray       |      4.84 |    0.10 |      0.00 |
-| Marcus Harris     |      4.28 |    0.09 |      0.26 |
+| Cedric Gray       |      4.83 |    0.10 |      0.00 |
+| Marcus Harris     |      4.28 |    0.09 |      0.25 |
 
 ## NWE vs NYJ
 Projected 63 plays, 59% dropbacks, 30.4 pass att, 26.2 runs, 3.1 sacks. QB: Drake Maye
@@ -482,39 +522,40 @@ Projected 63 plays, 59% dropbacks, 30.4 pass att, 26.2 runs, 3.1 sacks. QB: Drak
 
 | player              | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:--------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Drake Maye          | QB    |     224.66 |      1.20 |            0.55 |      4.76 |      32.63 |      0.00 |         0.00 |      0.00 |         0.05 |
-| Rhamondre Stevenson | RB    |       0.00 |      0.00 |            0.00 |     13.14 |      51.80 |      4.90 |         3.23 |     33.15 |         0.45 |
-| Romeo Doubs         | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.96 |         3.60 |     47.82 |         0.26 |
-| Hunter Henry        | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.68 |         3.03 |     36.80 |         0.17 |
-| DeMario Douglas     | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.45 |         2.77 |     36.67 |         0.16 |
-| TreVeyon Henderson  | RB    |       0.00 |      0.00 |            0.00 |      9.82 |      36.67 |      1.18 |         0.74 |      7.89 |         0.30 |
-| Efton Chism III     | WR    |       0.00 |      0.00 |            0.00 |      0.24 |       1.06 |      3.29 |         1.96 |     26.76 |         0.14 |
-| Eli Raridon         | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.34 |         1.50 |     17.65 |         0.10 |
-| Kyle Williams       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.15 |         1.25 |     17.92 |         0.10 |
-| Corey Kiner         | RB    |       0.00 |      0.00 |            0.00 |      1.90 |       6.79 |      0.00 |         0.00 |      0.00 |         0.05 |
+| Drake Maye          | QB    |     223.80 |      1.20 |            0.54 |      4.77 |      32.46 |      0.00 |         0.00 |      0.00 |         0.05 |
+| Rhamondre Stevenson | RB    |       0.00 |      0.00 |            0.00 |     13.13 |      51.59 |      4.86 |         3.22 |     33.47 |         0.45 |
+| Romeo Doubs         | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.96 |         3.59 |     47.52 |         0.25 |
+| Hunter Henry        | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.70 |         3.03 |     36.70 |         0.17 |
+| DeMario Douglas     | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.49 |         2.78 |     36.61 |         0.17 |
+| TreVeyon Henderson  | RB    |       0.00 |      0.00 |            0.00 |      9.84 |      37.29 |      1.16 |         0.74 |      8.06 |         0.29 |
+| Efton Chism III     | WR    |       0.00 |      0.00 |            0.00 |      0.25 |       1.03 |      3.29 |         1.98 |     26.34 |         0.14 |
+| Eli Raridon         | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.32 |         1.48 |     17.36 |         0.11 |
+| Kyle Williams       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.12 |         1.24 |     17.74 |         0.10 |
+| Corey Kiner         | RB    |       0.00 |      0.00 |            0.00 |      1.86 |       6.87 |      0.00 |         0.00 |      0.00 |         0.06 |
 
 **NWE kicker**
 
 | player          |   fg_made |   xp_made |   kicking_points |
 |:----------------|----------:|----------:|-----------------:|
-| Andy Borregales |      1.15 |      2.00 |             5.45 |
+| Andy Borregales |      1.15 |      2.01 |             5.46 |
 
 **NWE defenders (vs NYJ offense)**
 
 | player           |   tackles |   sacks |   def_int |
 |:-----------------|----------:|--------:|----------:|
-| Robert Spillane  |      7.25 |    0.00 |      0.00 |
-| Christian Elliss |      6.98 |    0.24 |      0.00 |
-| Charles Woods    |      4.78 |    0.00 |      0.00 |
+| Robert Spillane  |      7.28 |    0.00 |      0.00 |
+| Christian Elliss |      6.97 |    0.25 |      0.00 |
+| Charles Woods    |      4.77 |    0.00 |      0.00 |
 | Elijah Ponder    |      4.41 |    1.61 |      0.00 |
-| Marcus Jones     |      4.27 |    0.00 |      0.11 |
-| Kevin Byard      |      3.95 |    0.00 |      0.00 |
+| Marcus Jones     |      4.25 |    0.00 |      0.12 |
+| Kevin Byard      |      3.97 |    0.00 |      0.00 |
 | Craig Woodson    |      3.66 |    0.00 |      0.13 |
 | Gabe Jacas       |      3.44 |    0.35 |      0.09 |
 
 ## NYJ vs NWE
 Projected 55 plays, 62% dropbacks, 28.7 pass att, 20.9 runs, 3.4 sacks. QB: Geno Smith
 **Coaching style:** Deep-pass share low: 16% (league 19%); 4th-down go rate low: 11% (league 19%); Sack rate high: 10% (league 6%); Pass rate on 2nd & short low: 10% (league 31%); EPA/dropback low: -0.02 (league +0.06); Favors run inside left (31%).
+**Market team total:** implied 18.0 (this team landed within the tolerance in 80% of its games, avg miss 4.3). Model 16.9 → blended 17.6: TD rates x1.04, yards x1.01.
 **Model game script:** projected 16.9 – 19.9 (margin -3.0) → dropback rate +1.2%.
 **Strength of schedule:** opp pass D x0.95, opp scoring D x0.95 (raw stats re-rated against the opponents actually faced).
 **Out:** Dylan Parham (carried from week 5 report: Out (Knee)), Breece Hall (carried from week 5 report: Out (Quadricep)), Adonai Mitchell (carried from week 5 report: Out (Finger)), Francisco Mauigoa (carried from week 5 report: Out (Quadricep)).
@@ -523,7 +564,7 @@ Projected 55 plays, 62% dropbacks, 28.7 pass att, 20.9 runs, 3.4 sacks. QB: Geno
 **NWE defensive scheme (online/tagged):** blitz: heavy, coverage: avg, shell: two_high [online (high)].
 - NWE is soft deep (+0.67 EPA/deep att vs league +0.43); NYJ throws deep 16%.
 - NWE brings heavy 3rd-down pressure (source: blitz_pct); 3rd-down deep EPA allowed +0.48 on 11 attempts. NYJ 3rd-down deep share 19%.
-- Best matchups: pass_short_middle (x1.17), pass_other (x1.00); worst: run_inside_right (x0.87).
+- Best matchups: pass_short_middle (x1.18), pass_deep_middle (x1.01); worst: run_inside_right (x0.88).
 - NWE blitzes 35% of dropbacks (league 31%, FTN charting); NYJ gains x1.16 as much per dropback vs the blitz as other offenses (44 blitzed dropbacks) -> pass yards x1.01
 - NYJ short plays vs two high shell defenses: x1.08 vs how other offenses fare (98 plays)
 - NYJ run plays vs two high shell defenses: x0.95 vs how other offenses fare (74 plays)
@@ -533,31 +574,31 @@ Projected 55 plays, 62% dropbacks, 28.7 pass att, 20.9 runs, 3.4 sacks. QB: Geno
 
 | player          | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:----------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Geno Smith      | QB    |     198.66 |      1.22 |            0.34 |      2.37 |      14.88 |      0.00 |         0.00 |      0.00 |         0.03 |
-| Garrett Wilson  | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      9.08 |         5.86 |     74.85 |         0.37 |
-| Braelon Allen   | RB    |       0.00 |      0.00 |            0.00 |     18.66 |      68.66 |      3.12 |         1.96 |     16.80 |         0.53 |
-| Kenyon Sadiq    | TE    |       0.00 |      0.00 |            0.00 |      0.16 |       0.64 |      5.50 |         3.43 |     36.59 |         0.21 |
-| Isaiah Williams | WR    |       0.00 |      0.00 |            0.00 |      0.51 |       2.03 |      3.46 |         2.19 |     27.12 |         0.16 |
-| Jeremy Ruckert  | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.73 |         1.18 |     11.93 |         0.08 |
+| Geno Smith      | QB    |     201.02 |      1.29 |            0.34 |      2.37 |      14.90 |      0.00 |         0.00 |      0.00 |         0.03 |
+| Garrett Wilson  | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      9.07 |         5.88 |     75.29 |         0.39 |
+| Braelon Allen   | RB    |       0.00 |      0.00 |            0.00 |     18.63 |      69.27 |      3.12 |         1.99 |     17.36 |         0.54 |
+| Kenyon Sadiq    | TE    |       0.00 |      0.00 |            0.00 |      0.16 |       0.64 |      5.54 |         3.46 |     37.20 |         0.23 |
+| Isaiah Williams | WR    |       0.00 |      0.00 |            0.00 |      0.51 |       1.91 |      3.43 |         2.19 |     26.95 |         0.16 |
+| Jeremy Ruckert  | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.76 |         1.21 |     12.26 |         0.09 |
 
 **NYJ kicker**
 
 | player        |   fg_made |   xp_made |   kicking_points |
 |:--------------|----------:|----------:|-----------------:|
-| Jason Sanders |      1.21 |      1.81 |             5.45 |
+| Jason Sanders |      1.23 |      1.88 |             5.58 |
 
 **NYJ defenders (vs NWE offense)**
 
 | player             |   tackles |   sacks |   def_int |
 |:-------------------|----------:|--------:|----------:|
-| Dane Belton        |      7.93 |    0.23 |      0.00 |
-| Jamien Sherwood    |      7.12 |    0.00 |      0.00 |
-| Demario Davis      |      7.09 |    0.35 |      0.00 |
-| David Bailey       |      5.47 |    0.94 |      0.00 |
-| Minkah Fitzpatrick |      5.05 |    0.00 |      0.55 |
-| Azareye'h Thomas   |      3.81 |    0.00 |      0.00 |
-| Jowon Briggs       |      3.37 |    0.35 |      0.00 |
-| Andre Cisco        |      3.28 |    0.17 |      0.00 |
+| Dane Belton        |      7.92 |    0.25 |      0.00 |
+| Jamien Sherwood    |      7.10 |    0.00 |      0.00 |
+| Demario Davis      |      7.04 |    0.36 |      0.00 |
+| David Bailey       |      5.46 |    0.96 |      0.00 |
+| Minkah Fitzpatrick |      5.04 |    0.00 |      0.54 |
+| Azareye'h Thomas   |      3.84 |    0.00 |      0.00 |
+| Jowon Briggs       |      3.34 |    0.35 |      0.00 |
+| Andre Cisco        |      3.26 |    0.16 |      0.00 |
 
 ## NYG vs NOR
 Projected 64 plays, 59% dropbacks, 33.7 pass att, 26.5 runs, 2.6 sacks. QB: Jameis Winston
@@ -577,33 +618,33 @@ Projected 64 plays, 59% dropbacks, 33.7 pass att, 26.5 runs, 2.6 sacks. QB: Jame
 
 | player         | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:---------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Jameis Winston | QB    |     220.29 |      1.81 |            0.39 |      1.88 |      13.19 |      0.00 |         0.00 |      0.00 |         0.01 |
-| Isaiah Likely  | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |     10.34 |         6.98 |     67.35 |         0.50 |
-| Malik Nabers   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      9.68 |         6.22 |     65.81 |         0.37 |
-| Cam Skattebo   | RB    |       0.00 |      0.00 |            0.00 |     17.68 |      69.63 |      2.55 |         1.78 |     15.94 |         0.50 |
-| Darnell Mooney | WR    |       0.00 |      0.00 |            0.00 |      0.17 |       0.74 |      3.81 |         2.32 |     25.85 |         0.15 |
-| Malachi Fields | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.80 |         1.87 |     20.91 |         0.14 |
-| Najee Harris   | RB    |       0.00 |      0.00 |            0.00 |      6.39 |      25.15 |      0.28 |         0.18 |      1.73 |         0.23 |
-| Theo Johnson   | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.91 |         1.24 |     12.59 |         0.11 |
+| Jameis Winston | QB    |     218.90 |      1.81 |            0.37 |      1.87 |      12.98 |      0.00 |         0.00 |      0.00 |         0.02 |
+| Isaiah Likely  | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |     10.40 |         7.01 |     67.09 |         0.50 |
+| Malik Nabers   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      9.64 |         6.19 |     65.81 |         0.38 |
+| Cam Skattebo   | RB    |       0.00 |      0.00 |            0.00 |     17.63 |      69.37 |      2.52 |         1.76 |     15.46 |         0.50 |
+| Darnell Mooney | WR    |       0.00 |      0.00 |            0.00 |      0.15 |       0.62 |      3.79 |         2.31 |     25.85 |         0.14 |
+| Malachi Fields | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.77 |         1.83 |     20.15 |         0.14 |
+| Najee Harris   | RB    |       0.00 |      0.00 |            0.00 |      6.46 |      25.57 |      0.28 |         0.20 |      1.70 |         0.23 |
+| Theo Johnson   | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.88 |         1.23 |     12.37 |         0.10 |
 
 **NYG kicker**
 
 | player        |   fg_made |   xp_made |   kicking_points |
 |:--------------|----------:|----------:|-----------------:|
-| Dominic Zvada |      2.36 |      2.65 |             9.72 |
+| Dominic Zvada |      2.32 |      2.64 |             9.60 |
 
 **NYG defenders (vs NOR offense)**
 
 | player           |   tackles |   sacks |   def_int |
 |:-----------------|----------:|--------:|----------:|
-| Arvell Reese     |      9.59 |    0.30 |      0.28 |
-| Tremaine Edmunds |      9.04 |    0.52 |      0.00 |
-| Greg Newsome II  |      4.88 |    0.00 |      0.27 |
-| Jevon Holland    |      4.48 |    0.00 |      0.57 |
-| Andru Phillips   |      4.28 |    0.57 |      0.00 |
-| Tyler Nubin      |      4.03 |    0.00 |      0.00 |
-| Deonte Banks     |      3.37 |    0.00 |      0.27 |
-| Abdul Carter     |      3.23 |    0.48 |      0.00 |
+| Arvell Reese     |      9.75 |    0.28 |      0.28 |
+| Tremaine Edmunds |      9.13 |    0.54 |      0.00 |
+| Greg Newsome II  |      4.89 |    0.00 |      0.27 |
+| Jevon Holland    |      4.44 |    0.00 |      0.57 |
+| Andru Phillips   |      4.29 |    0.58 |      0.00 |
+| Tyler Nubin      |      4.06 |    0.00 |      0.00 |
+| Deonte Banks     |      3.41 |    0.00 |      0.27 |
+| Abdul Carter     |      3.20 |    0.45 |      0.00 |
 
 ## NOR vs NYG
 Projected 63 plays, 65% dropbacks, 38.3 pass att, 22.1 runs, 2.1 sacks. QB: Tyler Shough
@@ -623,38 +664,39 @@ Projected 63 plays, 65% dropbacks, 38.3 pass att, 22.1 runs, 2.1 sacks. QB: Tyle
 
 | player        | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:--------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Tyler Shough  | QB    |     249.88 |      1.97 |            1.38 |      2.58 |      13.85 |      0.00 |         0.00 |      0.00 |         0.07 |
-| Chris Olave   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      9.84 |         6.68 |     75.55 |         0.33 |
-| Juwan Johnson | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.86 |         5.03 |     47.02 |         0.41 |
-| Devaughn Vele | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.00 |         4.59 |     48.52 |         0.28 |
-| Alvin Kamara  | RB    |       0.00 |      0.00 |            0.00 |      7.74 |      31.99 |      3.78 |         2.69 |     21.81 |         0.36 |
-| Kendre Miller | RB    |       0.00 |      0.00 |            0.00 |      9.87 |      40.22 |      1.57 |         1.10 |      9.33 |         0.40 |
-| Bryce Lance   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.67 |         2.16 |     22.93 |         0.14 |
-| Noah Fant     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.64 |         1.93 |     16.95 |         0.22 |
-| CJ Donaldson  | RB    |       0.00 |      0.00 |            0.00 |      2.43 |       9.94 |      0.56 |         0.38 |      3.60 |         0.10 |
+| Tyler Shough  | QB    |     248.44 |      1.97 |            1.39 |      2.53 |      13.50 |      0.00 |         0.00 |      0.00 |         0.07 |
+| Chris Olave   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      9.91 |         6.74 |     75.38 |         0.32 |
+| Juwan Johnson | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.90 |         5.05 |     47.14 |         0.41 |
+| Devaughn Vele | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.04 |         4.63 |     48.21 |         0.28 |
+| Alvin Kamara  | RB    |       0.00 |      0.00 |            0.00 |      7.67 |      31.32 |      3.73 |         2.64 |     21.20 |         0.36 |
+| Kendre Miller | RB    |       0.00 |      0.00 |            0.00 |      9.84 |      40.50 |      1.58 |         1.09 |      9.15 |         0.41 |
+| Bryce Lance   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.60 |         2.13 |     22.68 |         0.15 |
+| Noah Fant     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.61 |         1.90 |     16.65 |         0.22 |
+| CJ Donaldson  | RB    |       0.00 |      0.00 |            0.00 |      2.47 |      10.54 |      0.58 |         0.40 |      3.75 |         0.11 |
 
 **NOR kicker**
 
 | player         |   fg_made |   xp_made |   kicking_points |
 |:---------------|----------:|----------:|-----------------:|
-| Daniel Carlson |      0.62 |      2.59 |             4.44 |
+| Daniel Carlson |      0.64 |      2.60 |             4.53 |
 
 **NOR defenders (vs NYG offense)**
 
 | player             |   tackles |   sacks |   def_int |
 |:-------------------|----------:|--------:|----------:|
-| Pete Werner        |      7.09 |    0.20 |      0.00 |
-| Jonas Sanker       |      6.60 |    0.00 |      0.00 |
-| Danny Stutsman     |      6.48 |    0.00 |      0.00 |
-| Justin Reid        |      6.08 |    0.00 |      0.00 |
-| Julian Blackmon    |      5.41 |    0.00 |      0.39 |
-| Kool-Aid McKinstry |      3.92 |    0.00 |      0.00 |
-| Carl Granderson    |      3.25 |    0.71 |      0.00 |
-| Quincy Riley       |      3.02 |    0.00 |      0.00 |
+| Pete Werner        |      7.06 |    0.21 |      0.00 |
+| Jonas Sanker       |      6.56 |    0.00 |      0.00 |
+| Danny Stutsman     |      6.44 |    0.00 |      0.00 |
+| Justin Reid        |      6.05 |    0.00 |      0.00 |
+| Julian Blackmon    |      5.47 |    0.00 |      0.37 |
+| Kool-Aid McKinstry |      4.00 |    0.00 |      0.00 |
+| Carl Granderson    |      3.27 |    0.73 |      0.00 |
+| Quincy Riley       |      2.97 |    0.00 |      0.00 |
 
 ## PHI vs CAR
 Projected 61 plays, 65% dropbacks, 35.7 pass att, 21.4 runs, 2.1 sacks. QB: Jalen Hurts
 **Coaching style:** Deep-pass share low: 16% (league 19%); Red-zone pass rate low: 38% (league 53%); No-huddle rate high: 11% (league 6%); Pass rate on 3rd & short high: 55% (league 41%); Red-zone run share high: 61% (league 46%); 3rd-down conversion low: 33% (league 42%); EPA/dropback low: -0.09 (league +0.06); EPA/run low: -0.24 (league -0.09).
+**Market team total:** implied 21.0 (this team landed within the tolerance in 80% of its games, avg miss 3.6). Model 22.9 → blended 21.8: TD rates x0.95, yards x0.98.
 **Model game script:** projected 22.9 – 26.3 (margin -3.4) → dropback rate +1.4%.
 **Strength of schedule:** own pass yds x0.96, own run yds x1.04, own scoring x1.02 (raw stats re-rated against the opponents actually faced).
 **Out:** Saquon Barkley (carried from week 5 report: Out (Hamstring)), Marcus Epps (carried from week 5 report: Out (Groin)), Marquise Brown (carried from week 5 report: Out (Ankle)), DeVonta Smith (carried from week 5 report: Out (Hamstring)), Drew Kendall (carried from week 5 report: Out (Knee)).
@@ -663,41 +705,41 @@ Projected 61 plays, 65% dropbacks, 35.7 pass att, 21.4 runs, 2.1 sacks. QB: Jale
 **CAR defensive scheme (online/tagged):** blitz: heavy, coverage: zone_heavy [online (high)].
 - CAR is soft deep (+0.54 EPA/deep att vs league +0.43); PHI throws deep 16%.
 - CAR brings heavy 3rd-down pressure (source: blitz_pct); 3rd-down deep EPA allowed -0.29 on 3 attempts. PHI 3rd-down deep share 19%.
-- Best matchups: pass_short_middle (x1.22), pass_deep_left (x1.16); worst: pass_deep_middle (x0.93).
+- Best matchups: pass_short_middle (x1.20), pass_deep_left (x1.15); worst: pass_deep_middle (x0.92).
 - CAR blitzes 32% of dropbacks (league 31%, FTN charting); PHI gains x0.80 as much per dropback vs the blitz as other offenses (68 blitzed dropbacks) -> pass yards x1.00
 - PHI short plays vs zone heavy coverage defenses: x1.13 vs how other offenses fare (62 plays)
 - PHI deep-throw rate vs zone heavy coverage: x1.21
 
 | player           | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-----------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Jalen Hurts      | QB    |     224.50 |      1.60 |            0.74 |      4.02 |      23.44 |      0.00 |         0.00 |      0.00 |         0.10 |
-| Dontayvion Wicks | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      8.14 |         4.67 |     61.45 |         0.29 |
-| Makai Lemon      | WR    |       0.00 |      0.00 |            0.00 |      0.19 |       0.86 |      6.33 |         3.86 |     39.44 |         0.19 |
-| Dallas Goedert   | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.02 |         3.02 |     34.03 |         0.26 |
-| Will Shipley     | RB    |       0.00 |      0.00 |            0.00 |      6.42 |      26.92 |      2.41 |         1.43 |     13.92 |         0.33 |
-| Darius Cooper    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.01 |         2.27 |     32.19 |         0.30 |
-| Tank Bigsby      | RB    |       0.00 |      0.00 |            0.00 |      8.38 |      35.36 |      1.17 |         0.72 |      6.18 |         0.34 |
-| Dameon Pierce    | RB    |       0.00 |      0.00 |            0.00 |      4.25 |      18.00 |      1.99 |         1.14 |     10.75 |         0.23 |
-| Zach Ertz        | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.58 |         1.47 |     18.57 |         0.10 |
-| Johnny Mundt     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.52 |         0.91 |      7.97 |         0.06 |
+| Jalen Hurts      | QB    |     219.47 |      1.51 |            0.74 |      4.08 |      23.48 |      0.00 |         0.00 |      0.00 |         0.10 |
+| Dontayvion Wicks | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      8.07 |         4.65 |     60.20 |         0.27 |
+| Makai Lemon      | WR    |       0.00 |      0.00 |            0.00 |      0.18 |       0.77 |      6.26 |         3.80 |     38.15 |         0.19 |
+| Dallas Goedert   | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.01 |         3.00 |     32.93 |         0.24 |
+| Will Shipley     | RB    |       0.00 |      0.00 |            0.00 |      6.40 |      26.25 |      2.41 |         1.42 |     13.45 |         0.31 |
+| Darius Cooper    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.01 |         2.28 |     32.17 |         0.29 |
+| Tank Bigsby      | RB    |       0.00 |      0.00 |            0.00 |      8.46 |      35.19 |      1.15 |         0.71 |      6.04 |         0.32 |
+| Dameon Pierce    | RB    |       0.00 |      0.00 |            0.00 |      4.25 |      17.80 |      2.01 |         1.17 |     10.61 |         0.21 |
+| Zach Ertz        | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.58 |         1.45 |     18.17 |         0.10 |
+| Johnny Mundt     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.50 |         0.91 |      7.75 |         0.06 |
 
 **PHI kicker**
 
 | player       |   fg_made |   xp_made |   kicking_points |
 |:-------------|----------:|----------:|-----------------:|
-| Jake Elliott |      0.99 |      2.46 |             5.43 |
+| Jake Elliott |      0.98 |      2.28 |             5.21 |
 
 **PHI defenders (vs CAR offense)**
 
 | player               |   tackles |   sacks |   def_int |
 |:---------------------|----------:|--------:|----------:|
-| Jihaad Campbell      |      8.14 |    0.20 |      0.00 |
+| Jihaad Campbell      |      8.04 |    0.20 |      0.00 |
 | Zack Baun            |      7.14 |    0.00 |      0.00 |
-| Cooper DeJean        |      6.83 |    0.00 |      0.21 |
-| Riq Woolen           |      4.92 |    0.00 |      0.00 |
-| Quinyon Mitchell     |      4.91 |    0.00 |      0.25 |
-| Andrew Mukuba        |      4.64 |    0.00 |      0.21 |
-| Jeremiah Trotter Jr. |      4.12 |    0.00 |      0.00 |
+| Cooper DeJean        |      6.85 |    0.00 |      0.21 |
+| Riq Woolen           |      4.91 |    0.00 |      0.00 |
+| Quinyon Mitchell     |      4.91 |    0.00 |      0.27 |
+| Andrew Mukuba        |      4.65 |    0.00 |      0.23 |
+| Jeremiah Trotter Jr. |      4.07 |    0.00 |      0.00 |
 | Jordan Davis         |      3.60 |    0.00 |      0.00 |
 
 ## CAR vs PHI
@@ -718,46 +760,47 @@ Projected 70 plays, 63% dropbacks, 41.6 pass att, 25.5 runs, 1.9 sacks. QB: Bryc
 
 | player            | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Bryce Young       | QB    |     314.82 |      1.61 |            0.67 |      0.77 |       5.93 |      0.00 |         0.00 |      0.00 |         0.00 |
-| Chuba Hubbard     | RB    |       0.00 |      0.00 |            0.00 |     21.43 |     107.16 |      2.98 |         1.97 |     22.81 |         0.71 |
-| Tetairoa McMillan | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |     10.15 |         6.30 |     88.83 |         0.35 |
-| Darren Waller     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.02 |         3.77 |     48.60 |         0.26 |
-| Jalen Coker       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.99 |         3.25 |     43.65 |         0.18 |
-| Tommy Tremble     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.48 |         2.89 |     35.16 |         0.13 |
-| John Metchie III  | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.40 |         2.11 |     26.72 |         0.14 |
-| Brycen Tremayne   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.69 |         1.59 |     22.57 |         0.09 |
-| AJ Dillon         | RB    |       0.00 |      0.00 |            0.00 |      4.07 |      18.87 |      0.71 |         0.46 |      5.48 |         0.18 |
-| Mitchell Evans    | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.80 |         1.18 |     14.23 |         0.06 |
+| Bryce Young       | QB    |     314.01 |      1.61 |            0.70 |      0.77 |       5.90 |      0.00 |         0.00 |      0.00 |         0.00 |
+| Chuba Hubbard     | RB    |       0.00 |      0.00 |            0.00 |     21.46 |     106.83 |      2.98 |         1.95 |     22.43 |         0.72 |
+| Tetairoa McMillan | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |     10.14 |         6.28 |     89.39 |         0.35 |
+| Darren Waller     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.04 |         3.76 |     48.49 |         0.26 |
+| Jalen Coker       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.03 |         3.22 |     42.93 |         0.19 |
+| Tommy Tremble     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.48 |         2.89 |     34.97 |         0.14 |
+| John Metchie III  | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.37 |         2.11 |     26.81 |         0.13 |
+| Brycen Tremayne   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.70 |         1.58 |     22.30 |         0.09 |
+| AJ Dillon         | RB    |       0.00 |      0.00 |            0.00 |      4.08 |      18.77 |      0.74 |         0.48 |      5.43 |         0.17 |
+| Mitchell Evans    | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.82 |         1.19 |     14.37 |         0.06 |
 
 **CAR kicker**
 
 | player          |   fg_made |   xp_made |   kicking_points |
 |:----------------|----------:|----------:|-----------------:|
-| Ryan Fitzgerald |      2.08 |      2.54 |             8.79 |
+| Ryan Fitzgerald |      2.10 |      2.54 |             8.86 |
 
 **CAR defenders (vs PHI offense)**
 
 | player              |   tackles |   sacks |   def_int |
 |:--------------------|----------:|--------:|----------:|
-| Devin Lloyd         |      8.07 |    0.28 |      0.50 |
-| Bobby Okereke       |      7.13 |    0.00 |      0.24 |
-| Akayleb Evans       |      5.78 |    0.00 |      0.00 |
-| Will Lee III        |      5.05 |    0.00 |      0.00 |
-| Lathan Ransom       |      5.03 |    0.00 |      0.00 |
-| Tre'von Moehrig     |      4.70 |    0.00 |      0.00 |
-| Zakee Wheatley      |      4.16 |    0.00 |      0.00 |
-| Princely Umanmielen |      3.07 |    0.99 |      0.00 |
+| Devin Lloyd         |      7.99 |    0.29 |      0.51 |
+| Bobby Okereke       |      7.14 |    0.00 |      0.24 |
+| Akayleb Evans       |      5.77 |    0.00 |      0.00 |
+| Will Lee III        |      5.08 |    0.00 |      0.00 |
+| Lathan Ransom       |      5.01 |    0.00 |      0.00 |
+| Tre'von Moehrig     |      4.82 |    0.00 |      0.00 |
+| Zakee Wheatley      |      4.12 |    0.00 |      0.00 |
+| Princely Umanmielen |      3.03 |    0.99 |      0.00 |
 
 ## TAM vs PIT
 Projected 58 plays, 62% dropbacks, 29.2 pass att, 22.0 runs, 2.9 sacks. QB: Jalon Daniels
 **Coaching style:** Sack rate high: 9% (league 6%); Pass rate on 3rd & short high: 61% (league 41%); EPA/dropback low: -0.10 (league +0.06); EPA/run high: +0.01 (league -0.09); Favors run inside right (32%).
+**Market team total:** implied 18.5 (this team landed within the tolerance in 60% of its games, avg miss 4.3). Model 15.4 → blended 17.2: TD rates x1.12, yards x1.04.
 **Model game script:** projected 15.4 – 20.8 (margin -5.4) → dropback rate +2.2%.
 **Strength of schedule:** own run yds x0.96, own scoring x1.02, opp pass D x1.03 (raw stats re-rated against the opponents actually faced).
 **Out:** Baker Mayfield (carried from week 5 report: Out (Thumb)), Antoine Winfield Jr. (carried from week 5 report: Out (Rib)), SirVocea Dennis (carried from week 5 report: Out (Ankle)), Benjamin Morrison (carried from week 5 report: Out (Quadricep)).
 **Coach angle:** HC Todd Bowles (veteran HC, 11 prior seasons); plays called by OC Zac Robinson (developing play-caller, 2 seasons calling); career run-first (-2.5 pts pass rate vs league, 2 seasons); leans on stars; this season top target share 24%.
 **PIT secondary:** DC Patrick Graham, zone-leaning: Game-plans week to week; zero man snaps reported in week 1; Ramsey used as the slot Star and in pressure packages; outside Asante Samuel Jr. / Jamel Dean (OUT); nickel Jalen Ramsey; weak spot: Joey Porter Jr. traded to DAL (reported); new corners not yet in sync per Ramsey; [research confidence low, 2026-10-14].
 **PIT defensive scheme (online/tagged):** blitz: avg, coverage: zone_heavy [online (high)].
-- Best matchups: pass_deep_right (x1.03), pass_short_middle (x1.01); worst: run_inside_right (x0.77).
+- Best matchups: pass_deep_right (x1.06), pass_short_middle (x1.05); worst: run_inside_right (x0.79).
 - PIT blitzes 27% of dropbacks (league 31%, FTN charting); TAM gains x0.87 as much per dropback vs the blitz as other offenses (71 blitzed dropbacks) -> pass yards x1.01
 - TAM deep plays vs zone heavy coverage defenses: x0.94 vs how other offenses fare (9 plays)
 - TAM run plays vs zone heavy coverage defenses: x0.85 vs how other offenses fare (43 plays)
@@ -766,34 +809,34 @@ Projected 58 plays, 62% dropbacks, 29.2 pass att, 22.0 runs, 2.9 sacks. QB: Jalo
 
 | player           | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-----------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Jalon Daniels    | QB    |     188.59 |      0.98 |            0.75 |      4.40 |      32.98 |      0.00 |         0.00 |      0.00 |         0.01 |
-| Bucky Irving     | RB    |       0.00 |      0.00 |            0.00 |     15.61 |      60.46 |      3.30 |         2.37 |     18.72 |         0.47 |
-| Emeka Egbuka     | WR    |       0.00 |      0.00 |            0.00 |      0.32 |       1.22 |      6.87 |         4.57 |     44.41 |         0.22 |
-| Cade Otton       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.29 |         3.56 |     39.44 |         0.14 |
-| Kenny Gainwell   | RB    |       0.00 |      0.00 |            0.00 |      3.27 |      11.25 |      3.47 |         2.41 |     20.16 |         0.23 |
-| Chris Godwin Jr. | WR    |       0.00 |      0.00 |            0.00 |      0.48 |       1.73 |      4.28 |         3.12 |     28.76 |         0.13 |
-| Ted Hurst III    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.41 |         1.52 |     18.25 |         0.09 |
-| Tez Johnson      | WR    |       0.00 |      0.00 |            0.00 |      0.24 |       0.93 |      1.73 |         1.09 |     13.16 |         0.07 |
-| Sean Tucker      | RB    |       0.00 |      0.00 |            0.00 |      1.90 |       6.47 |      0.00 |         0.00 |      0.00 |         0.09 |
+| Jalon Daniels    | QB    |     195.37 |      1.07 |            0.76 |      4.46 |      33.43 |      0.00 |         0.00 |      0.00 |         0.01 |
+| Bucky Irving     | RB    |       0.00 |      0.00 |            0.00 |     15.59 |      62.35 |      3.29 |         2.36 |     18.90 |         0.52 |
+| Emeka Egbuka     | WR    |       0.00 |      0.00 |            0.00 |      0.31 |       1.27 |      6.94 |         4.62 |     47.07 |         0.25 |
+| Cade Otton       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.23 |         3.53 |     40.47 |         0.14 |
+| Kenny Gainwell   | RB    |       0.00 |      0.00 |            0.00 |      3.29 |      12.07 |      3.44 |         2.39 |     20.46 |         0.25 |
+| Chris Godwin Jr. | WR    |       0.00 |      0.00 |            0.00 |      0.51 |       1.90 |      4.30 |         3.14 |     30.43 |         0.14 |
+| Ted Hurst III    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.41 |         1.52 |     18.75 |         0.10 |
+| Tez Johnson      | WR    |       0.00 |      0.00 |            0.00 |      0.25 |       0.96 |      1.69 |         1.08 |     13.06 |         0.07 |
+| Sean Tucker      | RB    |       0.00 |      0.00 |            0.00 |      1.86 |       6.54 |      0.00 |         0.00 |      0.00 |         0.10 |
 
 **TAM kicker**
 
 | player           |   fg_made |   xp_made |   kicking_points |
 |:-----------------|----------:|----------:|-----------------:|
-| Chase McLaughlin |      2.31 |      1.67 |             8.58 |
+| Chase McLaughlin |      2.38 |      1.87 |             9.02 |
 
 **TAM defenders (vs PIT offense)**
 
 | player               |   tackles |   sacks |   def_int |
 |:---------------------|----------:|--------:|----------:|
-| Josiah Trotter       |      7.44 |    0.21 |      0.13 |
-| Alex Anzalone        |      4.99 |    0.32 |      0.24 |
-| Keionte Scott        |      4.85 |    0.00 |      0.00 |
-| Jacob Parrish        |      4.70 |    0.00 |      0.20 |
-| Tykee Smith          |      4.68 |    0.00 |      0.00 |
-| Antoine Winfield Jr. |      4.11 |    0.00 |      0.00 |
-| A'Shawn Robinson     |      2.76 |    0.27 |      0.17 |
-| Zyon McCollum        |      2.55 |    0.00 |      0.00 |
+| Josiah Trotter       |      7.43 |    0.22 |      0.13 |
+| Alex Anzalone        |      4.97 |    0.32 |      0.24 |
+| Keionte Scott        |      4.79 |    0.00 |      0.00 |
+| Jacob Parrish        |      4.73 |    0.00 |      0.21 |
+| Tykee Smith          |      4.70 |    0.00 |      0.00 |
+| Antoine Winfield Jr. |      4.08 |    0.00 |      0.00 |
+| A'Shawn Robinson     |      2.75 |    0.26 |      0.17 |
+| Zyon McCollum        |      2.49 |    0.00 |      0.00 |
 
 ## PIT vs TAM
 Projected 56 plays, 65% dropbacks, 33.8 pass att, 19.5 runs, 1.7 sacks. QB: Aaron Rodgers
@@ -815,32 +858,32 @@ Projected 56 plays, 65% dropbacks, 33.8 pass att, 19.5 runs, 1.7 sacks. QB: Aaro
 
 | player             | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Aaron Rodgers      | QB    |     234.44 |      1.62 |            0.99 |      0.73 |       5.51 |      0.00 |         0.00 |      0.00 |         0.00 |
-| Jaylen Warren      | RB    |       0.00 |      0.00 |            0.00 |     16.45 |      70.91 |      5.59 |         3.79 |     39.69 |         0.45 |
-| DK Metcalf         | WR    |       0.00 |      0.00 |            0.00 |      0.28 |       1.23 |      7.40 |         4.40 |     55.57 |         0.26 |
-| Pat Freiermuth     | TE    |       0.00 |      0.00 |            0.00 |      0.72 |       2.71 |      5.42 |         3.47 |     38.80 |         0.35 |
-| Roman Wilson       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.54 |         2.69 |     35.36 |         0.23 |
-| Germie Bernard     | WR    |       0.00 |      0.00 |            0.00 |      0.28 |       1.12 |      4.58 |         2.86 |     33.05 |         0.16 |
-| Darnell Washington | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.43 |         2.25 |     24.64 |         0.16 |
+| Aaron Rodgers      | QB    |     234.56 |      1.60 |            1.02 |      0.74 |       5.79 |      0.00 |         0.00 |      0.00 |         0.00 |
+| Jaylen Warren      | RB    |       0.00 |      0.00 |            0.00 |     16.53 |      71.45 |      5.59 |         3.75 |     39.72 |         0.45 |
+| DK Metcalf         | WR    |       0.00 |      0.00 |            0.00 |      0.28 |       1.24 |      7.49 |         4.43 |     56.12 |         0.27 |
+| Pat Freiermuth     | TE    |       0.00 |      0.00 |            0.00 |      0.74 |       2.66 |      5.42 |         3.47 |     38.65 |         0.35 |
+| Roman Wilson       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.50 |         2.67 |     35.24 |         0.23 |
+| Germie Bernard     | WR    |       0.00 |      0.00 |            0.00 |      0.28 |       1.25 |      4.62 |         2.89 |     33.55 |         0.15 |
+| Darnell Washington | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.43 |         2.21 |     23.91 |         0.15 |
 
 **PIT kicker**
 
 | player        |   fg_made |   xp_made |   kicking_points |
 |:--------------|----------:|----------:|-----------------:|
-| Chris Boswell |      2.18 |      1.97 |             8.50 |
+| Chris Boswell |      2.14 |      1.94 |             8.36 |
 
 **PIT defenders (vs TAM offense)**
 
 | player                 |   tackles |   sacks |   def_int |
 |:-----------------------|----------:|--------:|----------:|
-| Payton Wilson          |      8.80 |    0.33 |      0.00 |
-| Jaquan Brisker         |      6.99 |    0.00 |      0.15 |
-| Patrick Queen          |      6.97 |    0.00 |      0.20 |
+| Payton Wilson          |      8.92 |    0.33 |      0.00 |
+| Patrick Queen          |      7.04 |    0.00 |      0.19 |
+| Jaquan Brisker         |      7.03 |    0.00 |      0.16 |
 | Jalen Ramsey           |      5.72 |    0.00 |      0.00 |
-| Cameron Heyward        |      3.58 |    0.40 |      0.00 |
+| Cameron Heyward        |      3.60 |    0.39 |      0.00 |
+| Asante Samuel Jr.      |      3.17 |    0.00 |      0.00 |
 | Robert Spears-Jennings |      3.17 |    0.00 |      0.26 |
-| Asante Samuel Jr.      |      3.16 |    0.00 |      0.00 |
-| Yahya Black            |      3.03 |    0.00 |      0.00 |
+| Yahya Black            |      3.09 |    0.00 |      0.00 |
 
 ## LAR vs ARI
 Projected 67 plays, 59% dropbacks, 37.3 pass att, 27.7 runs, 1.4 sacks. QB: Matthew Stafford
@@ -859,33 +902,33 @@ Projected 67 plays, 59% dropbacks, 37.3 pass att, 27.7 runs, 1.4 sacks. QB: Matt
 
 | player           | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-----------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Matthew Stafford | QB    |     289.85 |      3.01 |            0.91 |      1.03 |       6.78 |      0.00 |         0.00 |      0.00 |         0.01 |
-| Kyren Williams   | RB    |       0.00 |      0.00 |            0.00 |     18.07 |      75.86 |      6.63 |         4.65 |     48.40 |         0.78 |
-| Puka Nacua       | WR    |       0.00 |      0.00 |            0.00 |      0.77 |       3.35 |      9.15 |         6.16 |     73.64 |         0.47 |
-| Davante Adams    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.18 |         4.58 |     62.40 |         0.56 |
-| Blake Corum      | RB    |       0.00 |      0.00 |            0.00 |      8.56 |      34.60 |      2.33 |         1.57 |     18.36 |         0.39 |
-| Tyler Higbee     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.98 |         3.40 |     39.81 |         0.32 |
-| Konata Mumpfield | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.05 |         1.23 |     17.89 |         0.17 |
-| Davis Allen      | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.53 |         0.95 |     11.20 |         0.10 |
+| Matthew Stafford | QB    |     290.09 |      3.09 |            0.91 |      1.06 |       6.98 |      0.00 |         0.00 |      0.00 |         0.01 |
+| Kyren Williams   | RB    |       0.00 |      0.00 |            0.00 |     18.02 |      75.95 |      6.64 |         4.61 |     48.05 |         0.78 |
+| Puka Nacua       | WR    |       0.00 |      0.00 |            0.00 |      0.79 |       3.42 |      9.12 |         6.16 |     73.90 |         0.48 |
+| Davante Adams    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.22 |         4.64 |     63.10 |         0.56 |
+| Tyler Higbee     | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.03 |         3.45 |     40.35 |         0.33 |
+| Blake Corum      | RB    |       0.00 |      0.00 |            0.00 |      8.52 |      34.14 |      2.27 |         1.54 |     17.59 |         0.39 |
+| Konata Mumpfield | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.11 |         1.26 |     18.15 |         0.18 |
+| Davis Allen      | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.52 |         0.97 |     11.35 |         0.10 |
 
 **LAR kicker**
 
 | player         |   fg_made |   xp_made |   kicking_points |
 |:---------------|----------:|----------:|-----------------:|
-| Harrison Mevis |      1.02 |      4.11 |             7.16 |
+| Harrison Mevis |      1.01 |      4.19 |             7.23 |
 
 **LAR defenders (vs ARI offense)**
 
 | player          |   tackles |   sacks |   def_int |
 |:----------------|----------:|--------:|----------:|
-| Nate Landman    |      9.53 |    0.00 |      0.00 |
-| Quentin Lake    |      7.38 |    0.00 |      0.23 |
-| Kam Curl        |      5.25 |    0.00 |      0.00 |
-| Omar Speights   |      5.02 |    0.64 |      0.00 |
-| Kamren Kinchens |      4.65 |    0.17 |      0.00 |
-| Byron Young     |      4.37 |    1.10 |      0.00 |
-| Kobie Turner    |      4.00 |    0.00 |      0.00 |
-| Trent McDuffie  |      3.45 |    0.00 |      0.28 |
+| Nate Landman    |      9.61 |    0.00 |      0.00 |
+| Quentin Lake    |      7.37 |    0.00 |      0.23 |
+| Kam Curl        |      5.20 |    0.00 |      0.00 |
+| Omar Speights   |      4.98 |    0.65 |      0.00 |
+| Kamren Kinchens |      4.72 |    0.17 |      0.00 |
+| Byron Young     |      4.32 |    1.10 |      0.00 |
+| Kobie Turner    |      4.02 |    0.00 |      0.00 |
+| Trent McDuffie  |      3.43 |    0.00 |      0.27 |
 
 ## ARI vs LAR
 Projected 64 plays, 69% dropbacks, 40.9 pass att, 19.6 runs, 2.6 sacks. QB: Jacoby Brissett
@@ -902,33 +945,33 @@ Projected 64 plays, 69% dropbacks, 40.9 pass att, 19.6 runs, 2.6 sacks. QB: Jaco
 
 | player              | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:--------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Jacoby Brissett     | QB    |     258.82 |      2.02 |            1.28 |      2.59 |      12.74 |      0.35 |         0.24 |      2.06 |         0.09 |
-| Trey McBride        | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |     12.13 |         7.88 |     74.80 |         0.44 |
-| Michael Wilson      | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |     10.58 |         6.22 |     68.44 |         0.41 |
-| Jeremiyah Love      | RB    |       0.00 |      0.00 |            0.00 |     11.37 |      43.06 |      2.99 |         1.99 |     17.17 |         0.38 |
-| Tyler Allgeier      | RB    |       0.00 |      0.00 |            0.00 |      6.37 |      24.04 |      2.51 |         1.73 |     14.74 |         0.29 |
-| Kendrick Bourne     | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.08 |         2.63 |     29.11 |         0.15 |
-| Marvin Harrison Jr. | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.65 |         1.51 |     17.96 |         0.14 |
-| Elijah Higgins      | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.21 |         1.44 |     14.71 |         0.13 |
+| Jacoby Brissett     | QB    |     258.54 |      2.02 |            1.28 |      2.62 |      12.85 |      0.35 |         0.23 |      2.14 |         0.09 |
+| Trey McBride        | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |     11.97 |         7.78 |     73.89 |         0.43 |
+| Michael Wilson      | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |     10.68 |         6.26 |     68.68 |         0.40 |
+| Jeremiyah Love      | RB    |       0.00 |      0.00 |            0.00 |     11.42 |      42.65 |      3.00 |         1.97 |     16.95 |         0.39 |
+| Tyler Allgeier      | RB    |       0.00 |      0.00 |            0.00 |      6.40 |      24.32 |      2.51 |         1.73 |     14.81 |         0.29 |
+| Kendrick Bourne     | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.05 |         2.59 |     28.76 |         0.15 |
+| Marvin Harrison Jr. | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.68 |         1.52 |     18.38 |         0.14 |
+| Elijah Higgins      | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.21 |         1.45 |     15.13 |         0.13 |
 
 **ARI kicker**
 
 | player      |   fg_made |   xp_made |   kicking_points |
 |:------------|----------:|----------:|-----------------:|
-| Chad Ryland |      1.54 |      2.53 |             7.14 |
+| Chad Ryland |      1.52 |      2.55 |             7.12 |
 
 **ARI defenders (vs LAR offense)**
 
 | player         |   tackles |   sacks |   def_int |
 |:---------------|----------:|--------:|----------:|
-| Budda Baker    |      8.94 |    0.32 |      0.35 |
-| Mack Wilson    |      8.36 |    0.00 |      0.00 |
-| Jack Gibbens   |      7.96 |    0.04 |      0.00 |
-| Roy Lopez      |      5.09 |    0.17 |      0.00 |
-| Andrew Wingard |      4.80 |    0.00 |      0.20 |
-| Denzel Burke   |      3.85 |    0.00 |      0.33 |
-| Max Melton     |      3.75 |    0.00 |      0.00 |
-| Zaven Collins  |      3.66 |    0.13 |      0.00 |
+| Budda Baker    |      8.89 |    0.31 |      0.34 |
+| Mack Wilson    |      8.33 |    0.00 |      0.00 |
+| Jack Gibbens   |      7.99 |    0.04 |      0.00 |
+| Roy Lopez      |      5.08 |    0.17 |      0.00 |
+| Andrew Wingard |      4.87 |    0.00 |      0.20 |
+| Denzel Burke   |      3.83 |    0.00 |      0.35 |
+| Max Melton     |      3.80 |    0.00 |      0.00 |
+| Zaven Collins  |      3.63 |    0.14 |      0.00 |
 
 ## KAN vs LAC
 Projected 61 plays, 54% dropbacks, 30.1 pass att, 28.0 runs, 1.4 sacks. QB: Patrick Mahomes
@@ -946,33 +989,33 @@ Projected 61 plays, 54% dropbacks, 30.1 pass att, 28.0 runs, 1.4 sacks. QB: Patr
 
 | player             | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Patrick Mahomes    | QB    |     207.23 |      1.46 |            0.66 |      1.71 |      13.34 |      0.00 |         0.00 |      0.00 |         0.00 |
-| Kenneth Walker III | RB    |       0.00 |      0.00 |            0.00 |     23.49 |     123.24 |      3.92 |         2.50 |     24.55 |         0.74 |
-| Xavier Worthy      | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.89 |         3.64 |     43.05 |         0.23 |
-| Travis Kelce       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.88 |         3.11 |     38.13 |         0.25 |
-| Tyquan Thornton    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.88 |         2.41 |     33.26 |         0.22 |
-| Rashee Rice        | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.96 |         2.54 |     32.09 |         0.18 |
-| Emmett Johnson     | RB    |       0.00 |      0.00 |            0.00 |      3.54 |      16.82 |      0.89 |         0.60 |      6.11 |         0.17 |
-| Noah Gray          | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.96 |         1.22 |     13.86 |         0.07 |
+| Patrick Mahomes    | QB    |     209.98 |      1.50 |            0.67 |      1.72 |      13.27 |      0.00 |         0.00 |      0.00 |         0.00 |
+| Kenneth Walker III | RB    |       0.00 |      0.00 |            0.00 |     23.44 |     122.96 |      3.94 |         2.49 |     24.66 |         0.75 |
+| Xavier Worthy      | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.88 |         3.67 |     43.42 |         0.24 |
+| Travis Kelce       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.98 |         3.17 |     39.18 |         0.25 |
+| Tyquan Thornton    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.88 |         2.40 |     33.91 |         0.22 |
+| Rashee Rice        | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.98 |         2.54 |     32.31 |         0.18 |
+| Emmett Johnson     | RB    |       0.00 |      0.00 |            0.00 |      3.60 |      16.98 |      0.91 |         0.62 |      6.32 |         0.16 |
+| Noah Gray          | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.96 |         1.22 |     13.74 |         0.08 |
 
 **KAN kicker**
 
 | player          |   fg_made |   xp_made |   kicking_points |
 |:----------------|----------:|----------:|-----------------:|
-| Harrison Butker |      1.96 |      2.69 |             8.57 |
+| Harrison Butker |      1.90 |      2.70 |             8.40 |
 
 **KAN defenders (vs LAC offense)**
 
 | player           |   tackles |   sacks |   def_int |
 |:-----------------|----------:|--------:|----------:|
-| Nick Bolton      |     11.00 |    0.00 |      0.00 |
-| Drue Tranquill   |      8.44 |    0.00 |      0.00 |
-| L'Jarius Sneed   |      7.16 |    0.00 |      0.00 |
-| Mansoor Delane   |      6.84 |    0.00 |      0.23 |
-| Jaden Hicks      |      6.48 |    0.00 |      0.00 |
-| Alohi Gilman     |      4.97 |    0.00 |      0.00 |
-| George Karlaftis |      4.42 |    0.00 |      0.35 |
-| Nohl Williams    |      4.37 |    0.79 |      0.00 |
+| Nick Bolton      |     11.12 |    0.00 |      0.00 |
+| Drue Tranquill   |      8.45 |    0.00 |      0.00 |
+| L'Jarius Sneed   |      7.17 |    0.00 |      0.00 |
+| Mansoor Delane   |      6.81 |    0.00 |      0.26 |
+| Jaden Hicks      |      6.44 |    0.00 |      0.00 |
+| Alohi Gilman     |      4.99 |    0.00 |      0.00 |
+| Nohl Williams    |      4.46 |    0.80 |      0.00 |
+| George Karlaftis |      4.43 |    0.00 |      0.34 |
 
 ## LAC vs KAN
 Projected 63 plays, 64% dropbacks, 33.7 pass att, 22.9 runs, 2.4 sacks. QB: Justin Herbert
@@ -990,34 +1033,34 @@ Projected 63 plays, 64% dropbacks, 33.7 pass att, 22.9 runs, 2.4 sacks. QB: Just
 
 | player                   | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-------------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Justin Herbert           | QB    |     221.64 |      1.08 |            1.28 |      4.83 |      33.16 |      0.32 |         0.20 |      2.09 |         0.05 |
-| Tre Harris               | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.77 |         4.51 |     55.84 |         0.17 |
-| Omarion Hampton          | RB    |       0.00 |      0.00 |            0.00 |     12.53 |      50.19 |      1.76 |         1.14 |     11.37 |         0.38 |
-| Keaton Mitchell          | RB    |       0.00 |      0.00 |            0.00 |      5.78 |      24.26 |      4.60 |         3.02 |     27.38 |         0.26 |
-| Oronde Gadsden II        | TE    |       0.00 |      0.00 |            0.00 |      0.17 |       0.76 |      4.81 |         2.91 |     32.57 |         0.17 |
-| Ladd McConkey            | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.02 |         2.40 |     30.59 |         0.14 |
-| Kimani Vidal             | RB    |       0.00 |      0.00 |            0.00 |      3.05 |      13.34 |      2.59 |         1.59 |     16.74 |         0.20 |
-| Charlie Kolar            | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.29 |         1.50 |     15.12 |         0.08 |
-| Marquez Valdes-Scantling | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.68 |         1.07 |     11.60 |         0.06 |
+| Justin Herbert           | QB    |     223.68 |      1.10 |            1.29 |      4.78 |      32.95 |      0.32 |         0.20 |      2.06 |         0.04 |
+| Tre Harris               | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.74 |         4.50 |     55.74 |         0.18 |
+| Omarion Hampton          | RB    |       0.00 |      0.00 |            0.00 |     12.54 |      50.54 |      1.79 |         1.17 |     11.73 |         0.38 |
+| Keaton Mitchell          | RB    |       0.00 |      0.00 |            0.00 |      5.82 |      24.99 |      4.69 |         3.06 |     28.24 |         0.27 |
+| Oronde Gadsden II        | TE    |       0.00 |      0.00 |            0.00 |      0.18 |       0.71 |      4.83 |         2.93 |     33.52 |         0.17 |
+| Ladd McConkey            | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.00 |         2.37 |     30.39 |         0.14 |
+| Kimani Vidal             | RB    |       0.00 |      0.00 |            0.00 |      3.07 |      13.70 |      2.59 |         1.60 |     17.02 |         0.20 |
+| Charlie Kolar            | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.29 |         1.50 |     14.99 |         0.07 |
+| Marquez Valdes-Scantling | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.62 |         1.02 |     11.20 |         0.05 |
 
 **LAC kicker**
 
 | player         |   fg_made |   xp_made |   kicking_points |
 |:---------------|----------:|----------:|-----------------:|
-| Cameron Dicker |      1.59 |      1.72 |             6.48 |
+| Cameron Dicker |      1.65 |      1.73 |             6.68 |
 
 **LAC defenders (vs KAN offense)**
 
 | player             |   tackles |   sacks |   def_int |
 |:-------------------|----------:|--------:|----------:|
-| Daiyan Henley      |      6.00 |    0.05 |      0.00 |
-| Del'Shawn Phillips |      5.61 |    0.00 |      0.00 |
-| Akheem Mesidor     |      4.86 |    0.33 |      0.00 |
-| Tuli Tuipulotu     |      4.42 |    0.26 |      0.20 |
-| Cam Hart           |      4.00 |    0.00 |      0.13 |
-| Elijah Molden      |      3.77 |    0.00 |      0.00 |
-| Tony Jefferson     |      3.77 |    0.00 |      0.00 |
-| Justin Eboigbe     |      3.43 |    0.07 |      0.00 |
+| Daiyan Henley      |      6.05 |    0.05 |      0.00 |
+| Del'Shawn Phillips |      5.66 |    0.00 |      0.00 |
+| Akheem Mesidor     |      4.85 |    0.35 |      0.00 |
+| Tuli Tuipulotu     |      4.46 |    0.25 |      0.21 |
+| Cam Hart           |      3.96 |    0.00 |      0.15 |
+| Tony Jefferson     |      3.74 |    0.00 |      0.00 |
+| Elijah Molden      |      3.72 |    0.00 |      0.00 |
+| Justin Eboigbe     |      3.42 |    0.08 |      0.00 |
 
 ## LVR vs BUF
 Projected 69 plays, 60% dropbacks, 39.8 pass att, 27.5 runs, 1.4 sacks. QB: Kirk Cousins
@@ -1036,32 +1079,32 @@ Projected 69 plays, 60% dropbacks, 39.8 pass att, 27.5 runs, 1.4 sacks. QB: Kirk
 
 | player              | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:--------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Kirk Cousins        | QB    |     296.35 |      2.63 |            0.58 |      0.75 |       5.07 |      0.00 |         0.00 |      0.00 |         0.01 |
-| Ashton Jeanty       | RB    |       0.00 |      0.00 |            0.00 |     19.28 |      68.86 |      7.24 |         4.95 |     51.02 |         0.58 |
-| Brock Bowers        | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |     10.73 |         7.30 |     87.16 |         0.57 |
-| Tre Tucker          | WR    |       0.00 |      0.00 |            0.00 |      0.59 |       2.07 |      6.19 |         4.14 |     51.72 |         0.31 |
-| Michael Mayer       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.30 |         4.64 |     46.15 |         0.30 |
-| Cody White          | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.52 |         2.23 |     26.12 |         0.29 |
-| Mike Washington Jr. | RB    |       0.00 |      0.00 |            0.00 |      5.97 |      22.62 |      1.22 |         0.82 |      8.41 |         0.27 |
+| Kirk Cousins        | QB    |     295.54 |      2.65 |            0.58 |      0.77 |       5.25 |      0.00 |         0.00 |      0.00 |         0.01 |
+| Ashton Jeanty       | RB    |       0.00 |      0.00 |            0.00 |     19.25 |      69.20 |      7.25 |         4.92 |     50.74 |         0.59 |
+| Brock Bowers        | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |     10.71 |         7.29 |     87.23 |         0.55 |
+| Tre Tucker          | WR    |       0.00 |      0.00 |            0.00 |      0.57 |       1.98 |      6.25 |         4.17 |     52.12 |         0.30 |
+| Michael Mayer       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.34 |         4.67 |     45.59 |         0.30 |
+| Cody White          | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.54 |         2.29 |     26.83 |         0.31 |
+| Mike Washington Jr. | RB    |       0.00 |      0.00 |            0.00 |      5.97 |      22.93 |      1.19 |         0.80 |      8.11 |         0.27 |
 
 **LVR kicker**
 
 | player   |   fg_made |   xp_made |   kicking_points |
 |:---------|----------:|----------:|-----------------:|
-| Matt Gay |      1.87 |      3.21 |             8.81 |
+| Matt Gay |      1.85 |      3.23 |             8.78 |
 
 **LVR defenders (vs BUF offense)**
 
 | player          |   tackles |   sacks |   def_int |
 |:----------------|----------:|--------:|----------:|
-| Nakobe Dean     |      9.36 |    0.20 |      0.00 |
-| Quay Walker     |      6.56 |    0.20 |      0.00 |
-| Jeremy Chinn    |      6.08 |    0.16 |      0.00 |
-| Taron Johnson   |      4.58 |    0.00 |      0.00 |
-| Hezekiah Masses |      3.92 |    0.00 |      0.57 |
-| Treydan Stukes  |      3.33 |    0.00 |      0.15 |
-| Eric Stokes     |      3.33 |    0.15 |      0.00 |
-| Adam Butler     |      2.69 |    0.11 |      0.00 |
+| Nakobe Dean     |      9.38 |    0.19 |      0.00 |
+| Quay Walker     |      6.56 |    0.21 |      0.00 |
+| Jeremy Chinn    |      6.02 |    0.18 |      0.00 |
+| Taron Johnson   |      4.61 |    0.00 |      0.00 |
+| Hezekiah Masses |      3.91 |    0.00 |      0.57 |
+| Treydan Stukes  |      3.34 |    0.00 |      0.15 |
+| Eric Stokes     |      3.28 |    0.14 |      0.00 |
+| Adam Butler     |      2.68 |    0.10 |      0.00 |
 
 ## BUF vs LVR
 Projected 58 plays, 58% dropbacks, 27.7 pass att, 24.4 runs, 2.0 sacks. QB: Josh Allen
@@ -1081,37 +1124,38 @@ Projected 58 plays, 58% dropbacks, 27.7 pass att, 24.4 runs, 2.0 sacks. QB: Josh
 
 | player         | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:---------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Josh Allen     | QB    |     226.08 |      1.62 |            0.71 |      7.78 |      47.90 |      0.17 |         0.12 |      1.53 |         0.38 |
-| James Cook     | RB    |       0.00 |      0.00 |            0.00 |     18.70 |     103.02 |      2.21 |         1.49 |     16.23 |         0.69 |
-| Khalil Shakir  | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.76 |         3.98 |     50.23 |         0.23 |
-| Keon Coleman   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.01 |         2.65 |     36.84 |         0.28 |
-| DJ Moore       | WR    |       0.00 |      0.00 |            0.00 |      0.29 |       1.49 |      3.94 |         2.52 |     33.65 |         0.23 |
-| Dalton Kincaid | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.86 |         2.50 |     36.32 |         0.21 |
-| Ty Johnson     | RB    |       0.00 |      0.00 |            0.00 |      0.24 |       1.13 |      2.60 |         1.90 |     23.12 |         0.14 |
-| Dawson Knox    | TE    |       0.00 |      0.00 |            0.00 |      0.21 |       0.96 |      2.15 |         1.45 |     17.17 |         0.16 |
+| Josh Allen     | QB    |     225.51 |      1.64 |            0.72 |      7.82 |      48.18 |      0.19 |         0.12 |      1.56 |         0.38 |
+| James Cook     | RB    |       0.00 |      0.00 |            0.00 |     18.66 |     102.99 |      2.19 |         1.47 |     15.59 |         0.70 |
+| Khalil Shakir  | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.81 |         3.97 |     50.17 |         0.23 |
+| Keon Coleman   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.05 |         2.68 |     37.66 |         0.29 |
+| Dalton Kincaid | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.84 |         2.50 |     36.47 |         0.22 |
+| DJ Moore       | WR    |       0.00 |      0.00 |            0.00 |      0.29 |       1.48 |      3.90 |         2.47 |     33.65 |         0.24 |
+| Ty Johnson     | RB    |       0.00 |      0.00 |            0.00 |      0.24 |       1.17 |      2.63 |         1.88 |     22.66 |         0.15 |
+| Dawson Knox    | TE    |       0.00 |      0.00 |            0.00 |      0.21 |       1.04 |      2.13 |         1.45 |     17.10 |         0.16 |
 
 **BUF kicker**
 
 | player     |   fg_made |   xp_made |   kicking_points |
 |:-----------|----------:|----------:|-----------------:|
-| Tyler Bass |      1.23 |      2.97 |             6.66 |
+| Tyler Bass |      1.19 |      2.98 |             6.54 |
 
 **BUF defenders (vs LVR offense)**
 
 | player               |   tackles |   sacks |   def_int |
 |:---------------------|----------:|--------:|----------:|
-| Dorian Williams      |      8.19 |    0.00 |      0.00 |
-| Cole Bishop          |      7.34 |    0.00 |      0.00 |
-| Terrel Bernard       |      6.84 |    0.00 |      0.00 |
-| Christian Benford    |      5.26 |    0.00 |      0.00 |
-| Davison Igbinosun    |      5.21 |    0.00 |      0.00 |
-| C.J. Gardner-Johnson |      4.95 |    0.00 |      0.27 |
+| Dorian Williams      |      8.14 |    0.00 |      0.00 |
+| Cole Bishop          |      7.40 |    0.00 |      0.00 |
+| Terrel Bernard       |      6.81 |    0.00 |      0.00 |
+| Christian Benford    |      5.28 |    0.00 |      0.00 |
+| Davison Igbinosun    |      5.22 |    0.00 |      0.00 |
+| C.J. Gardner-Johnson |      5.01 |    0.00 |      0.26 |
 | Greg Rousseau        |      3.73 |    0.73 |      0.00 |
-| Bradley Chubb        |      3.19 |    0.18 |      0.00 |
+| Bradley Chubb        |      3.25 |    0.18 |      0.00 |
 
 ## GNB vs DAL
 Projected 57 plays, 60% dropbacks, 33.1 pass att, 22.7 runs, 1.3 sacks. QB: Jordan Love
 **Coaching style:** 3rd-down conversion low: 33% (league 42%); EPA/dropback high: +0.13 (league +0.06); EPA/run low: -0.25 (league -0.09); Favors run inside left (32%).
+**Market team total:** implied 27.0 (this team landed within the tolerance in 60% of its games, avg miss 5.3). Model 31.2 → blended 28.7: TD rates x0.92, yards x0.98.
 **Model game script:** projected 31.2 – 27.9 (margin +3.3) → dropback rate -1.3%.
 **Strength of schedule:** own scoring x1.06 (raw stats re-rated against the opponents actually faced).
 **Out:** Aaron Banks (carried from week 5 report: Doubtful (Knee)), Chris Brooks (carried from week 5 report: Out (Ankle)), Jacob Monk (carried from week 5 report: Doubtful (Quadricep)), Savion Williams (carried from week 5 report: Out (Ankle)).
@@ -1119,39 +1163,39 @@ Projected 57 plays, 60% dropbacks, 33.1 pass att, 22.7 runs, 1.3 sacks. QB: Jord
 **DAL secondary:** DC Christian Parker, mixed-leaning: Multiple 3-4 with 4-2-5 nickel; will play man if the corners allow; analysts expect more zone; outside Joey Porter Jr. / DaRon Bland; nickel Caleb Downs; weak spot: Depleted corner room; Joey Porter Jr. added Oct 1; [research confidence low, 2026-10-14].
 **DAL defensive scheme (online/tagged):** blitz: avg, coverage: avg [online (high)].
 - DAL is soft deep (+0.83 EPA/deep att vs league +0.43); GNB throws deep 22%.
-- Best matchups: run_inside_right (x1.17), run_outside_left (x1.12); worst: run_middle (x0.97).
+- Best matchups: run_inside_right (x1.14), run_outside_left (x1.09); worst: run_middle (x0.95).
 - DAL blitzes 27% of dropbacks (league 31%, FTN charting); GNB gains x1.14 as much per dropback vs the blitz as other offenses (74 blitzed dropbacks) -> pass yards x0.99
 - DAL DBs out: Cobie Durant (5 tgts, 7.3 yds/tgt allowed) -> coverage 8.3 → 8.4 yds/tgt; WR yards x1.01
 
 | player           | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-----------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Jordan Love      | QB    |     257.70 |      2.43 |            0.24 |      0.79 |       4.28 |      0.00 |         0.00 |      0.00 |         0.02 |
-| Christian Watson | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.53 |         4.81 |     63.37 |         0.61 |
-| MarShawn Lloyd   | RB    |       0.00 |      0.00 |            0.00 |     13.10 |      51.61 |      3.20 |         2.28 |     22.45 |         0.59 |
-| Matthew Golden   | WR    |       0.00 |      0.00 |            0.00 |      0.25 |       1.16 |      7.88 |         5.10 |     66.26 |         0.36 |
-| Tucker Kraft     | TE    |       0.00 |      0.00 |            0.00 |      0.71 |       2.81 |      6.26 |         4.34 |     48.67 |         0.34 |
-| Kaleb Johnson    | RB    |       0.00 |      0.00 |            0.00 |      6.63 |      27.71 |      0.72 |         0.47 |      4.67 |         0.24 |
-| Skyy Moore       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.51 |         1.69 |     17.26 |         0.13 |
-| Bo Melton        | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.51 |         1.02 |     11.13 |         0.09 |
+| Jordan Love      | QB    |     251.27 |      2.23 |            0.23 |      0.79 |       4.26 |      0.00 |         0.00 |      0.00 |         0.02 |
+| Christian Watson | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.55 |         4.82 |     61.25 |         0.59 |
+| MarShawn Lloyd   | RB    |       0.00 |      0.00 |            0.00 |     13.01 |      50.72 |      3.22 |         2.28 |     21.73 |         0.56 |
+| Matthew Golden   | WR    |       0.00 |      0.00 |            0.00 |      0.27 |       1.05 |      7.86 |         5.04 |     64.59 |         0.32 |
+| Tucker Kraft     | TE    |       0.00 |      0.00 |            0.00 |      0.72 |       2.64 |      6.26 |         4.35 |     47.30 |         0.31 |
+| Kaleb Johnson    | RB    |       0.00 |      0.00 |            0.00 |      6.67 |      27.18 |      0.69 |         0.45 |      4.23 |         0.24 |
+| Skyy Moore       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      2.49 |         1.67 |     16.82 |         0.12 |
+| Bo Melton        | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.50 |         1.03 |     11.34 |         0.07 |
 
 **GNB kicker**
 
 | player     |   fg_made |   xp_made |   kicking_points |
 |:-----------|----------:|----------:|-----------------:|
-| Trey Smack |      1.54 |      3.16 |             7.79 |
+| Trey Smack |      1.52 |      2.91 |             7.46 |
 
 **GNB defenders (vs DAL offense)**
 
 | player          |   tackles |   sacks |   def_int |
 |:----------------|----------:|--------:|----------:|
-| Evan Williams   |      9.70 |    0.11 |      0.19 |
-| Zaire Franklin  |      8.29 |    0.00 |      0.00 |
-| Javon Bullard   |      6.63 |    0.00 |      0.00 |
-| Keisean Nixon   |      6.49 |    0.03 |      0.12 |
-| Edgerrin Cooper |      5.69 |    0.26 |      0.19 |
-| Lukas Van Ness  |      4.58 |    0.18 |      0.00 |
-| Brandon Cisse   |      4.40 |    0.17 |      0.00 |
-| Isaiah McDuffie |      3.94 |    0.00 |      0.00 |
+| Evan Williams   |      9.77 |    0.11 |      0.19 |
+| Zaire Franklin  |      8.18 |    0.00 |      0.00 |
+| Javon Bullard   |      6.58 |    0.00 |      0.00 |
+| Keisean Nixon   |      6.43 |    0.03 |      0.11 |
+| Edgerrin Cooper |      5.68 |    0.25 |      0.19 |
+| Lukas Van Ness  |      4.62 |    0.18 |      0.00 |
+| Brandon Cisse   |      4.38 |    0.17 |      0.00 |
+| Isaiah McDuffie |      3.90 |    0.00 |      0.00 |
 
 ## DAL vs GNB
 Projected 63 plays, 65% dropbacks, 38.0 pass att, 22.2 runs, 1.3 sacks. QB: Dak Prescott
@@ -1174,34 +1218,34 @@ Projected 63 plays, 65% dropbacks, 38.0 pass att, 22.2 runs, 1.3 sacks. QB: Dak 
 
 | player           | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-----------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Dak Prescott     | QB    |     259.71 |      1.63 |            1.34 |      2.14 |      15.90 |      0.00 |         0.00 |      0.00 |         0.01 |
-| Javonte Williams | RB    |       0.00 |      0.00 |            0.00 |     18.14 |      72.44 |      3.90 |         2.84 |     24.03 |         0.77 |
-| CeeDee Lamb      | WR    |       0.00 |      0.00 |            0.00 |      0.34 |       1.53 |      9.48 |         6.72 |     71.54 |         0.41 |
-| George Pickens   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      8.31 |         5.60 |     62.70 |         0.25 |
-| Ryan Flournoy    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.36 |         3.57 |     37.54 |         0.15 |
-| Jake Ferguson    | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.37 |         3.01 |     26.70 |         0.25 |
-| KaVontae Turpin  | WR    |       0.00 |      0.00 |            0.00 |      0.33 |       1.47 |      1.62 |         1.12 |     10.30 |         0.08 |
-| Jonathan Mingo   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.55 |         1.03 |     10.96 |         0.06 |
-| Tyler Goodson    | RB    |       0.00 |      0.00 |            0.00 |      2.40 |       9.79 |      0.44 |         0.30 |      2.72 |         0.12 |
+| Dak Prescott     | QB    |     258.12 |      1.64 |            1.32 |      2.15 |      15.81 |      0.00 |         0.00 |      0.00 |         0.01 |
+| Javonte Williams | RB    |       0.00 |      0.00 |            0.00 |     18.21 |      72.06 |      3.83 |         2.77 |     23.02 |         0.78 |
+| CeeDee Lamb      | WR    |       0.00 |      0.00 |            0.00 |      0.34 |       1.46 |      9.50 |         6.74 |     71.62 |         0.42 |
+| George Pickens   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      8.27 |         5.53 |     61.93 |         0.23 |
+| Ryan Flournoy    | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      5.39 |         3.55 |     37.25 |         0.15 |
+| Jake Ferguson    | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.41 |         3.01 |     27.01 |         0.26 |
+| KaVontae Turpin  | WR    |       0.00 |      0.00 |            0.00 |      0.33 |       1.48 |      1.63 |         1.13 |     10.33 |         0.08 |
+| Jonathan Mingo   | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      1.57 |         1.04 |     11.28 |         0.06 |
+| Tyler Goodson    | RB    |       0.00 |      0.00 |            0.00 |      2.46 |      10.20 |      0.44 |         0.30 |      2.72 |         0.12 |
 
 **DAL kicker**
 
 | player         |   fg_made |   xp_made |   kicking_points |
 |:---------------|----------:|----------:|-----------------:|
-| Brandon Aubrey |      1.27 |      2.97 |             6.79 |
+| Brandon Aubrey |      1.23 |      2.99 |             6.69 |
 
 **DAL defenders (vs GNB offense)**
 
 | player            |   tackles |   sacks |   def_int |
 |:------------------|----------:|--------:|----------:|
-| Dee Winters       |      6.41 |    0.00 |      0.00 |
-| Caleb Downs       |      5.12 |    0.17 |      0.00 |
-| Jaishawn Barham   |      4.78 |    0.00 |      0.00 |
-| Donovan Ezeiruaku |      4.33 |    0.09 |      0.00 |
+| Dee Winters       |      6.35 |    0.00 |      0.00 |
+| Caleb Downs       |      5.14 |    0.17 |      0.00 |
+| Jaishawn Barham   |      4.76 |    0.00 |      0.00 |
+| Donovan Ezeiruaku |      4.39 |    0.09 |      0.00 |
 | DaRon Bland       |      3.63 |    0.00 |      0.00 |
-| Markquese Bell    |      3.26 |    0.00 |      0.00 |
-| Otito Ogbonnia    |      3.09 |    0.00 |      0.00 |
-| Malik Hooker      |      2.75 |    0.00 |      0.00 |
+| Markquese Bell    |      3.23 |    0.00 |      0.00 |
+| Otito Ogbonnia    |      3.13 |    0.00 |      0.00 |
+| Malik Hooker      |      2.71 |    0.00 |      0.00 |
 
 ## SFO vs WAS
 Projected 57 plays, 54% dropbacks, 27.6 pass att, 25.9 runs, 0.6 sacks. QB: Brock Purdy
@@ -1225,31 +1269,31 @@ Projected 57 plays, 54% dropbacks, 27.6 pass att, 25.9 runs, 0.6 sacks. QB: Broc
 
 | player              | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:--------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Brock Purdy         | QB    |     225.13 |      2.13 |            0.43 |      4.17 |      25.77 |      0.00 |         0.00 |      0.00 |         0.06 |
-| Christian McCaffrey | RB    |       0.00 |      0.00 |            0.00 |     14.44 |      66.94 |      4.96 |         3.28 |     36.13 |         0.61 |
-| Mike Evans          | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.37 |         4.65 |     70.59 |         0.50 |
-| George Kittle       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.55 |         4.30 |     57.27 |         0.47 |
-| Deebo Samuel Sr.    | WR    |       0.00 |      0.00 |            0.00 |      2.15 |      10.37 |      4.10 |         2.77 |     31.48 |         0.32 |
-| Kaelon Black        | RB    |       0.00 |      0.00 |            0.00 |      7.47 |      32.42 |      0.39 |         0.23 |      2.74 |         0.18 |
+| Brock Purdy         | QB    |     226.01 |      2.12 |            0.43 |      4.14 |      25.60 |      0.00 |         0.00 |      0.00 |         0.06 |
+| Christian McCaffrey | RB    |       0.00 |      0.00 |            0.00 |     14.32 |      65.98 |      4.95 |         3.27 |     36.29 |         0.62 |
+| Mike Evans          | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      7.36 |         4.64 |     70.37 |         0.49 |
+| George Kittle       | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.60 |         4.31 |     57.53 |         0.48 |
+| Deebo Samuel Sr.    | WR    |       0.00 |      0.00 |            0.00 |      2.13 |      10.23 |      4.08 |         2.77 |     31.70 |         0.32 |
+| Kaelon Black        | RB    |       0.00 |      0.00 |            0.00 |      7.53 |      32.51 |      0.36 |         0.22 |      2.55 |         0.19 |
 
 **SFO kicker**
 
 | player       |   fg_made |   xp_made |   kicking_points |
 |:-------------|----------:|----------:|-----------------:|
-| Eddy Pineiro |      1.49 |      2.93 |             7.41 |
+| Eddy Pineiro |      1.49 |      2.93 |             7.39 |
 
 **SFO defenders (vs WAS offense)**
 
 | player            |   tackles |   sacks |   def_int |
 |:------------------|----------:|--------:|----------:|
-| Fred Warner       |     10.35 |    0.09 |      0.00 |
-| Dre Greenlaw      |      7.57 |    0.00 |      0.00 |
-| Ji'Ayir Brown     |      6.87 |    0.00 |      0.00 |
-| Marques Sigle     |      4.71 |    0.18 |      0.00 |
+| Fred Warner       |     10.36 |    0.09 |      0.00 |
+| Dre Greenlaw      |      7.58 |    0.00 |      0.00 |
+| Ji'Ayir Brown     |      6.99 |    0.00 |      0.00 |
+| Marques Sigle     |      4.66 |    0.19 |      0.00 |
 | Renardo Green     |      4.38 |    0.00 |      0.54 |
-| Deommodore Lenoir |      4.05 |    0.00 |      0.00 |
-| Jaden Dugger      |      3.84 |    0.30 |      0.00 |
-| Malik Mustapha    |      3.60 |    0.00 |      0.00 |
+| Deommodore Lenoir |      4.07 |    0.00 |      0.00 |
+| Jaden Dugger      |      3.82 |    0.30 |      0.00 |
+| Malik Mustapha    |      3.64 |    0.00 |      0.00 |
 
 ## WAS vs SFO
 Projected 65 plays, 67% dropbacks, 36.2 pass att, 21.1 runs, 2.7 sacks. QB: Jayden Daniels
@@ -1269,31 +1313,31 @@ Projected 65 plays, 67% dropbacks, 36.2 pass att, 21.1 runs, 2.7 sacks. QB: Jayd
 
 | player                 | pos   |   pass_yds |   pass_td |   interceptions |   carries |   rush_yds |   targets |   receptions |   rec_yds |   anytime_td |
 |:-----------------------|:------|-----------:|----------:|----------------:|----------:|-----------:|----------:|-------------:|----------:|-------------:|
-| Jayden Daniels         | QB    |     219.43 |      1.18 |            0.54 |      5.39 |      39.38 |      0.00 |         0.00 |      0.00 |         0.01 |
-| Terry McLaurin         | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.70 |         4.09 |     47.25 |         0.19 |
-| Antonio Williams       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.48 |         4.10 |     40.97 |         0.19 |
-| Jacory Croskey-Merritt | RB    |       0.00 |      0.00 |            0.00 |     11.81 |      40.30 |      1.98 |         1.29 |     11.96 |         0.37 |
-| Rachaad White          | RB    |       0.00 |      0.00 |            0.00 |      5.05 |      17.70 |      2.47 |         1.71 |     14.50 |         0.22 |
-| Chig Okonkwo           | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.12 |         2.52 |     26.45 |         0.12 |
-| Treylon Burks          | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.68 |         2.17 |     24.72 |         0.17 |
-| Dyami Brown            | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.91 |         2.27 |     25.94 |         0.11 |
-| Kaytron Allen          | RB    |       0.00 |      0.00 |            0.00 |      1.75 |       5.95 |      0.00 |         0.00 |      0.00 |         0.06 |
+| Jayden Daniels         | QB    |     218.68 |      1.21 |            0.54 |      5.41 |      39.91 |      0.00 |         0.00 |      0.00 |         0.02 |
+| Terry McLaurin         | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.72 |         4.07 |     47.31 |         0.20 |
+| Antonio Williams       | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      6.55 |         4.13 |     41.09 |         0.21 |
+| Jacory Croskey-Merritt | RB    |       0.00 |      0.00 |            0.00 |     11.92 |      41.15 |      2.00 |         1.32 |     12.27 |         0.39 |
+| Rachaad White          | RB    |       0.00 |      0.00 |            0.00 |      5.00 |      17.37 |      2.44 |         1.71 |     14.11 |         0.21 |
+| Chig Okonkwo           | TE    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      4.15 |         2.51 |     26.41 |         0.12 |
+| Treylon Burks          | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.62 |         2.12 |     24.01 |         0.17 |
+| Dyami Brown            | WR    |       0.00 |      0.00 |            0.00 |      0.00 |       0.00 |      3.94 |         2.24 |     25.68 |         0.11 |
+| Kaytron Allen          | RB    |       0.00 |      0.00 |            0.00 |      1.74 |       5.86 |      0.00 |         0.00 |      0.00 |         0.06 |
 
 **WAS kicker**
 
 | player       |   fg_made |   xp_made |   kicking_points |
 |:-------------|----------:|----------:|-----------------:|
-| Drew Stevens |      2.36 |      1.67 |             8.74 |
+| Drew Stevens |      2.31 |      1.72 |             8.65 |
 
 **WAS defenders (vs SFO offense)**
 
 | player          |   tackles |   sacks |   def_int |
 |:----------------|----------:|--------:|----------:|
-| Sonny Styles    |      6.67 |    0.05 |      0.13 |
-| Jeremy Reaves   |      6.27 |    0.00 |      0.00 |
-| Amik Robertson  |      6.16 |    0.00 |      0.00 |
-| Rasul Douglas   |      4.77 |    0.00 |      0.15 |
-| Quan Martin     |      4.54 |    0.00 |      0.00 |
-| Frankie Luvu    |      3.80 |    0.04 |      0.00 |
-| Mike Sainristil |      2.79 |    0.00 |      0.00 |
-| Daron Payne     |      2.15 |    0.10 |      0.00 |
+| Sonny Styles    |      6.73 |    0.06 |      0.13 |
+| Jeremy Reaves   |      6.24 |    0.00 |      0.00 |
+| Amik Robertson  |      6.06 |    0.00 |      0.00 |
+| Rasul Douglas   |      4.84 |    0.00 |      0.15 |
+| Quan Martin     |      4.50 |    0.00 |      0.00 |
+| Frankie Luvu    |      3.80 |    0.05 |      0.00 |
+| Mike Sainristil |      2.80 |    0.00 |      0.00 |
+| Daron Payne     |      2.16 |    0.10 |      0.00 |

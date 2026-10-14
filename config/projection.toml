@@ -99,19 +99,18 @@ min_factor = 0.85            # cap on how far schedule can move an input
 max_factor = 1.15
 
 [market]
-# Betting-market team totals (closing spread and over/under from nflverse).
-# OFF: projections come from the model alone. Turning it on blends the
-# market's implied team totals into scoring and uses the spread for game script.
-enabled = false
-# Share of the projected team total taken from the market (rest = model).
+# Implied team totals (closing spread + over/under from nflverse). Used ONLY
+# for the team total, and ONLY for teams that consistently land on it.
+# The spread itself is never used; game script comes from [script].
+enabled = true
+hit_tolerance = 4.0          # a game "hits" if points scored are within this many of the implied total
+min_hit_rate = 0.6           # share of games that must hit
+min_games = 4
+# Share of a qualifying team's projected points taken from the implied total.
 weight = 0.6
-# Teams that keep missing (or beating) their implied totals: the average miss
-# counts this many games of evidence before it is trusted at 50%.
-miss_shrink_games = 6.0
+miss_shrink_games = 6.0      # only for the report's average-miss column
 # Yardage moves less than scoring: yards factor = TD factor ^ this.
 yards_elasticity = 0.3
-# Dropback rate change per point of spread (favorites run more).
-pass_rate_per_point = 0.004
 min_factor = 0.6
 max_factor = 1.6
 

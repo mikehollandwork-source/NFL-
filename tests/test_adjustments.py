@@ -105,3 +105,20 @@ def test_corners_out_and_shadow():
     f2, notes2 = hurt.receiver_factors("DEN", rec)
     assert f2["w1"] > 1 and abs(f2["w1"] - f2["w2"]) < 1e-9 and 1 < f2["t1"] < f2["w1"]
     assert any("is out: no shadow" in n for n in notes2)
+
+
+def test_market_only_for_consistent_teams():
+    from nfl_proj.market import Market
+    # TEN lands within 4 of its implied total every game; IND misses by 10 every game.
+    rows = []
+    for w in range(1, 6):
+        rows.append({"week": w, "home": "TEN", "away": "IND", "spread_line": 0.0, "total_line": 40.0,
+                     "home_score": 21 if w % 2 else 18, "away_score": 30, "boxscore_id": f"g{w}"})
+    rows.append({"week": 6, "home": "TEN", "away": "IND", "spread_line": 3.0, "total_line": 44.0,
+                 "home_score": None, "away_score": None, "boxscore_id": None})
+    m = Market(pd.DataFrame(rows), {"market": {"enabled": True}})
+    ten, ind = m.line("TEN", 6), m.line("IND", 6)
+    assert ind is None
+    assert ten["target"] == 23.5 and ten["hit_rate"] == 1.0
+    b = m.blend(ten, 20.0)
+    assert abs(b["blended_pts"] - (0.6 * 23.5 + 0.4 * 20.0)) < 1e-9 and "dropback_shift" not in b

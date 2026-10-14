@@ -87,13 +87,10 @@ def _adjust_lines(ctx: dict) -> list[str]:
     out = []
     m = a.get("market")
     if m:
-        miss = ""
-        if m["games"]:
-            miss = (f"; has scored {m['avg_miss']:+.1f} pts/game vs its implied totals over {m['games']} games "
-                    f"(fell short in {m['under_rate']:.0%}), correction {m['correction']:+.1f}")
-        out.append(f"**Market:** implied team total {m['implied']:.1f} (spread {m['spread']:+.1f}){miss}. "
+        out.append(f"**Market team total:** implied {m['implied']:.1f} (this team landed within the "
+                   f"tolerance in {m['hit_rate']:.0%} of its games, avg miss {m['abs_miss']:.1f}). "
                    f"Model {m['model_pts']:.1f} → blended {m['blended_pts']:.1f}: TD rates x{m['td_factor']:.2f}, "
-                   f"yards x{m['ypp_factor']:.2f}, dropback rate {m['dropback_shift']:+.1%}.")
+                   f"yards x{m['ypp_factor']:.2f}.")
     sc = a.get("script")
     if sc:
         out.append(f"**Model game script:** projected {sc['model_pts']:.1f} – {sc['opp_model_pts']:.1f} "
@@ -121,11 +118,12 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
     if market is not None and market.enabled:
         mm = market.misses(week)
         if not mm.empty:
-            worst = mm.sort_values("avg_miss").head(6)
-            out += ["## Teams falling short of their implied team totals", "",
-                    "Points scored minus the betting market's implied team total, per game. The shrunk "
-                    "`correction` is added to this week's implied total before blending.", "",
-                    worst[["team", "games", "implied_avg", "scored_avg", "avg_miss", "under_rate", "correction"]]
+            q = mm.sort_values(["qualifies", "hit_rate", "abs_miss"], ascending=[False, False, True])
+            out += ["## Market team totals: which teams qualify", "",
+                    f"Only teams that landed within {market.tol:.0f} points of their implied team total in at "
+                    f"least {market.min_hit_rate:.0%} of their games (min {market.min_games}) get the market "
+                    f"blended in ({market.weight:.0%} market). Everyone else is model only. No spreads are used.", "",
+                    q[["team", "games", "hit_rate", "abs_miss", "implied_avg", "scored_avg", "qualifies"]]
                     .to_markdown(index=False, floatfmt=".2f"), ""]
     for ctx in contexts:
         team, opp = ctx["team"], ctx["opp"]
