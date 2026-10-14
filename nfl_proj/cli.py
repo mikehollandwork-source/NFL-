@@ -98,6 +98,15 @@ def main(argv=None):
     bt.add_argument("--weeks", default="2-5", help="e.g. 2-5")
     bt.add_argument("--sims", type=int, default=2000)
     bt.add_argument("--tag", default="", help="suffix for the output files (compare variants)")
+    od = sub.add_parser("odds")
+    od.add_argument("--week", type=int)
+    od.add_argument("--label", default="lock", choices=["lock", "close"])
+    lk = sub.add_parser("lock")
+    lk.add_argument("--week", type=int)
+    lk.add_argument("--force", action="store_true")
+    gr = sub.add_parser("grade")
+    gr.add_argument("--week", type=int, required=True)
+    sub.add_parser("paper-summary")
     pj = sub.add_parser("project")
     pj.add_argument("--week", type=int, help="defaults to the next week with unplayed games")
     pj.add_argument("--yes", action="store_true", help="skip the confirmation prompt")
@@ -170,6 +179,48 @@ def main(argv=None):
         print(md)
         return
 
+    paper_dir = paths["out"] / "paper"
+    odds_dir = ROOT / "data" / "odds"
+    nxt_week = int(t["games"][t["games"]["boxscore_id"].isna()]["week"].min()) if t["games"]["boxscore_id"].isna().any() else None
+    if args.cmd == "odds":
+        from .odds import fetch_props, save
+        wk = args.week or nxt_week
+        lines = fetch_props(t["games"], wk, cfg)
+        print(f"saved {save(lines, odds_dir, wk, args.label)} ({len(lines)} lines)")
+        return
+    if args.cmd == "lock":
+        from .odds import load_lines, pick_book
+        from .paper import lock
+        from .pipeline import run_week
+        wk = args.week or nxt_week
+        lines = pick_book(load_lines(odds_dir, wk, "lock", paths["lines"]), cfg)
+        if lines.empty:
+            print("No lines. Run `python -m nfl_proj odds` (needs ODDS_API_KEY) or fill data/manual/prop_lines.csv "
+                  "(player, stat, line, over_odds, under_odds).")
+            return
+        r = run_week(t, cfg, paths, wk)
+        for f in r["flags"]:
+            print("availability:", f)
+        bets, path = lock(r["props"], lines, r["tables"]["player_games"], wk, cfg, paper_dir, ROOT, args.force)
+        print(f"locked {len(bets)} bets -> {path}")
+        if not bets.empty:
+            print(bets[["player", "stat", "side", "line", "odds", "p_cal", "ev", "stake"]].to_markdown(
+                index=False, floatfmt=".3f"))
+        return
+    if args.cmd == "grade":
+        from .odds import load_lines, pick_book
+        from .paper import grade, summary
+        close = pick_book(load_lines(odds_dir, args.week, "close"), cfg)
+        g = grade(args.week, t["player_games"], paper_dir, close)
+        print(g[["player", "stat", "side", "line", "odds", "stake", "actual", "result", "profit"]].to_markdown(index=False))
+        (paper_dir / "summary.md").write_text(summary(paper_dir))
+        print(summary(paper_dir))
+        return
+    if args.cmd == "paper-summary":
+        from .paper import summary
+        print(summary(paper_dir))
+        return
+
     if args.cmd == "backtest":
         from .backtest import run as run_backtest
         a_, _, b_ = args.weeks.partition("-")
@@ -177,7 +228,7 @@ def main(argv=None):
         res = run_backtest(t, cfg, paths, weeks, n_sims=args.sims)
         sfx = f"_{args.tag}" if args.tag else ""
         (paths["out"] / f"backtest{sfx}.md").write_text(res["report"])
-        for k in ("picks", "calls", "totals", "proj_err", "actual_components"):
+        for k in ("picks", "calls", "totals", "proj_err", "actual_components", "paper_ev"):
             if not res[k].empty:
                 res[k].to_csv(paths["out"] / f"backtest{sfx}_{k}.csv", index=False)
         print(res["report"])

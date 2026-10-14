@@ -99,17 +99,16 @@ min_factor = 0.85            # cap on how far schedule can move an input
 max_factor = 1.15
 
 [market]
-# Implied team totals (closing spread + over/under from nflverse). Used ONLY
-# for the team total, and ONLY for teams that consistently land on it.
-# The spread itself is never used; game script comes from [script].
-enabled = true
-hit_tolerance = 4.0          # a game "hits" if points scored are within this many of the implied total
-min_hit_rate = 0.6           # share of games that must hit
+# The betting market is NOT used for any projection. It is used only to
+# grade paper trades (lines and odds recorded at lock and at close).
+# enabled = true would blend implied team totals into scoring (kept for
+# comparison runs only).
+enabled = false
+hit_tolerance = 4.0
+min_hit_rate = 0.6
 min_games = 4
-# Share of a qualifying team's projected points taken from the implied total.
 weight = 0.6
-miss_shrink_games = 6.0      # only for the report's average-miss column
-# Yardage moves less than scoring: yards factor = TD factor ^ this.
+miss_shrink_games = 6.0
 yards_elasticity = 0.3
 min_factor = 0.6
 max_factor = 1.6
@@ -222,3 +221,33 @@ method = "clock"
 ppd_shrink_games = 8.0       # plays per drive barely repeats: shrink hard
 pace_shrink_games = 3.0
 pace_prior_regress = 0.7     # 2025 pace kept at 70% as the starting point
+
+[odds]
+# Player prop lines and prices for paper trading, from The Odds API
+# (free key at https://the-odds-api.com; set ODDS_API_KEY). Cost on the free
+# tier (500 credits/month) = markets x events per pull; 5 markets x ~14
+# games x 2 pulls (lock + close) ~ 140 per week.
+markets = ["player_pass_yds", "player_pass_completions", "player_receptions", "player_reception_yds",
+           "player_rush_attempts"]
+regions = "us"
+book = "draftkings"          # price to trade at; falls back to the first book with the line
+
+[paper]
+# Paper trading. Probabilities are calibrated first: the backtest showed
+# the model overconfident (an 80% call hit ~68%):
+#   p = sigmoid(calib_a + calib_b * logit(model probability))
+# Refit as graded paper trades accumulate (`paper-summary` reports it).
+calib_a = 0.13
+calib_b = 0.45
+# Props the backtest found no skill on are skipped (rushing yards: 44%
+# hit, -6 points vs no-information on 25 calls).
+exclude_stats = ["rush_yds"]
+min_ev = 0.03                # expected value per unit staked at the posted price
+min_prob = 0.54              # calibrated probability floor
+kelly_fraction = 0.25        # quarter Kelly on the calibrated probability
+max_stake = 1.5              # units
+min_stake = 0.5
+max_per_game = 2             # correlated outcomes: cap exposure per game
+max_per_team_side = 1        # no stacking two same-team props in the same direction
+max_bets = 15
+require_usage_trend = true   # your rule: overs need rising usage, unders falling (stars / QBs exempt)

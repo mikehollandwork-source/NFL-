@@ -219,6 +219,24 @@ edge from the projection itself (the stat's skew removed), and 2+ agreeing signa
 coverage / position factor, comparable offenses, usage trend, game script, team total). Ranked by
 edge x sample x signal agreement; one pick per player.
 
+## Paper trading (`[paper]`, `[odds]`)
+
+The betting market never feeds a projection; it's used only to grade paper trades.
+
+Weekly routine (Sunday slate; Thursday / Monday games lock the day before their game):
+
+| When | Command | What it does |
+|---|---|---|
+| Saturday evening (after Friday's final injury report and Saturday elevations) | `python -m nfl_proj scrape && python -m nfl_proj build` then `python -m nfl_proj odds --label lock` then `python -m nfl_proj lock` | Pulls lines (The Odds API, `ODDS_API_KEY`) or reads `data/manual/prop_lines.csv`, projects, and locks bets in `output/<season>/paper/week_NN_locked.csv` (never overwritten without `--force`). |
+| Sunday ~90 min before the 1 p.m. kickoffs | `python -m nfl_proj odds --label close` | Closing lines, for closing-line value (did the line move toward our side?). |
+| Tuesday (after nflverse updates) | `python -m nfl_proj scrape && python -m nfl_proj build && python -m nfl_proj grade --week NN` | Grades at the locked prices, updates `paper/ledger.csv` and `paper/summary.md`. |
+
+Selection: model probability → calibrated (the backtest showed the raw model overconfident: an 80% call
+hit ~68%) → expected value at the posted price. A bet needs EV ≥ +3% and a calibrated probability ≥ 54%,
+a stat with backtested skill (rushing yards excluded), and, per your rule, usage trending the bet's way
+(stars and QBs exempt). Stakes are quarter Kelly, 0.5-1.5 units. Portfolio: best EV first, one bet per
+player, at most two per game and one per team per direction (correlated), at most 15.
+
 ## Backtest (`python -m nfl_proj backtest --weeks 2-5` → `backtest.md`)
 
 `--tag NAME` writes `backtest_NAME.*` so variants (e.g. a config with a feature switched off,

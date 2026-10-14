@@ -22,6 +22,42 @@ import pandas as pd
 from .picks import STATS, grade, pick_week
 
 
+def _paper_ev(r: dict, week: int, cfg: dict, full_pg: pd.DataFrame) -> pd.DataFrame:
+    """Paper-trading rule replayed with stand-in lines: each player's season
+    average so far (to the half point) at -110 both ways. Every side is
+    evaluated and graded so any selection rule can be scored afterwards."""
+    from .paper import evaluate
+    pg = r["tables"]["player_games"]
+    c = cfg.get("picks", {})
+    rows = []
+    for (pid, team), h in pg.groupby(["player_id", "team"]):
+        player = h["player"].iloc[-1]
+        for stat, (col, ucol, fam) in STATS.items():
+            hh = h[h[ucol] >= (10 if fam == "qb" else 1)]
+            if len(hh) < c.get("min_games", 3):
+                continue
+            floor = {"targets": c.get("min_targets", 4.0), "rush_att": c.get("min_carries", 8.0), "pass_att": 20}[ucol]
+            if hh[ucol].mean() < floor:
+                continue
+            line = np.floor(hh[col].mean()) + 0.5
+            rows.append({"player": player, "stat": stat, "line": line, "over_odds": -110, "under_odds": -110,
+                         "book": "stand-in", "fetched_at": ""})
+    ev = evaluate(r["props"], pd.DataFrame(rows), pg, week, cfg)
+    if ev.empty:
+        return ev
+    act = []
+    for e in ev.itertuples():
+        a = full_pg[(full_pg["player_id"] == e.player_id) & (full_pg["week"] == week)]
+        if a.empty:
+            act.append(np.nan)
+        else:
+            act.append(float(a[STATS[e.stat][0]].sum()))
+    ev["actual"] = act
+    ev["won"] = np.where(ev["actual"].isna(), np.nan,
+                         np.where(ev["side"] == "over", ev["actual"] > ev["line"], ev["actual"] < ev["line"]))
+    return ev
+
+
 def _naive_calls(proj, props, pg, week, cfg):
     """Every qualifying-volume call with no gate / signal / top-5 filter."""
     c = dict(cfg)
@@ -34,13 +70,16 @@ def run(tables: dict, cfg: dict, paths: dict, weeks: list[int], n_sims: int = 20
     from .market import implied_totals
     from .pipeline import run_week
     full_pg = tables["player_games"]
-    picks, calls, proj_err, totals = [], [], [], []
+    picks, calls, proj_err, totals, paper = [], [], [], [], []
     imp = implied_totals(tables["games"])
     for w in weeks:
         log(f"backtest: week {w} (data through week {w - 1})")
         r = run_week(tables, cfg, paths, w, asof=True, n_sims=n_sims, log=lambda *_: None)
         if not r["picks"].empty:
             picks.append(grade(r["picks"], full_pg))
+        pe = _paper_ev(r, w, cfg, full_pg)
+        if not pe.empty:
+            paper.append(pe)
         allc = _naive_calls(r["proj"], r["props"], r["tables"]["player_games"], w, cfg)
         if not allc.empty:
             calls.append(grade(allc, full_pg))
@@ -74,7 +113,8 @@ def run(tables: dict, cfg: dict, paths: dict, weeks: list[int], n_sims: int = 20
     out = {"picks": pd.concat(picks, ignore_index=True) if picks else pd.DataFrame(),
            "calls": pd.concat(calls, ignore_index=True) if calls else pd.DataFrame(),
            "proj_err": pd.DataFrame(proj_err),
-           "totals": pd.concat(totals, ignore_index=True) if totals else pd.DataFrame()}
+           "totals": pd.concat(totals, ignore_index=True) if totals else pd.DataFrame(),
+           "paper_ev": pd.concat(paper, ignore_index=True) if paper else pd.DataFrame()}
     from .components import actual_components
     out["actual_components"] = actual_components(tables["plays"], tables["games"])
     try:
