@@ -75,7 +75,14 @@ def run(tables: dict, cfg: dict, paths: dict, weeks: list[int], n_sims: int = 20
            "calls": pd.concat(calls, ignore_index=True) if calls else pd.DataFrame(),
            "proj_err": pd.DataFrame(proj_err),
            "totals": pd.concat(totals, ignore_index=True) if totals else pd.DataFrame()}
-    out["report"] = report(out, weeks)
+    from .components import actual_components
+    out["actual_components"] = actual_components(tables["plays"], tables["games"])
+    try:
+        out["report"] = report(out, weeks)
+    except Exception as exc:  # keep the replay results even if the write-up fails
+        import traceback
+        out["report"] = "report failed:\n" + traceback.format_exc()
+        log(f"warning: backtest report failed: {exc}")
     return out
 
 
@@ -101,6 +108,44 @@ def _rate(df: pd.DataFrame) -> str:
         return "—"
     h = (d["result"] == "hit").sum()
     return f"{h}/{len(d)} ({h / len(d):.0%})"
+
+
+def components_section(o: dict) -> list[str]:
+    from .components import error_table
+    t, a = o.get("totals"), o.get("actual_components")
+    if t is None or t.empty or a is None or a.empty or "proj_td" not in t:
+        return []
+    tab, m = error_table(t, a)
+    m = m.dropna(subset=["points", "final_points"])
+    pts_err = m["final_points"] - m["points"]
+    # How much of the points miss each component explains (share of variance
+    # of the points error matched by 7 x TD error and 3 x FG error)
+    td_err = 6.95 * (m["proj_td"] - m["td"])
+    fg_err = 3 * (m["proj_fgm"] - m["fgm"])
+    other = pts_err - td_err - fg_err
+    var = pts_err.var()
+    attrib = pd.DataFrame([
+        {"part": "touchdowns (x6.95)", "share of points-miss variance":
+            np.cov(pts_err, td_err)[0, 1] / var},
+        {"part": "field goals (x3)", "share of points-miss variance": np.cov(pts_err, fg_err)[0, 1] / var},
+        {"part": "other (defensive / return TDs, 2-pt, safeties)",
+         "share of points-miss variance": np.cov(pts_err, other)[0, 1] / var}])
+    # Drives: the model doesn't project drives, so show how points per drive
+    # and drive counts relate to the miss
+    d = m.dropna(subset=["drives", "points_per_drive"])
+    corr_d = np.corrcoef(-(d["final_points"] - d["points"]), d["drives"])[0, 1] if len(d) > 5 else np.nan
+    corr_ppd = np.corrcoef(-(d["final_points"] - d["points"]), d["points_per_drive"])[0, 1] if len(d) > 5 else np.nan
+    return ["## Where the team-total miss comes from", "",
+            "Projected vs actual per team-game for each piece of the scoring model "
+            "(`corr` near 0 = the model can't tell teams apart on that piece; `sd_projected` far above "
+            "`sd_actual` x corr = projections spread too wide).", "",
+            tab.to_markdown(index=False, floatfmt=".2f"), "",
+            attrib.to_markdown(index=False, floatfmt=".2f"), "",
+            f"Actual drives per team-game: {d['drives'].mean():.1f} (sd {d['drives'].std():.1f}); "
+            f"points per drive {d['points_per_drive'].mean():.2f} (sd {d['points_per_drive'].std():.2f}). "
+            f"Correlation of the points miss (actual - projected) with drive count: {corr_d:+.2f}; "
+            f"with points per drive: {corr_ppd:+.2f}. Red-zone trips per game "
+            f"{d['rz_trips'].mean():.1f}, red-zone TD rate {d['rz_td_rate'].mean():.0%}.", ""]
 
 
 def report(o: dict, weeks: list[int]) -> str:
@@ -154,6 +199,7 @@ def report(o: dict, weeks: list[int]) -> str:
         if not p.empty:
             out += ["Top-5 picks:", "", _lift_table(_with_base(p, base_rates).assign(all="picks"), "all")
                     .to_markdown(floatfmt=".2f"), ""]
+    out += components_section(o)
     e = o["proj_err"]
     if not e.empty:
         s = e.groupby("stat").apply(lambda d: pd.Series({

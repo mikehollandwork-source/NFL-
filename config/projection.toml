@@ -163,3 +163,37 @@ per_game = 5
 star_target_share = 0.25     # "consistent action" exemption from the usage-trend rule
 star_carry_share = 0.55
 star_cv = 0.35               # max game-to-game variation in usage for the exemption
+
+[priors]
+# Last season's team rates, regressed toward league average, as the
+# starting point that this season's games gradually replace.
+season = 2025
+enabled = true
+regress = 0.5                # keep this share of a team's 2025 edge over league (offense)
+regress_new_caller = 0.3     # ...for offenses with a new play-caller
+regress_defense = 0.4
+volume_prior_games = 3.0     # plays per game: 2025 counts as this many games
+
+[player_adaptation]
+# Per player: play types (buckets) that failed for him last game are cut by
+# their failure rate (custom negative-play rule) and his volume moves to the
+# play types that worked; his total volume is unchanged. The team's play mix
+# is rebuilt from the players' plans, and the defense's numbers on those
+# play types decide what they're worth.
+#   "assume"   -> cut = the value below (1.0 = cancel what failed)
+#   "measured" -> estimate the cut from this season's data
+#   "off"      -> no player-level adaptation
+mode = "assume"
+cut = 1.0
+min_plays = 1                # plays of a type last game before it can be cut
+
+[weather]
+# Wind / cold / rain effects measured from 2025-26 outdoor games; forecasts
+# from the National Weather Service (Open-Meteo abroad). Domes and
+# retractable roofs: no effect.
+enabled = true
+
+[oline]
+# Missing starting offensive linemen: per-starter effects measured from
+# 2025-26 team-games, applied for starters listed out this week.
+enabled = true

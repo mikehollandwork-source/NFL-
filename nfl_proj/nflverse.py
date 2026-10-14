@@ -82,12 +82,12 @@ class Downloader:
         return p
 
 
-def download_season(season: int, cache_dir: Path, log=print) -> None:
+def download_season(season: int, cache_dir: Path, log=print, refresh: bool = True) -> None:
     d = Downloader(cache_dir, log)
-    d.get(GAMES_URL, refresh=True)
+    d.get(GAMES_URL, refresh=refresh)
     for key, url in season_files(season).items():
         try:
-            d.get(url, refresh=True)
+            d.get(url, refresh=refresh)
         except requests.HTTPError as exc:
             if key not in OPTIONAL:
                 raise
@@ -110,6 +110,7 @@ def parse_games(games: pd.DataFrame, season: int, played_ids: set[str]) -> pd.Da
         "neutral": g["location"].eq("Neutral"), "nv_game_id": g["game_id"],
         # Market: spread_line > 0 means the home team is favored by that many points.
         "spread_line": g["spread_line"], "total_line": g["total_line"],
+        "gametime": g.get("gametime"), "stadium_id": g.get("stadium_id"), "sched_roof": g.get("roof"),
         "home_score": g["home_score"], "away_score": g["away_score"],
     })
     return out.reset_index(drop=True)
@@ -217,7 +218,7 @@ PBP_COLS = ["game_id", "play_id", "week", "qtr", "time", "down", "ydstogo", "yar
             "pass_length", "pass_location", "run_location", "run_gap", "kick_distance",
             "field_goal_result", "extra_point_result", "passer_player_id", "receiver_player_id",
             "rusher_player_id", "kicker_player_id", "interception_player_id",
-            *TACKLE_COLS, *SACK_COLS]
+            "fixed_drive", "fixed_drive_result", *TACKLE_COLS, *SACK_COLS]
 
 
 def build_plays(pbp: pd.DataFrame, games: pd.DataFrame, season: int) -> pd.DataFrame:
@@ -240,6 +241,7 @@ def build_plays(pbp: pd.DataFrame, games: pd.DataFrame, season: int) -> pd.DataF
                 "score_diff": r["score_differential"] if pd.notna(r["score_differential"]) else None,
                 "detail": r["desc"] if isinstance(r["desc"], str) else "",
                 "epa": r["epa"] if pd.notna(r["epa"]) else None,
+                "drive": r.get("fixed_drive"), "drive_result": r.get("fixed_drive_result"),
                 "success": is_success(down, ytg, parsed["yards"])
                 if parsed["play_type"] in ("pass", "run", "sack", "scramble") else None,
                 **parsed,
@@ -359,6 +361,11 @@ def build_season(season: int, cache_dir: Path, db_path: Path, log=print) -> dict
     pbp = pd.read_csv(paths["pbp"], low_memory=False)
     pbp = pbp[pbp["season_type"] == "REG"]
     games = parse_games(pd.read_csv(paths["games"], low_memory=False), season, set(pbp["game_id"]))
+    # Game-day weather from the play-by-play (temperature °F, wind mph, roof)
+    wx = pbp.drop_duplicates("game_id").set_index("game_id")
+    for col in ("temp", "wind", "roof", "weather"):
+        if col in wx:
+            games[col] = games["nv_game_id"].map(wx[col])
     stats = pd.read_csv(paths["player_week"], low_memory=False)
     plays = build_plays(pbp, games, season)
     opt = {k: paths[k] for k in OPTIONAL if paths[k].exists()}

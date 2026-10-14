@@ -181,6 +181,22 @@ play-by-play. A heavy-blitz team that isn't getting sacks shows up as a mismatch
     faced). How structurally similar offenses did against this defense, relative to their own norms
     and beyond how every offense did against it, moves pass and run efficiency (capped at ±12%).
 
+14. **Player-level adaptation** (`[player_adaptation]`): for each player, the play types (e.g. short
+    right, deep left, inside-left run) that failed for him last game are cut by their failure rate
+    (custom rule: netted zero or less, a turnover, or a failed 3rd/4th down). The volume he loses
+    moves to the play types that worked for him last game (to the uncut ones if nothing worked); his
+    total volume stays the same. The team's play mix is rebuilt from the players' plans, and this
+    week's defense's numbers on those play types decide what they're worth. `mode = "assume"` (cut
+    = 1.0 cancels what failed), `"measured"` (cut estimated from this season), or `"off"`. The report
+    shows, per player: what was cut, what he does more of, what this defense allows there, and the
+    effect in yards.
+15. **2025 priors** (`[priors]`): small samples are pulled toward the team's own 2025 rates
+    (regressed toward league; more for offenses with a new play-caller) instead of league average.
+16. **Weather** (`[weather]`): wind, cold and rain effects measured from 2025-26 outdoor games and
+    applied from the National Weather Service hourly forecast at kickoff (Open-Meteo abroad).
+17. **Offensive line** (`[oline]`): per-missing-starter effects measured from 2025-26 team-games,
+    applied for starting linemen listed out.
+
 ## Top 5 picks per game (`week_NN_picks.csv`, `[picks]`)
 
 Over / under calls against your line (`prop_lines.csv`) or, without one, the player's own season
@@ -192,6 +208,11 @@ coverage / position factor, comparable offenses, usage trend, game script, team 
 edge x sample x signal agreement; one pick per player.
 
 ## Backtest (`python -m nfl_proj backtest --weeks 2-5` → `backtest.md`)
+
+`--tag NAME` writes `backtest_NAME.*` so variants (e.g. a config with a feature switched off,
+`python -m nfl_proj --config other.toml backtest --tag other`) can be compared side by side. The
+report includes where the team-total miss comes from: projected vs actual plays, dropbacks, TDs,
+field goals, turnovers and sacks, plus drives, points per drive and red-zone trips.
 
 Replays each week with only what was known before it (play-by-play, stats, injury report, depth chart
 as of that week) and scores the picks, every unfiltered call, player projections vs a naive season
@@ -241,6 +262,10 @@ nfl_proj/defense.py     position-group weakness, struggle-week diagnosis, compar
 nfl_proj/picks.py       usage-trend gate and the top 5 picks per game
 nfl_proj/pipeline.py    one week's run, live or replayed as of a past week
 nfl_proj/backtest.py    replay and score past weeks
+nfl_proj/components.py  actual team-game components (drives, red zone, TDs, FGs) vs projected
+nfl_proj/priors.py      2025 team rates as early-season starting points
+nfl_proj/weather.py     measured weather effects + NWS / Open-Meteo forecasts
+nfl_proj/oline.py       offensive line starters and the measured effect of missing ones
 nfl_proj/external.py    online scheme data (Sharp scraper), scheme labels, PBP cross-check
 nfl_proj/report.py      markdown reports
 tests/                  parser + nflverse mapping tests, end-to-end run on synthetic pages

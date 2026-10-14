@@ -95,6 +95,13 @@ def _adjust_lines(ctx: dict) -> list[str]:
     if sc:
         out.append(f"**Model game script:** projected {sc['model_pts']:.1f} – {sc['opp_model_pts']:.1f} "
                    f"(margin {sc['margin']:+.1f}) → dropback rate {a['dropback_shift']:+.1%}.")
+    w = a.get("weather") or {}
+    if w.get("note") and (abs(w.get("pass", 1) - 1) >= 0.01 or abs(w.get("fg", 1) - 1) >= 0.01):
+        out.append(f"**Weather:** {w['note']}.")
+    ol = a.get("oline") or {}
+    if ol.get("missing"):
+        out.append(f"**Offensive line:** starters out: {', '.join(ol['missing'])} → sack rate x{ol['sack']:.2f}, "
+                   f"yds/dropback x{ol['pass']:.2f}, yds/carry x{ol['run']:.2f} (measured effect per missing starter).")
     s = a["sos"]
     moved = {k: v for k, v in s.items() if abs(v - 1) >= 0.02}
     if moved:
@@ -167,6 +174,13 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
             cl2 = corners.describe(opp)
             if cl2:
                 out.append(f"**{opp} secondary:** {cl2}.")
+        if projector is not None and ctx.get("player_changes"):
+            view = projector.adaptation_view(team, opp, week, ctx["player_changes"])
+            if not view.empty:
+                out += ["", f"**What worked last game → this week vs {opp}** (failed play types cut, volume moved "
+                        f"to what worked; `{opp} allows there` = yards-per-play multiplier on those play types; "
+                        f"Δ = effect on this week's projection):", "",
+                        view.head(8).to_markdown(index=False, floatfmt=".1f"), ""]
         if projector is not None:
             weak = projector.defan.weaknesses(opp)
             if weak:

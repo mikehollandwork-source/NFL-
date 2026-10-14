@@ -52,9 +52,11 @@ class Projector:
     def __init__(self, plays: pd.DataFrame, player_games: pd.DataFrame, games: pd.DataFrame,
                  cfg: dict, labels: pd.DataFrame | None = None, overrides: pd.DataFrame | None = None,
                  scheme: pd.DataFrame | None = None, coach: pd.DataFrame | None = None,
-                 corners=None, tables: dict | None = None):
+                 corners=None, tables: dict | None = None, priors=None):
         self.cfg = cfg
         self.corners = corners
+        from .priors import Priors
+        self.priors = priors if priors is not None else Priors(None, cfg)
         self._cb_cache = {}
         self.scheme = scheme.set_index("team") if scheme is not None and not scheme.empty else None
         self.coach = coach.set_index("team") if coach is not None and not coach.empty else None
@@ -113,6 +115,8 @@ class Projector:
         self._market_on = True
         self._adj_cache = {}
         self.base_mode = False      # True: SOS only (first pass for model team totals)
+        self.weather = {}           # team -> {"pass", "fg", "note"} (set by the pipeline)
+        self.oline = {}             # team -> {"sack", "pass", "run", "missing"}
         self.pts_override = {}      # (team, opp) -> simulated model points
         pts = games.dropna(subset=["boxscore_id"])
         lg_pts = (pts[["home_score", "away_score"]].stack().mean()
@@ -299,7 +303,9 @@ class Projector:
                      "def_pass": 1 + dw * (f("pass", "def", opp) - 1),
                      "def_run": 1 + dw * (f("run", "def", opp) - 1),
                      "def_pts": 1 + dw * (f("points", "def", opp) - 1)},
-             "market": None, "td_factor": 1.0, "ypp_factor": 1.0, "dropback_shift": 0.0}
+             "market": None, "td_factor": 1.0, "ypp_factor": 1.0, "dropback_shift": 0.0,
+             "weather": self.weather.get(team, {"pass": 1.0, "fg": 1.0, "note": None}),
+             "oline": self.oline.get(team, {"sack": 1.0, "pass": 1.0, "run": 1.0, "missing": []})}
         self._adj_cache[key] = a  # provisional, so the base projections below see no adjustment
         if not self._market_on or self.base_mode:
             return a
@@ -343,23 +349,32 @@ class Projector:
         d_run = self.p[(self.p["defense"] == opp) & self.p["is_run"]]
         a = self.adjustments(team, opp, week)
         s = a["sos"]["off_pts"] * a["sos"]["def_pts"] * a["td_factor"]
-        return {"pass_td": self._ratio(_wmean(d_pass, "touchdown"), self.lg_pass_td, len(d_pass)) * s,
-                "run_td": self._ratio(_wmean(d_run, "touchdown"), self.lg_run_td, len(d_run)) * s,
+        pf = self.priors.factor
+        return {"pass_td": self._ratio(_wmean(d_pass, "touchdown"), self.lg_pass_td, len(d_pass),
+                                       pf("def", opp, "pass_td")) * s,
+                "run_td": self._ratio(_wmean(d_run, "touchdown"), self.lg_run_td, len(d_run),
+                                      pf("def", opp, "run_td")) * s,
                 "int": self._ratio(_wmean(d_pass, "interception"), self.lg_int, len(d_pass))}
 
     # ---------------------------------------------------------------- team
-    def _ratio(self, d_val, lg_val, n):
-        """Opponent multiplier: shrunk D rate / league rate, weighted by dw."""
+    def _ratio(self, d_val, lg_val, n, prior_mult: float = 1.0):
+        """Opponent multiplier: shrunk D rate / league rate, weighted by dw.
+        Small samples are pulled toward ``prior_mult`` x league (the
+        defense's regressed 2025 rate when priors are on)."""
         if lg_val is None or pd.isna(lg_val) or lg_val == 0:
             return 1.0
-        d = shrink(d_val, n, lg_val, self.k_def)
+        d = shrink(d_val, n, lg_val * prior_mult, self.k_def)
         return float(1 + self.dw * (d / lg_val - 1))
 
     def team_volume(self, team: str, opp: str, week: int | None = None) -> dict:
         p, allp = self.p, self.all
         off_games = allp[allp["offense"] == team].groupby("boxscore_id").size()
         def_games = allp[allp["defense"] == opp].groupby("boxscore_id").size()
-        plays = off_games.mean() * (1 + self.dw * (def_games.mean() / self.lg_ppg - 1))
+        g_n = len(off_games)
+        k = self.priors.k_games if self.priors.enabled else 0.0
+        own = (g_n * off_games.mean() + k * self.lg_ppg * self.priors.plays_factor(team)) / (g_n + k) \
+            if g_n + k > 0 else self.lg_ppg
+        plays = own * (1 + self.dw * (def_games.mean() / self.lg_ppg - 1))
 
         t, d = p[p["offense"] == team], p[p["defense"] == opp]
         db_rate = _wmean(t, "dropback")
@@ -376,6 +391,8 @@ class Projector:
         dropbacks = plays * db_rate
         tdb, ddb = t[t["dropback"]], d[d["dropback"]]
         sack_rate = _wmean(tdb, "is_sack") * self._ratio(_wmean(ddb, "is_sack"), self.lg_sack, len(ddb))
+        if week is not None:
+            sack_rate *= self.adjustments(team, opp, week)["oline"]["sack"]
         scramble_rate = _wmean(tdb, "play_type", fn=lambda s: s == "scramble")
         sacks = dropbacks * sack_rate
         scrambles = dropbacks * scramble_rate
@@ -418,9 +435,12 @@ class Projector:
         o = oo.loc[(team, b)] if (team, b) in oo.index else None
         d = dd.loc[(opp, b)] if (opp, b) in dd.index else None
         o_n = o["n_raw"] if o is not None else 0
-        team_ypp = shrink(o["ypp"] if o is not None else np.nan, o_n, lgr["ypp"], self.k_def)
+        fam_p = "pass" if family == "pass" else "run"
+        team_ypp = shrink(o["ypp"] if o is not None else np.nan, o_n,
+                          lgr["ypp"] * self.priors.factor("off", team, fam_p), self.k_def)
         team_cmp = shrink(o["cmp"] if o is not None else np.nan, o_n, lgr["cmp"], self.k_def)
-        m_ypp = self._ratio(d["ypp"], lgr["ypp"], d["n_raw"]) if d is not None else 1.0
+        m_ypp = (self._ratio(d["ypp"], lgr["ypp"], d["n_raw"], self.priors.factor("def", opp, fam_p))
+                 if d is not None else self.priors.factor("def", opp, fam_p) ** self.dw)
         m_cmp = self._ratio(d["cmp"], lgr["cmp"], d["n_raw"]) if d is not None and family == "pass" else 1.0
         fam = "run" if family == "run" else ("deep" if "_deep_" in b else "short")
         m_ypp *= self.scheme_effect(team, opp)["ypp"][fam]
@@ -430,6 +450,7 @@ class Projector:
             side = "pass" if family == "pass" else "run"
             team_ypp *= a["sos"][f"off_{side}"]
             m_ypp *= a["sos"][f"def_{side}"] * a["ypp_factor"]
+            m_ypp *= a["oline"][side] * (a["weather"]["pass"] if side == "pass" else 1.0)
         return {"ypp": float(team_ypp), "cmp": float(team_cmp), "td": float(lgr["td"]),
                 "m_ypp": m_ypp, "m_cmp": m_cmp}
 
@@ -500,6 +521,129 @@ class Projector:
         td = d.groupby(id_col).agg(td=("touchdown", "sum"), n=("touchdown", "size"))
         return g.set_index([id_col, bucket_col]), td
 
+    # ------------------------------------------------------ player adaptation
+    def player_signal(self, team: str, family: str) -> pd.DataFrame:
+        """Each player's last game for this team, by play type (bucket): how
+        many plays he got and what share failed (custom negative-play rule:
+        netted zero or less, a turnover, or a failed 3rd/4th down)."""
+        src = self.passes if family == "pass" else self.runs
+        id_col, b_col = ("target_id", "pb") if family == "pass" else ("rusher_id", "bucket")
+        t = src[(src["offense"] == team) & src[id_col].notna()]
+        if t.empty:
+            return pd.DataFrame(columns=["player_id", "bucket", "n", "fail", "yards"])
+        last = t[t["week"] == t["week"].max()]
+        g = last.groupby([id_col, b_col]).agg(n=("negative", "size"), fail=("negative", "mean"),
+                                               yards=("yards", "sum")).reset_index()
+        return g.rename(columns={id_col: "player_id", b_col: "bucket"})
+
+    def player_cut(self) -> float:
+        """How hard to cut a player's failed play types. ``assume``: the
+        configured value (1.0 = cancel them); ``measured``: estimated from
+        this season (does a player's share of a play type drop after it
+        failed?); ``off``: 0."""
+        c = self.cfg.get("player_adaptation", {})
+        mode = c.get("mode", "assume")
+        if mode == "off" or getattr(self, "_pa_off", False):
+            return 0.0
+        if mode == "assume":
+            return float(c.get("cut", 1.0))
+        if not hasattr(self, "_measured_cut"):
+            self._measured_cut = measure_player_cut(self.p, c.get("min_plays", 1))
+        return float(np.clip(self._measured_cut["cut"], 0.0, 1.0))
+
+    def usage_plan(self, team: str, opp: str, family: str, base_shares: pd.DataFrame,
+                   mix: dict) -> tuple[dict, pd.DataFrame, list[dict]]:
+        """Apply player-level adaptation: each player's volume moves out of
+        the play types that failed for him last game into the ones that
+        worked (his total volume stays the same). The team's play mix is
+        rebuilt from the players' new plans. Returns (mix, shares, changes)."""
+        cut = self.player_cut()
+        c = self.cfg.get("player_adaptation", {})
+        min_n = c.get("min_plays", 1)
+        id_col, b_col = ("target_id", "pb") if family == "pass" else ("rusher_id", "bucket")
+        if cut <= 0 or base_shares.empty:
+            return mix, base_shares, []
+        sig = self.player_signal(team, family)
+        sig = sig[sig["n"] >= min_n]
+        if sig.empty:
+            return mix, base_shares, []
+        T = base_shares.assign(T=base_shares[b_col].map(mix).fillna(0) * base_shares["share"])
+        fail = {(r.player_id, r.bucket): r.fail for r in sig.itertuples()}
+        T["f"] = [1 - cut * fail.get((pid, b), 0.0) for pid, b in zip(T[id_col], T[b_col])]
+        # Play types that worked for him last game (used, and not all failures)
+        worked = {(r.player_id, r.bucket) for r in sig.itertuples() if r.fail < 1.0}
+        T["worked"] = [(pid, b) in worked for pid, b in zip(T[id_col], T[b_col])]
+        before = T.groupby(id_col)["T"].transform("sum")
+        T["T2"] = T["T"] * T["f"]
+        lost = before - T.groupby(id_col)["T2"].transform("sum")
+        # What he loses in failed play types goes to the ones that worked last
+        # game (in proportion to his usual use of them); if nothing worked,
+        # to the play types that weren't cut.
+        w_base = T["T2"].where(T["worked"], 0.0)
+        w_sum = w_base.groupby(T[id_col]).transform("sum")
+        alt = T["T2"].where(T["f"] >= 1.0, 0.0)
+        alt_sum = alt.groupby(T[id_col]).transform("sum")
+        T["T2"] = np.where(w_sum > 0, T["T2"] + lost * w_base / w_sum.replace(0, np.nan),
+                           np.where(alt_sum > 0, T["T2"] + lost * alt / alt_sum.replace(0, np.nan), T["T"]))
+        T["T2"] = T["T2"].fillna(T["T"])
+        tot = T.groupby(b_col)["T2"].sum()
+        new_mix = dict(mix)
+        targeted_before = T.groupby(b_col)["T"].sum()
+        for b in new_mix:
+            if b in tot.index and targeted_before.get(b, 0) > 0:
+                new_mix[b] = mix[b] * tot[b] / targeted_before[b]
+        z = sum(new_mix.values()) or 1.0
+        new_mix = {b: v / z for b, v in new_mix.items()}
+        T["share"] = T["T2"] / T.groupby(b_col)["T2"].transform("sum").replace(0, np.nan)
+        T["share"] = T["share"].fillna(0.0)
+        changes = []
+        for pid, g in T.groupby(id_col):
+            moved = g[(g["f"] < 1) | (g["T2"] > g["T"] * 1.05)]
+            if len(moved) and before[g.index[0]] > 0:
+                changes.append({"player_id": pid,
+                                "cut": [(r[b_col], fail.get((pid, r[b_col]), 0)) for _, r in g[g["f"] < 1].iterrows()],
+                                "more": [(r[b_col], r["T2"] / max(r["T"], 1e-9)) for _, r in g[g["T2"] > g["T"] * 1.05].iterrows()]})
+        return new_mix, T[[id_col, b_col, "share"]], changes
+
+    def adaptation_view(self, team: str, opp: str, week: int, changes: list[dict]) -> pd.DataFrame:
+        """Per player: what got cut / what he'll do more of, how this
+        defense handles those play types, and the projected effect
+        (with vs without player adaptation)."""
+        if not changes:
+            return pd.DataFrame()
+        self._pa_off = True
+        try:
+            base, _ = self.project_team(team, opp, week)
+        finally:
+            self._pa_off = False
+        adapted, _ = self.project_team(team, opp, week)
+        cols = ["targets", "rec_yds", "carries", "rush_yds"]
+        b = base.set_index("player_id").reindex(columns=cols).fillna(0)
+        a = adapted.set_index("player_id").reindex(columns=cols).fillna(0)
+        names = dict(zip(adapted["player_id"], adapted["player"]))
+        rows = []
+        for ch in changes:
+            pid = ch["player_id"]
+            if pid not in a.index:
+                continue
+            fam = "pass" if any(bk.startswith("pass") for bk, _ in ch["cut"] + ch["more"]) else "run"
+            m = {bk: self.bucket_matchup(team, opp, fam, bk, week)["m_ypp"] for bk, _ in ch["more"]}
+            d = a.loc[pid] - b.loc[pid] if pid in b.index else a.loc[pid]
+            rows.append({
+                "player": names.get(pid, pid), "type": "receiving" if fam == "pass" else "rushing",
+                "cut (failed last game)": ", ".join(f"{bk.replace('pass_', '').replace('run_', 'run ')} "
+                                                   f"({f:.0%} failed)" for bk, f in ch["cut"]) or "—",
+                "more of": ", ".join(f"{bk.replace('pass_', '').replace('run_', 'run ')} x{r:.1f}"
+                                     for bk, r in ch["more"]) or "—",
+                f"{opp} allows there": ", ".join(f"x{v:.2f}" for v in m.values()) or "—",
+                "Δ targets": d["targets"], "Δ rec yds": d["rec_yds"],
+                "Δ carries": d["carries"], "Δ rush yds": d["rush_yds"],
+                "proj yds": a.loc[pid, "rec_yds"] + a.loc[pid, "rush_yds"]})
+        out = pd.DataFrame(rows)
+        if out.empty:
+            return out
+        return out.reindex(out[["Δ rec yds", "Δ rush yds"]].abs().sum(axis=1).sort_values(ascending=False).index)
+
     def project_team(self, team: str, opp: str, week: int) -> tuple[pd.DataFrame, dict]:
         vol = self.team_volume(team, opp, week)
         pmix, psig = self.mix(team, "pass", opp)
@@ -525,6 +669,7 @@ class Projector:
         k_t = self.cfg["players"]["shrink_targets"]
         tp = self.passes[self.passes["offense"] == team]
         shares = self._shares(tp, "target_id", "pb", active, k_t, team, "target")
+        pmix, shares, p_changes = self.usage_plan(team, opp, "pass", shares, pmix)
         eff, td = self._player_eff(tp, "target_id", "pb", peff, k_t)
         cbf, cb_notes = self.corner_factors(team, opp)
         lg_td_t = self.lg_pass_td
@@ -544,7 +689,8 @@ class Projector:
             x["rec_yds"] = x.get("rec_yds", 0) + yds * cbf.get(pid, 1.0)
         for pid, x in rows.items():
             if pid in td.index:
-                rate = shrink(td.loc[pid, "td"] / td.loc[pid, "n"], td.loc[pid, "n"], lg_td_t, 60)
+                rate = shrink(td.loc[pid, "td"] / td.loc[pid, "n"], td.loc[pid, "n"],
+                              lg_td_t * self.priors.factor("off", team, "pass_td"), 60)
             else:
                 rate = lg_td_t
             x["rec_td"] = x.get("targets", 0) * rate * m_pass_td
@@ -553,6 +699,7 @@ class Projector:
         k_c = self.cfg["players"]["shrink_carries"]
         tr = self.runs[self.runs["offense"] == team]
         rshares = self._shares(tr, "rusher_id", "bucket", active, k_c, team, "carry")
+        rmix, rshares, r_changes = self.usage_plan(team, opp, "run", rshares, rmix)
         reff_p, rtd = self._player_eff(tr, "rusher_id", "bucket", reff, k_c)
         for r in rshares.itertuples():
             b, pid = r.bucket, r.rusher_id
@@ -564,7 +711,8 @@ class Projector:
             x["rush_yds"] = x.get("rush_yds", 0) + car * ypc * reff[b]["m_ypp"]
         for pid, x in rows.items():
             if pid in rtd.index:
-                rate = shrink(rtd.loc[pid, "td"] / rtd.loc[pid, "n"], rtd.loc[pid, "n"], self.lg_run_td, 80)
+                rate = shrink(rtd.loc[pid, "td"] / rtd.loc[pid, "n"], rtd.loc[pid, "n"],
+                              self.lg_run_td * self.priors.factor("off", team, "run_td"), 80)
             else:
                 rate = self.lg_run_td
             x["rush_td"] = x.get("carries", 0) * rate * m_run_td
@@ -583,7 +731,8 @@ class Projector:
             tp_td = _wmean(tp, "touchdown")
             tp_int = _wmean(tp, "interception")
             n = len(tp)
-            x["pass_td"] = vol["pass_att"] * shrink(tp_td, n, self.lg_pass_td, 150) * m_pass_td
+            x["pass_td"] = vol["pass_att"] * shrink(tp_td, n, self.lg_pass_td * self.priors.factor(
+                "off", team, "pass_td"), 150) * m_pass_td
             x["interceptions"] = vol["pass_att"] * shrink(tp_int, n, self.lg_int, 200) * m_int
             sc = self.p[(self.p["offense"] == team) & (self.p["play_type"] == "scramble")]
             sc_ypc = sc["yards"].mean() if len(sc) else 6.0
@@ -597,7 +746,8 @@ class Projector:
                    "pass_signal": psig, "run_signal": rsig, "pass_eff": peff, "run_eff": reff,
                    "qb": names.get(qb, qb) if qb else None,
                    "scheme_notes": self.scheme_effect(team, opp)["notes"] + cb_notes,
-                   "adjust": self.adjustments(team, opp, week) if self._market_on else None}
+                   "adjust": self.adjustments(team, opp, week) if self._market_on else None,
+                   "player_changes": p_changes + r_changes}
         return out, context
 
     def project_week(self, week: int) -> tuple[pd.DataFrame, list[dict]]:
@@ -619,6 +769,46 @@ class Projector:
         out = out[keep][["week", "team", "opp", "player", "pos", "player_id"] + stat_cols]
         return out.sort_values(["team", "pass_att", "rec_yds", "rush_yds"],
                                ascending=[True, False, False, False]), contexts
+
+
+def measure_player_cut(plays: pd.DataFrame, min_plays: int = 1) -> dict:
+    """Does a player get less of a play type after it failed for him?
+    For each player, bucket and game: x = share of his plays in that bucket
+    that failed; y = his share of that bucket next game / his share so far
+    - 1. The slope of y on x (negative = cut after failure) gives the cut."""
+    p = plays[~plays["garbage"]]
+    rows = []
+    for fam, id_col in (("pass", "target_id"), ("run", "rusher_id")):
+        src = p[(p["is_pass"] if fam == "pass" else p["is_run"]) & p[id_col].notna() & p["bucket"].notna()]
+        g = src.groupby(["offense", "week", id_col, "bucket"]).agg(n=("negative", "size"),
+                                                                    fail=("negative", "mean")).reset_index()
+        tot = src.groupby(["offense", "week", "bucket"]).size().rename("bn")
+        g = g.join(tot, on=["offense", "week", "bucket"])
+        g["sh"] = g["n"] / g["bn"]
+        for (team, pid, b), sub in g.groupby(["offense", id_col, "bucket"]):
+            sub = sub.sort_values("week")
+            weeks = sorted(src[src["offense"] == team]["week"].unique())
+            for _, cur in sub.iterrows():
+                nxt_w = [w for w in weeks if w > cur["week"]]
+                if not nxt_w or cur["n"] < min_plays:
+                    continue
+                nw = nxt_w[0]
+                nxt = sub[sub["week"] == nw]
+                prior = sub[sub["week"] <= cur["week"]]["sh"].mean()
+                y = (float(nxt["sh"].iloc[0]) if len(nxt) else 0.0) / prior - 1 if prior > 0 else np.nan
+                rows.append({"x": cur["fail"], "y": y, "n": cur["n"]})
+    d = pd.DataFrame(rows).dropna()
+    if len(d) < 50:
+        return {"cut": 0.0, "slope": np.nan, "t": np.nan, "n": len(d)}
+    X = np.column_stack([np.ones(len(d)), d["x"]])
+    w = d["n"].to_numpy(float)
+    W = np.diag(w)
+    coef = np.linalg.solve(X.T @ W @ X, X.T @ W @ d["y"].to_numpy(float))
+    resid = d["y"].to_numpy(float) - X @ coef
+    se = np.sqrt(np.diag(np.linalg.inv(X.T @ W @ X)) * (w * resid ** 2).sum() / (len(d) - 2))
+    slope, t = coef[1], coef[1] / se[1]
+    return {"cut": float(max(0.0, -slope) * min(1.0, abs(t) / 2)), "slope": float(slope), "t": float(t),
+            "n": len(d)}
 
 
 def _wmean(df, col, fn=None):

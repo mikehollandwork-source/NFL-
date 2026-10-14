@@ -53,6 +53,7 @@ class Simulator:
         sc = p[p["play_type"] == "scramble"]["yards"].dropna().to_numpy(float)
         self.team_points = {}
         self.team_point_samples = {}
+        self.team_components = {}
         self.scramble_pool = sc if len(sc) >= 30 else np.clip(np.random.default_rng(1).normal(6, 5, 400), -3, 40)
 
     # ------------------------------------------------------------ offense
@@ -90,6 +91,7 @@ class Simulator:
         tp = P.passes[P.passes["offense"] == team]
         k_t = P.cfg["players"]["shrink_targets"]
         shares = P._shares(tp, "target_id", "pb", active, k_t, team, "target")
+        pmix, shares, _ = P.usage_plan(team, opp, "pass", shares, pmix)
         eff, td = P._player_eff(tp, "target_id", "pb", peff, k_t)
         cbf, _ = P.corner_factors(team, opp)
         tgt_rate = tp.assign(has=tp["target_id"].notna()).groupby("pb").apply(
@@ -101,7 +103,7 @@ class Simulator:
         team_long = np.zeros(n)
         for j, b in enumerate(buckets):
             sb = shares[shares["pb"] == b]
-            if sb.empty:
+            if sb.empty or sb["share"].sum() <= 0:
                 continue
             targeted = rng.binomial(bcounts[:, j], float(tgt_rate.get(b, 0.9)))
             pids = sb["target_id"].tolist()
@@ -118,7 +120,8 @@ class Simulator:
                 scale = ypt / max(cr, 0.01) / pool_mean if pool_mean > 0 else 1.0
                 yds, longest = _draw_sum_max(rng, comp, pool, scale=scale)
                 if pid in td.index:
-                    rate = shrink(td.loc[pid, "td"] / td.loc[pid, "n"], td.loc[pid, "n"], P.lg_pass_td, 60)
+                    rate = shrink(td.loc[pid, "td"] / td.loc[pid, "n"], td.loc[pid, "n"],
+                                  P.lg_pass_td * P.priors.factor("off", team, "pass_td"), 60)
                 else:
                     rate = P.lg_pass_td
                 tds = rng.binomial(comp, min(rate * m_pass_td / max(cr, 0.05), 0.8))
@@ -153,13 +156,14 @@ class Simulator:
         tr = P.runs[P.runs["offense"] == team]
         k_c = P.cfg["players"]["shrink_carries"]
         rshares = P._shares(tr, "rusher_id", "bucket", active, k_c, team, "carry")
+        rmix, rshares, _ = P.usage_plan(team, opp, "run", rshares, rmix)
         reff_p, rtd = P._player_eff(tr, "rusher_id", "bucket", reff, k_c)
         m_run_td = tm["run_td"]
         rb = list(rmix)
         rcounts = rng.multinomial(runs, [rmix[b] for b in rb])
         for j, b in enumerate(rb):
             sb = rshares[rshares["bucket"] == b]
-            if sb.empty:
+            if sb.empty or sb["share"].sum() <= 0:
                 continue
             per = rng.multinomial(rcounts[:, j], sb["share"].to_numpy() / sb["share"].sum())
             pool = self.run_pool.get(b, np.array([4.0]))
@@ -169,7 +173,8 @@ class Simulator:
                 ypc = (e["ypp_s"] if e is not None else reff[b]["ypp"]) * reff[b]["m_ypp"]
                 yds, longest = _draw_sum_max(rng, k, pool, shift=ypc - pool.mean())
                 if pid in rtd.index:
-                    rate = shrink(rtd.loc[pid, "td"] / rtd.loc[pid, "n"], rtd.loc[pid, "n"], P.lg_run_td, 80)
+                    rate = shrink(rtd.loc[pid, "td"] / rtd.loc[pid, "n"], rtd.loc[pid, "n"],
+                                  P.lg_run_td * P.priors.factor("off", team, "run_td"), 80)
                 else:
                     rate = P.lg_run_td
                 acc(pid, "carries", k)
@@ -188,6 +193,8 @@ class Simulator:
                                 + d["receptions"])
         team_sim = {"plays": plays, "sacks": sacks, "interceptions": out.get(qb, {}).get("interceptions", np.zeros(n)),
                     "tackle_opps": runs + scr + team_comp + sacks,
+                    "dropbacks": db, "pass_att": att, "runs": runs, "scrambles": scr,
+                    "pass_td": sum(d.get("rec_td", 0) for d in out.values()),
                     "td": sum(d["rush_rec_td"] for d in out.values())}
         meta = {pid: (row.player, row.pos) for row in active_df.itertuples() for pid in [row.player_id]}
         return {"players": out, "meta": meta, "team": team_sim}, {"qb": qb}
@@ -222,6 +229,7 @@ class Simulator:
             # Field goals move with the drives: schedule and market yardage factors.
             a = P.adjustments(team, opp, week)
             lam *= a["sos"]["off_pts"] * a["sos"]["def_pts"] * a["ypp_factor"]
+            pct = pct * (1 + 0.5 * (a["weather"]["fg"] - 1))  # the fg factor is for 40+ yard tries
         fga = rng.poisson(max(lam, 0.0), n)
         fgm = rng.binomial(fga, pct)
         xpa = np.round(team_td).astype(int)
@@ -276,6 +284,14 @@ class Simulator:
                 else:
                     pts = 6.95 * s["team"]["td"]
                 self.team_points[(team, opp)] = float(np.mean(pts))
+                ts = s["team"]
+                comp = {k: float(np.mean(ts[k])) for k in ("plays", "dropbacks", "pass_att", "runs", "sacks",
+                                                            "interceptions", "td", "pass_td")}
+                comp["rush_td"] = comp["td"] - comp["pass_td"]
+                comp["fga"] = float(np.mean(kk["stats"]["fg_att"])) if kk else np.nan
+                comp["fgm"] = float(np.mean(kk["stats"]["fg_made"])) if kk else np.nan
+                comp["points"] = float(np.mean(pts))
+                self.team_components[(team, opp)] = comp
                 self.team_point_samples[(team, opp)] = pts
                 for dp in self.defense(team, sims[opp]["team"]):
                     rows += _summ(week, team, opp, dp["player_id"], dp["player"], dp["pos"], dp["stats"])

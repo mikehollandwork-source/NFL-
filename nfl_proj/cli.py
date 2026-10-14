@@ -97,6 +97,7 @@ def main(argv=None):
     bt = sub.add_parser("backtest")
     bt.add_argument("--weeks", default="2-5", help="e.g. 2-5")
     bt.add_argument("--sims", type=int, default=2000)
+    bt.add_argument("--tag", default="", help="suffix for the output files (compare variants)")
     pj = sub.add_parser("project")
     pj.add_argument("--week", type=int, help="defaults to the next week with unplayed games")
     pj.add_argument("--yes", action="store_true", help="skip the confirmation prompt")
@@ -108,6 +109,9 @@ def main(argv=None):
     if args.cmd == "scrape" and _provider(cfg) == "nflverse":
         from .nflverse import download_season
         download_season(cfg["season"], paths["nflverse"])
+        prior = cfg.get("priors", {}).get("season")
+        if prior:
+            download_season(int(prior), paths["nflverse"], refresh=False)
         return
     if args.cmd == "scrape":
         from .scrape import scrape_season
@@ -125,6 +129,9 @@ def main(argv=None):
     if args.cmd == "build" and _provider(cfg) == "nflverse":
         from .nflverse import build_season
         build_season(cfg["season"], paths["nflverse"], paths["db"])
+        prior = cfg.get("priors", {}).get("season")
+        if prior:
+            build_season(int(prior), paths["nflverse"], ROOT / "data" / f"nfl_{int(prior)}.db")
         return
     if args.cmd == "build":
         from .build import build_season
@@ -168,10 +175,11 @@ def main(argv=None):
         a_, _, b_ = args.weeks.partition("-")
         weeks = list(range(int(a_), int(b_ or a_) + 1))
         res = run_backtest(t, cfg, paths, weeks, n_sims=args.sims)
-        (paths["out"] / "backtest.md").write_text(res["report"])
-        for k in ("picks", "calls", "totals", "proj_err"):
+        sfx = f"_{args.tag}" if args.tag else ""
+        (paths["out"] / f"backtest{sfx}.md").write_text(res["report"])
+        for k in ("picks", "calls", "totals", "proj_err", "actual_components"):
             if not res[k].empty:
-                res[k].to_csv(paths["out"] / f"backtest_{k}.csv", index=False)
+                res[k].to_csv(paths["out"] / f"backtest{sfx}_{k}.csv", index=False)
         print(res["report"])
         return
 
