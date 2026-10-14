@@ -1,10 +1,18 @@
 """Player prop lines and prices (for grading paper trades only).
 
-Source: The Odds API (https://the-odds-api.com), key in ODDS_API_KEY. Lines
-are saved per week and snapshot ("lock" when picks are locked, "close"
-shortly before kickoff, to measure closing-line value). Without a key, put
-lines in data/manual/prop_lines.csv with columns
-player, stat, line, over_odds, under_odds.
+Sources (``[odds] source``; "auto" = The Odds API when ODDS_API_KEY is set,
+else ESPN):
+
+- ESPN's public odds feed (no key). DraftKings player-prop lines, current and
+  opening, for every game. It carries no prices, so both sides get
+  ``[odds] assumed_price`` (default -115, a little worse than the usual
+  DraftKings prop price) and every row is marked price_source = "assumed".
+  ROI graded at assumed prices is an estimate; line movement (CLV) is real.
+- The Odds API (https://the-odds-api.com), key in ODDS_API_KEY: real prices.
+- data/manual/prop_lines.csv (player, stat, line, over_odds, under_odds).
+
+Lines are saved per week and snapshot ("lock" when picks are locked,
+"close" shortly before kickoff, to measure closing-line value).
 
 The market never feeds a projection.
 """
@@ -12,6 +20,8 @@ The market never feeds a projection.
 from __future__ import annotations
 
 import os
+import re
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -88,6 +98,94 @@ def fetch_props(games: pd.DataFrame, week: int, cfg: dict, key: str | None = Non
                                  "book": bk["key"], "fetched_at": now})
         log(f"odds: {a}@{h} ok (credits left: {remaining})")
     return pd.DataFrame(rows)
+
+
+ESPN_SCOREBOARD = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
+ESPN_CORE = "https://sports.core.api.espn.com/v2/sports/football/leagues/nfl"
+ESPN_TYPE_TO_STAT = {  # main over/under markets only (milestones and alt lines are skipped)
+    "total passing yards": "pass_yds", "total pass completions": "completions",
+    "total passing attempts": "pass_att", "total receptions": "receptions",
+    "total receiving yards": "rec_yds", "total rushing yards": "rush_yds", "total carries": "carries"}
+ESPN_TEAM = {"WSH": "WAS"}  # ESPN codes that differ from nflverse before the PFR mapping
+
+
+def _espn_stat(type_name: str) -> str | None:
+    return ESPN_TYPE_TO_STAT.get(type_name.split("(")[0].strip().lower())
+
+
+def fetch_espn(games: pd.DataFrame, week: int, cfg: dict, roster: pd.DataFrame | None = None,
+               log=print) -> pd.DataFrame:
+    """DraftKings lines from ESPN's public odds feed. Prices are assumed (see module doc)."""
+    from .nflverse import team as nv_team
+    c = cfg.get("odds", {})
+    price = float(c.get("assumed_price", -115))
+    provider = c.get("espn_provider", 100)  # 100 = DraftKings
+    season = int(games["season"].max()) if "season" in games else datetime.now().year
+    want = games[games["week"] == week]
+    pairs = {(r.home, r.away) for r in want.itertuples()}
+    sb = requests.get(ESPN_SCOREBOARD, params={"seasontype": 2, "week": week, "dates": season}, timeout=30).json()
+    ids = {}
+    if roster is not None and {"espn_id", "gsis_id", "full_name"} <= set(roster.columns):
+        rr = roster.dropna(subset=["espn_id"]).drop_duplicates("espn_id", keep="last")
+        ids = {str(int(e)): (g, n) for e, g, n in zip(rr["espn_id"], rr["gsis_id"], rr["full_name"])}
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    rows = []
+    for ev in sb.get("events", []):
+        comp = ev["competitions"][0]
+        side = {t["homeAway"]: nv_team(ESPN_TEAM.get(t["team"]["abbreviation"], t["team"]["abbreviation"]))
+                for t in comp["competitors"]}
+        h, a = side.get("home"), side.get("away")
+        if (h, a) not in pairs:
+            continue
+        url = f"{ESPN_CORE}/events/{ev['id']}/competitions/{comp['id']}/odds/{provider}/propBets"
+        items, page, pages = [], 1, 1
+        while page <= pages:
+            r = requests.get(url, params={"limit": 1000, "page": page}, timeout=30)
+            if r.status_code != 200:
+                log(f"odds(espn): {a}@{h} page {page} failed ({r.status_code})")
+                break
+            d = r.json()
+            items += d.get("items", [])
+            pages = d.get("pageCount", 1)
+            page += 1
+            time.sleep(1)
+        n0 = len(rows)
+        for it in items:
+            stat = _espn_stat(it.get("type", {}).get("name", ""))
+            ref = it.get("athlete", {}).get("$ref", "")
+            m = re.search(r"/athletes/(\d+)", ref)
+            line = it.get("current", {}).get("target", {}).get("value")
+            if not stat or not m or line is None:
+                continue
+            gsis, name = ids.get(m.group(1), (None, None))
+            if name is None:
+                try:
+                    name = requests.get(ref.replace("http://", "https://"), timeout=30).json().get("fullName")
+                except Exception:
+                    name = None
+                ids[m.group(1)] = (None, name)
+            if not name:
+                continue
+            rows.append({"week": week, "home": h, "away": a, "player": name, "player_id": gsis,
+                         "espn_id": m.group(1), "stat": stat, "line": float(line),
+                         "open_line": it.get("open", {}).get("target", {}).get("value"),
+                         "over_odds": price, "under_odds": price, "price_source": "assumed",
+                         "book": "draftkings", "line_updated": it.get("lastUpdated"), "fetched_at": now})
+        log(f"odds(espn): {a}@{h} {len(rows) - n0} lines")
+    out = pd.DataFrame(rows)
+    if out.empty:
+        return out
+    # Each over/under appears twice (one item per side); keep the newest line per player and stat
+    return out.sort_values("line_updated", ascending=False).drop_duplicates(["espn_id", "stat"]) \
+              .sort_values(["home", "player", "stat"]).reset_index(drop=True)
+
+
+def fetch(games: pd.DataFrame, week: int, cfg: dict, roster: pd.DataFrame | None = None, log=print) -> pd.DataFrame:
+    src = cfg.get("odds", {}).get("source", "auto")
+    if src == "the_odds_api" or (src == "auto" and os.environ.get("ODDS_API_KEY")):
+        out = fetch_props(games, week, cfg, log=log)
+        return out.assign(price_source="book") if not out.empty else out
+    return fetch_espn(games, week, cfg, roster, log=log)
 
 
 def pick_book(lines: pd.DataFrame, cfg: dict) -> pd.DataFrame:

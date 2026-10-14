@@ -183,9 +183,12 @@ def main(argv=None):
     odds_dir = ROOT / "data" / "odds"
     nxt_week = int(t["games"][t["games"]["boxscore_id"].isna()]["week"].min()) if t["games"]["boxscore_id"].isna().any() else None
     if args.cmd == "odds":
-        from .odds import fetch_props, save
+        from .odds import fetch, save
         wk = args.week or nxt_week
-        lines = fetch_props(t["games"], wk, cfg)
+        season = int(t["games"]["season"].max())
+        rp = ROOT / "data" / "raw" / "nflverse" / f"roster_weekly_{season}.csv.gz"
+        roster = pd.read_csv(rp, low_memory=False) if rp.exists() else None
+        lines = fetch(t["games"], wk, cfg, roster)
         print(f"saved {save(lines, odds_dir, wk, args.label)} ({len(lines)} lines)")
         return
     if args.cmd == "lock":
@@ -195,7 +198,7 @@ def main(argv=None):
         wk = args.week or nxt_week
         lines = pick_book(load_lines(odds_dir, wk, "lock", paths["lines"]), cfg)
         if lines.empty:
-            print("No lines. Run `python -m nfl_proj odds` (needs ODDS_API_KEY) or fill data/manual/prop_lines.csv "
+            print("No lines. Run `python -m nfl_proj odds` (ESPN, no key; or The Odds API with ODDS_API_KEY) or fill data/manual/prop_lines.csv "
                   "(player, stat, line, over_odds, under_odds).")
             return
         r = run_week(t, cfg, paths, wk)

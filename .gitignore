@@ -4,3 +4,4 @@ data/raw/
 data/*.db
 .pytest_cache/
 output/
+data/odds/

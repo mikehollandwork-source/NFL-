@@ -66,9 +66,13 @@ def evaluate(props: pd.DataFrame, lines: pd.DataFrame, player_games: pd.DataFram
     pr = props[props["stat"].isin(list(STATS)) & props["_samples"].notna()].copy()
     pr["key"] = pr["player"].map(norm_name)
     idx = {(k, s): i for i, k, s in zip(pr.index, pr["key"], pr["stat"])}
+    by_id = {(p, s): i for i, p, s in zip(pr.index, pr["player_id"], pr["stat"])}
     rows = []
     for ln in lines.itertuples():
-        i = idx.get((norm_name(ln.player), ln.stat))
+        pid = getattr(ln, "player_id", None)
+        i = by_id.get((pid, ln.stat)) if isinstance(pid, str) and pid else None
+        if i is None:
+            i = idx.get((norm_name(ln.player), ln.stat))
         if i is None:
             continue
         r = pr.loc[i]
@@ -85,7 +89,8 @@ def evaluate(props: pd.DataFrame, lines: pd.DataFrame, player_games: pd.DataFram
             rows.append({"week": week, "game": " @ ".join(sorted([r["team"], r["opp"]])), "team": r["team"],
                          "opp": r["opp"], "player": r["player"], "player_id": r["player_id"], "pos": r["pos"],
                          "stat": ln.stat, "side": side, "line": ln.line, "odds": float(odds),
-                         "book": getattr(ln, "book", ""), "line_fetched_at": getattr(ln, "fetched_at", ""),
+                         "book": getattr(ln, "book", ""), "price_source": getattr(ln, "price_source", "book"),
+                         "line_fetched_at": getattr(ln, "fetched_at", ""),
                          "model_mean": float(smp.mean()), "model_median": float(np.median(smp)),
                          "p_model": p, "p_cal": pc, "breakeven": 1 / dec, "ev": ev,
                          "stake_kelly": kelly * c.get("kelly_fraction", 0.25) * 100})
@@ -207,6 +212,8 @@ def summary(paper_dir: Path) -> str:
              f"({(dec['result'] == 'win').mean():.1%} hit vs {dec['breakeven'].mean():.1%} needed at the average price)"
              if len(dec) else "- Record: —",
              f"- Units: {units:+.2f} on {staked:.2f} staked → **ROI {units / staked:+.1%}**" if staked else "- ROI: —",
+             f"- Prices: {(g.get('price_source', pd.Series(dtype=str)) == 'assumed').mean():.0%} of bets graded at an "
+             f"assumed price (ESPN lines carry none), so ROI is an estimate; hit rate and CLV are exact",
              f"- Average expected value at lock: {s['ev'].mean():+.1%}" if len(s) else "",
              f"- Closing-line value: line moved our way on {(g['clv_line'] > 0).mean():.0%} of bets with a closing "
              f"line (avg {g['clv_line'].mean():+.2f})" if g["clv_line"].notna().any() else

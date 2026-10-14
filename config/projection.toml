@@ -223,6 +223,12 @@ pace_shrink_games = 3.0
 pace_prior_regress = 0.7     # 2025 pace kept at 70% as the starting point
 
 [odds]
+# source: "auto" = The Odds API when ODDS_API_KEY is set, else ESPN's public
+# feed (no key; DraftKings lines, current + opening, but no prices: both
+# sides are graded at assumed_price). "espn" / "the_odds_api" force one.
+source = "auto"
+assumed_price = -115         # conservative vs the usual DraftKings prop price (-110 to -120)
+espn_provider = 100          # ESPN's id for DraftKings
 # Player prop lines and prices for paper trading, from The Odds API
 # (free key at https://the-odds-api.com; set ODDS_API_KEY). Cost on the free
 # tier (500 credits/month) = markets x events per pull; 5 markets x ~14

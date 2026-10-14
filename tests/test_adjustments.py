@@ -178,3 +178,11 @@ def test_clock_model_slow_team_takes_possession():
     assert g["plays"] > g["opp_plays"]
     # A slow opponent cuts this team's drives (and plays) vs a fast one
     assert c.game("X", "SLOW")["drives"] < c.game("X", "FAST")["drives"]
+
+
+def test_espn_prop_type_mapping():
+    from nfl_proj.odds import _espn_stat
+    assert _espn_stat("Total Receptions (incl. overtime)") == "receptions"
+    assert _espn_stat("Total Carries (incl. overtime)") == "carries"
+    assert _espn_stat("Receptions Milestones") is None
+    assert _espn_stat("1st Half Total Rushing Yards") is None
