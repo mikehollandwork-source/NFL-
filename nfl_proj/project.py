@@ -89,6 +89,20 @@ class Projector:
         self.lg_run_td = _wmean(p[p["is_run"]], "touchdown")
         self.games_played = plays.groupby("offense")["boxscore_id"].nunique()
         self._scheme_cache = {}
+        from .market import Market
+        from .ratings import Schedule
+        self.sos = Schedule(p, games, cfg)
+        self.market = Market(games, cfg)
+        self._market_on = True
+        self._adj_cache = {}
+        pts = games.dropna(subset=["boxscore_id"])
+        lg_pts = (pts[["home_score", "away_score"]].stack().mean()
+                  if {"home_score", "away_score"} <= set(pts.columns) and len(pts) else np.nan)
+        tds = plays[plays["touchdown"].astype(bool) & ~plays["no_play"].astype(bool)
+                    & plays["play_type"].isin(["pass", "run", "scramble"])]
+        lg_tds = len(tds) / max(plays.groupby(["offense", "boxscore_id"]).ngroups, 1)
+        # Points per offensive TD (folds in FGs, XPs, safeties): turns model TDs into a points total
+        self.pts_per_td = float(lg_pts / lg_tds) if lg_tds and pd.notna(lg_pts) else 10.0
         p["family"] = np.where(p["is_run"], "run", np.where(p["deep"], "deep", "short"))
         if self.scheme is not None:
             p = p.join(self.scheme[["blitz", "coverage", "shell"]], on="defense")
@@ -143,7 +157,12 @@ class Projector:
         k = self.k_scheme
         off = p[p["offense"] == team]
         third_share = float(off["third"].mean()) if len(off) else 0.25
+        ftn = "is_blitz" in p.columns and p["is_blitz"].notna().mean() > 0.5
+        if ftn:
+            self._ftn_blitz(team, opp, res)
         for label in ("blitz", "coverage", "shell"):
+            if label == "blitz" and ftn:
+                continue  # charted per-play blitzes replace the season label
             v = self.scheme.loc[opp, label]
             if not v or v == "avg" or pd.isna(v):
                 continue
@@ -180,6 +199,74 @@ class Projector:
         self._scheme_cache[key] = res
         return res
 
+    def _ftn_blitz(self, team: str, opp: str, res: dict) -> None:
+        """Per-play blitz effect from FTN charting. How much worse (or better)
+        THIS offense does when blitzed, relative to how the league does when
+        blitzed, applied in proportion to how often the opponent blitzes vs
+        league. The league-wide blitz effect is already in the opponent's own
+        allowed stats, so only the offense-specific part is used."""
+        p = self.p
+        db = p[(p["dropback"]) & p["is_blitz"].notna()]
+        if db.empty:
+            return
+        lg_b, lg_nb = db[db["is_blitz"] == 1]["yards"].mean(), db[db["is_blitz"] == 0]["yards"].mean()
+        o = db[db["offense"] == team]
+        ob, onb = o[o["is_blitz"] == 1], o[o["is_blitz"] == 0]
+        d = db[db["defense"] == opp]
+        if len(ob) == 0 or len(onb) == 0 or len(d) == 0 or min(lg_b, lg_nb, onb["yards"].mean()) <= 0:
+            return
+        s = (ob["yards"].mean() / onb["yards"].mean()) / (lg_b / lg_nb)
+        s = float(np.clip(shrink(s, len(ob), 1.0, self.k_scheme), 0.6, 1.6))
+        rb, lb = d["is_blitz"].mean(), db["is_blitz"].mean()
+        mult = (1 + rb * (s - 1)) / (1 + lb * (s - 1))
+        res["ypp"]["deep"] *= mult
+        res["ypp"]["short"] *= mult
+        res["blitz_mult"] = mult
+        if abs(s - 1) >= 0.05:
+            res["notes"].append(
+                f"{opp} blitzes {rb:.0%} of dropbacks (league {lb:.0%}, FTN charting); {team} gains "
+                f"x{s:.2f} as much per dropback vs the blitz as other offenses ({len(ob)} blitzed dropbacks) "
+                f"-> pass yards x{mult:.2f}")
+
+    # ---------------------------------------------------------- adjustments
+    def adjustments(self, team: str, opp: str, week: int) -> dict:
+        """Strength-of-schedule factors and the market blend for one matchup."""
+        key = (team, opp, week, self._market_on)
+        if key in self._adj_cache:
+            return self._adj_cache[key]
+        dw = self.dw
+        f = self.sos.factor
+        a = {"sos": {"off_pass": f("pass", "off", team), "off_run": f("run", "off", team),
+                     "off_pts": f("points", "off", team),
+                     "def_pass": 1 + dw * (f("pass", "def", opp) - 1),
+                     "def_run": 1 + dw * (f("run", "def", opp) - 1),
+                     "def_pts": 1 + dw * (f("points", "def", opp) - 1)},
+             "market": None, "td_factor": 1.0, "ypp_factor": 1.0, "dropback_shift": 0.0}
+        self._adj_cache[key] = a  # provisional, so the base projection below sees no market
+        line = self.market.line(team, week) if self._market_on else None
+        if line is not None:
+            self._market_on = False
+            try:
+                base, _ = self.project_team(team, opp, week)
+            finally:
+                self._market_on = True
+            model_tds = float(base.get("pass_td", pd.Series(dtype=float)).sum()
+                              + base.get("rush_td", pd.Series(dtype=float)).sum())
+            m = self.market.blend(line, model_tds * self.pts_per_td)
+            a.update(market=m, td_factor=m["td_factor"], ypp_factor=m["ypp_factor"],
+                     dropback_shift=m["dropback_shift"])
+        return a
+
+    def td_mults(self, team: str, opp: str, week: int) -> dict:
+        """Opponent TD / INT multipliers after schedule and market adjustments."""
+        d_pass = self.p[(self.p["defense"] == opp) & self.p["is_pass"]]
+        d_run = self.p[(self.p["defense"] == opp) & self.p["is_run"]]
+        a = self.adjustments(team, opp, week)
+        s = a["sos"]["off_pts"] * a["sos"]["def_pts"] * a["td_factor"]
+        return {"pass_td": self._ratio(_wmean(d_pass, "touchdown"), self.lg_pass_td, len(d_pass)) * s,
+                "run_td": self._ratio(_wmean(d_run, "touchdown"), self.lg_run_td, len(d_run)) * s,
+                "int": self._ratio(_wmean(d_pass, "interception"), self.lg_int, len(d_pass))}
+
     # ---------------------------------------------------------------- team
     def _ratio(self, d_val, lg_val, n):
         """Opponent multiplier: shrunk D rate / league rate, weighted by dw."""
@@ -188,7 +275,7 @@ class Projector:
         d = shrink(d_val, n, lg_val, self.k_def)
         return float(1 + self.dw * (d / lg_val - 1))
 
-    def team_volume(self, team: str, opp: str) -> dict:
+    def team_volume(self, team: str, opp: str, week: int | None = None) -> dict:
         p, allp = self.p, self.all
         off_games = allp[allp["offense"] == team].groupby("boxscore_id").size()
         def_games = allp[allp["defense"] == opp].groupby("boxscore_id").size()
@@ -203,6 +290,9 @@ class Projector:
             g = float(self.games_played.get(team, 0))
             prior = self.lg_dropback + c["pass_lean"]
             db_rate = (g * db_rate + self.k_coach * prior) / (g + self.k_coach)
+        if week is not None:
+            # Game script from the spread: favorites run more.
+            db_rate = float(np.clip(db_rate + self.adjustments(team, opp, week)["dropback_shift"], 0.3, 0.8))
         dropbacks = plays * db_rate
         tdb, ddb = t[t["dropback"]], d[d["dropback"]]
         sack_rate = _wmean(tdb, "is_sack") * self._ratio(_wmean(ddb, "is_sack"), self.lg_sack, len(ddb))
@@ -238,7 +328,7 @@ class Projector:
                 share = {b: v / tot for b, v in share.items()}
         return share, {b: v for b, v in signal.items() if b in share}
 
-    def bucket_matchup(self, team: str, opp: str, family: str, b: str) -> dict:
+    def bucket_matchup(self, team: str, opp: str, family: str, b: str, week: int | None = None) -> dict:
         lg = self.lg_pass if family == "pass" else self.lg_run
         dd = self.def_pass if family == "pass" else self.def_run
         oo = self.off_pass if family == "pass" else self.off_run
@@ -254,6 +344,11 @@ class Projector:
         m_cmp = self._ratio(d["cmp"], lgr["cmp"], d["n_raw"]) if d is not None and family == "pass" else 1.0
         fam = "run" if family == "run" else ("deep" if "_deep_" in b else "short")
         m_ypp *= self.scheme_effect(team, opp)["ypp"][fam]
+        if week is not None:
+            a = self.adjustments(team, opp, week)
+            side = "pass" if family == "pass" else "run"
+            team_ypp *= a["sos"][f"off_{side}"]
+            m_ypp *= a["sos"][f"def_{side}"] * a["ypp_factor"]
         return {"ypp": float(team_ypp), "cmp": float(team_cmp), "td": float(lgr["td"]),
                 "m_ypp": m_ypp, "m_cmp": m_cmp}
 
@@ -262,16 +357,18 @@ class Projector:
         pg = self.pg[self.pg["team"] == team]
         weeks = sorted(pg["week"].unique())[-self.cfg["players"]["active_within_games"]:]
         active = pg[pg["week"].isin(weeks)][["player_id", "player", "pos"]].drop_duplicates("player_id")
-        out = self.overrides[(self.overrides["team"] == team)
-                             & (self.overrides["status"].str.lower() == "out")]["player"]
-        return active[~active["player"].isin(set(out))]
+        ov = self.overrides[(self.overrides["team"] == team)
+                            & (self.overrides["status"].str.lower() == "out")]
+        ids = set(ov["player_id"]) if "player_id" in ov else set()
+        return active[~active["player"].isin(set(ov["player"])) & ~active["player_id"].isin(ids)]
 
     def starting_qb(self, team: str) -> str | None:
         ov = self.overrides[(self.overrides["team"] == team)
                             & (self.overrides["status"].str.lower() == "starter")]
         pg = self.pg[self.pg["team"] == team]
         if not ov.empty:
-            hit = pg[pg["player"].isin(ov["player"])]
+            ids = set(ov["player_id"]) - {""} if "player_id" in ov else set()
+            hit = pg[pg["player_id"].isin(ids) | pg["player"].isin(ov["player"])]
             if not hit.empty:
                 return hit["player_id"].iloc[0]
         active = set(self.active_players(team)["player_id"])
@@ -323,21 +420,18 @@ class Projector:
         return g.set_index([id_col, bucket_col]), td
 
     def project_team(self, team: str, opp: str, week: int) -> tuple[pd.DataFrame, dict]:
-        vol = self.team_volume(team, opp)
+        vol = self.team_volume(team, opp, week)
         pmix, psig = self.mix(team, "pass", opp)
         rmix, rsig = self.mix(team, "run", opp)
-        peff = {b: self.bucket_matchup(team, opp, "pass", b) for b in pmix}
-        reff = {b: self.bucket_matchup(team, opp, "run", b) for b in rmix}
+        peff = {b: self.bucket_matchup(team, opp, "pass", b, week) for b in pmix}
+        reff = {b: self.bucket_matchup(team, opp, "run", b, week) for b in rmix}
         active_df = self.active_players(team)
         active = set(active_df["player_id"])
         names = dict(zip(active_df["player_id"], active_df["player"]))
         pos = dict(zip(active_df["player_id"], active_df["pos"]))
 
-        d_pass = self.p[(self.p["defense"] == opp) & self.p["is_pass"]]
-        d_run = self.p[(self.p["defense"] == opp) & self.p["is_run"]]
-        m_pass_td = self._ratio(_wmean(d_pass, "touchdown"), self.lg_pass_td, len(d_pass))
-        m_run_td = self._ratio(_wmean(d_run, "touchdown"), self.lg_run_td, len(d_run))
-        m_int = self._ratio(_wmean(d_pass, "interception"), self.lg_int, len(d_pass))
+        tm = self.td_mults(team, opp, week)
+        m_pass_td, m_run_td, m_int = tm["pass_td"], tm["run_td"], tm["int"]
 
         rows = {}
 
@@ -412,7 +506,8 @@ class Projector:
         context = {"team": team, "opp": opp, "volume": vol, "pass_mix": pmix, "run_mix": rmix,
                    "pass_signal": psig, "run_signal": rsig, "pass_eff": peff, "run_eff": reff,
                    "qb": names.get(qb, qb) if qb else None,
-                   "scheme_notes": self.scheme_effect(team, opp)["notes"]}
+                   "scheme_notes": self.scheme_effect(team, opp)["notes"],
+                   "adjust": self.adjustments(team, opp, week) if self._market_on else None}
         return out, context
 
     def project_week(self, week: int) -> tuple[pd.DataFrame, list[dict]]:

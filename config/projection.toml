@@ -88,3 +88,32 @@ shrink_plays = 40
 prior_games = 3.0
 # Volume spread multiplier for first-time / newly arrived play-callers.
 new_caller_sd_mult = 1.15
+
+[sos]
+# Strength of schedule: re-rate each team's raw pass/run yards per play and
+# points per game against the opponents it actually faced.
+enabled = true
+shrink_plays = 60.0          # ridge penalty for per-play ratings (plays)
+shrink_games = 3.0           # ridge penalty for points ratings (games)
+min_factor = 0.85            # cap on how far schedule can move an input
+max_factor = 1.15
+
+[market]
+# Betting-market team totals (closing spread and over/under from nflverse).
+enabled = true
+# Share of the projected team total taken from the market (rest = model).
+weight = 0.6
+# Teams that keep missing (or beating) their implied totals: the average miss
+# counts this many games of evidence before it is trusted at 50%.
+miss_shrink_games = 6.0
+# Yardage moves less than scoring: yards factor = TD factor ^ this.
+yards_elasticity = 0.3
+# Dropback rate change per point of spread (favorites run more).
+pass_rate_per_point = 0.004
+min_factor = 0.6
+max_factor = 1.6
+
+[availability]
+# Injury report + depth chart -> automatic outs and starting QB.
+# data/manual/player_overrides.csv always wins.
+doubtful_plays = false

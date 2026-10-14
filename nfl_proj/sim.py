@@ -54,13 +54,14 @@ class Simulator:
         self.scramble_pool = sc if len(sc) >= 30 else np.clip(np.random.default_rng(1).normal(6, 5, 400), -3, 40)
 
     # ------------------------------------------------------------ offense
-    def offense(self, team: str, opp: str) -> tuple[dict, dict]:
+    def offense(self, team: str, opp: str, week: int) -> tuple[dict, dict]:
         P, rng, n = self.P, self.rng, self.n
-        vol = P.team_volume(team, opp)
+        vol = P.team_volume(team, opp, week)
         pmix, _ = P.mix(team, "pass", opp)
         rmix, _ = P.mix(team, "run", opp)
-        peff = {b: P.bucket_matchup(team, opp, "pass", b) for b in pmix}
-        reff = {b: P.bucket_matchup(team, opp, "run", b) for b in rmix}
+        peff = {b: P.bucket_matchup(team, opp, "pass", b, week) for b in pmix}
+        reff = {b: P.bucket_matchup(team, opp, "run", b, week) for b in rmix}
+        tm = P.td_mults(team, opp, week)
         active_df = P.active_players(team)
         active = set(active_df["player_id"])
 
@@ -90,8 +91,7 @@ class Simulator:
         eff, td = P._player_eff(tp, "target_id", "pb", peff, k_t)
         tgt_rate = tp.assign(has=tp["target_id"].notna()).groupby("pb").apply(
             lambda d: np.average(d["has"], weights=d["w"]), include_groups=False)
-        d_pass = P.p[(P.p["defense"] == opp) & P.p["is_pass"]]
-        m_pass_td = P._ratio(_wmean(d_pass, "touchdown"), P.lg_pass_td, len(d_pass))
+        m_pass_td = tm["pass_td"]
         buckets = list(pmix)
         bcounts = rng.multinomial(att, [pmix[b] for b in buckets])
         team_comp = np.zeros(n)
@@ -131,7 +131,7 @@ class Simulator:
         if qb:
             rec_yds = sum(d.get("rec_yds", 0) for d in out.values())
             rec_td = sum(d.get("rec_td", 0) for d in out.values())
-            m_int = P._ratio(_wmean(d_pass, "interception"), P.lg_int, len(d_pass))
+            m_int = tm["int"]
             int_rate = shrink(_wmean(tp, "interception"), len(tp), P.lg_int, 200) * m_int
             acc(qb, "pass_att", att)
             acc(qb, "completions", team_comp)
@@ -150,8 +150,7 @@ class Simulator:
         k_c = P.cfg["players"]["shrink_carries"]
         rshares = P._shares(tr, "rusher_id", "bucket", active, k_c, team, "carry")
         reff_p, rtd = P._player_eff(tr, "rusher_id", "bucket", reff, k_c)
-        d_run = P.p[(P.p["defense"] == opp) & P.p["is_run"]]
-        m_run_td = P._ratio(_wmean(d_run, "touchdown"), P.lg_run_td, len(d_run))
+        m_run_td = tm["run_td"]
         rb = list(rmix)
         rcounts = rng.multinomial(runs, [rmix[b] for b in rb])
         for j, b in enumerate(rb):
@@ -190,7 +189,7 @@ class Simulator:
         return {"players": out, "meta": meta, "team": team_sim}, {"qb": qb}
 
     # ------------------------------------------------------------ kicker
-    def kicker(self, team: str, opp: str, team_td: np.ndarray) -> dict | None:
+    def kicker(self, team: str, opp: str, team_td: np.ndarray, week: int | None = None) -> dict | None:
         k = self.kickers
         if k.empty or team not in set(k["team"]):
             return None
@@ -215,6 +214,10 @@ class Simulator:
         pct = shrink(mine["fg_made"].sum() / max(mine["fg_att"].sum(), 1), mine["fg_att"].sum(), lg_pct, 20)
         xp_pct = shrink(mine["xp_made"].sum() / max(mine["xp_att"].sum(), 1), mine["xp_att"].sum(),
                         k["xp_made"].sum() / max(k["xp_att"].sum(), 1), 30)
+        if week is not None:
+            # Field goals move with the drives: schedule and market yardage factors.
+            a = P.adjustments(team, opp, week)
+            lam *= a["sos"]["off_pts"] * a["sos"]["def_pts"] * a["ypp_factor"]
         fga = rng.poisson(max(lam, 0.0), n)
         fgm = rng.binomial(fga, pct)
         xpa = np.round(team_td).astype(int)
@@ -256,13 +259,13 @@ class Simulator:
         for g in sched.itertuples():
             sims = {}
             for team, opp in ((g.home, g.away), (g.away, g.home)):
-                sims[team], _ = self.offense(team, opp)
+                sims[team], _ = self.offense(team, opp, week)
             for team, opp in ((g.home, g.away), (g.away, g.home)):
                 s = sims[team]
                 for pid, stats in s["players"].items():
                     name, pos = s["meta"].get(pid, (pid, ""))
                     rows += _summ(week, team, opp, pid, name, pos, stats)
-                kk = self.kicker(team, opp, s["team"]["td"])
+                kk = self.kicker(team, opp, s["team"]["td"], week)
                 if kk:
                     rows += _summ(week, team, opp, kk["player_id"], kk["player"], "K", kk["stats"])
                 for dp in self.defense(team, sims[opp]["team"]):

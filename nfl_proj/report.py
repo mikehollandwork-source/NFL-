@@ -80,13 +80,49 @@ def _scheme_line(team, scheme):
     return (", ".join(parts) + f" [{r['scheme_source']}]") if parts else None
 
 
+def _adjust_lines(ctx: dict) -> list[str]:
+    a = ctx.get("adjust")
+    if not a:
+        return []
+    out = []
+    m = a.get("market")
+    if m:
+        miss = ""
+        if m["games"]:
+            miss = (f"; has scored {m['avg_miss']:+.1f} pts/game vs its implied totals over {m['games']} games "
+                    f"(fell short in {m['under_rate']:.0%}), correction {m['correction']:+.1f}")
+        out.append(f"**Market:** implied team total {m['implied']:.1f} (spread {m['spread']:+.1f}){miss}. "
+                   f"Model {m['model_pts']:.1f} → blended {m['blended_pts']:.1f}: TD rates x{m['td_factor']:.2f}, "
+                   f"yards x{m['ypp_factor']:.2f}, dropback rate {m['dropback_shift']:+.1%}.")
+    s = a["sos"]
+    moved = {k: v for k, v in s.items() if abs(v - 1) >= 0.02}
+    if moved:
+        names = {"off_pass": "own pass yds", "off_run": "own run yds", "off_pts": "own scoring",
+                 "def_pass": "opp pass D", "def_run": "opp run D", "def_pts": "opp scoring D"}
+        out.append("**Strength of schedule:** " + ", ".join(f"{names[k]} x{v:.2f}" for k, v in moved.items())
+                   + " (raw stats re-rated against the opponents actually faced).")
+    return out
+
+
 def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.DataFrame,
                 dprof: pd.DataFrame, labels: pd.DataFrame, cfg: dict, est: dict, strength: float,
                 scheme: pd.DataFrame | None = None, coach: pd.DataFrame | None = None,
-                plays: pd.DataFrame | None = None) -> str:
+                plays: pd.DataFrame | None = None, overrides: pd.DataFrame | None = None,
+                flags: list[str] | None = None, market=None) -> str:
     lg_style = style.mean(numeric_only=True)
     lg_def = dprof.mean(numeric_only=True)
     out = [f"# Week {week} projections", "", settings_block(cfg, est, strength)]
+    if flags:
+        out += ["## Availability flags", ""] + [f"- {f}" for f in flags] + [""]
+    if market is not None and market.enabled:
+        mm = market.misses(week)
+        if not mm.empty:
+            worst = mm.sort_values("avg_miss").head(6)
+            out += ["## Teams falling short of their implied team totals", "",
+                    "Points scored minus the betting market's implied team total, per game. The shrunk "
+                    "`correction` is added to this week's implied total before blending.", "",
+                    worst[["team", "games", "implied_avg", "scored_avg", "avg_miss", "under_rate", "correction"]]
+                    .to_markdown(index=False, floatfmt=".2f"), ""]
     for ctx in contexts:
         team, opp = ctx["team"], ctx["opp"]
         v = ctx["volume"]
@@ -98,6 +134,13 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
             notes = describe_style(style.set_index("team").loc[team], lg_style)
             if notes:
                 out.append("**Coaching style:** " + "; ".join(notes) + ".")
+        for line in _adjust_lines(ctx):
+            out.append(line)
+        if overrides is not None and not overrides.empty:
+            o = overrides[(overrides["team"] == team) & (overrides["status"].str.lower() == "out")]
+            if not o.empty:
+                out.append("**Out:** " + ", ".join(f"{r.player}" + (f" ({r.notes})" if getattr(r, "notes", "") else "")
+                                                   for r in o.itertuples()) + ".")
         cl = _coach_line(team, coach, plays)
         if cl:
             out.append(f"**Coach angle:** {cl}.")
@@ -125,7 +168,9 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
 
 def styles_report(style: pd.DataFrame, dprof: pd.DataFrame, labels: pd.DataFrame,
                   splits: pd.DataFrame, est: dict, scheme: pd.DataFrame | None = None,
-                  coach: pd.DataFrame | None = None, plays: pd.DataFrame | None = None) -> str:
+                  coach: pd.DataFrame | None = None, plays: pd.DataFrame | None = None,
+                  sos=None, misses: pd.DataFrame | None = None,
+                  team_def: pd.DataFrame | None = None) -> str:
     lg = style.mean(numeric_only=True)
     out = ["# Coaching styles and defensive profiles", "",
            "## Do coaches call more of what worked last game?",
@@ -138,6 +183,30 @@ def styles_report(style: pd.DataFrame, dprof: pd.DataFrame, labels: pd.DataFrame
             labels.to_markdown(index=False), "",
             "## League: play family vs defense label", "",
             splits.to_markdown(index=False, floatfmt=".2f") if not splits.empty else "(no data)", ""]
+    if sos is not None:
+        tb = sos.table()
+        cols = [c for c in ("team", "off_pass_raw", "off_pass_adj", "off_pass_sched", "def_pass_raw",
+                            "def_pass_adj", "def_pass_sched", "off_points_raw", "off_points_adj",
+                            "def_points_raw", "def_points_adj", "def_points_sched") if c in tb]
+        out += ["## Strength of schedule", "",
+                "Ratings vs league average (yards per dropback, per run; points per game). `raw` is the "
+                "team's own numbers, `adj` re-rates them against the opponents actually faced, `sched` is "
+                "the average strength of those opponents (for an offense: the defenses it faced, positive "
+                "= faced generous defenses; for a defense: the offenses it faced, positive = faced good "
+                "offenses). For defenses, lower is better.", "",
+                tb[cols].to_markdown(index=False, floatfmt="+.2f"), ""]
+    if misses is not None and not misses.empty:
+        out += ["## Market: points vs implied team totals", "",
+                "Implied total from the closing spread and over/under. `correction` (shrunk average miss) "
+                "is applied to next week's implied total.", "",
+                misses.sort_values("avg_miss").to_markdown(index=False, floatfmt=".2f"), ""]
+    if team_def is not None and not team_def.empty and "blitz_pct" in team_def:
+        cols = [c for c in ("team", "blitz_pct", "third_down_blitz_rate", "avg_rushers", "pressure_per_db_pct")
+                if c in team_def]
+        out += ["## Blitz and pressure (FTN charting + PFR advanced defense)", "",
+                "Blitz = any blitzer or 5+ rushers on a charted dropback. Pressures per dropback sum "
+                "individual defenders' pressures, so it's an index, not a play rate.", "",
+                team_def[cols].sort_values("blitz_pct", ascending=False).to_markdown(index=False, floatfmt=".1f"), ""]
     if coach is not None:
         out += ["## Coaches", ""]
         for t in sorted(coach["team"]):

@@ -143,7 +143,14 @@ def main(argv=None):
         return
 
     if args.cmd == "styles":
-        md = styles_report(style, dprof, labels, splits, est, scheme, coach, plays)
+        from .market import Market
+        from .ratings import Schedule
+        sos = Schedule(plays, t["games"], cfg)
+        mk = Market(t["games"], cfg)
+        nxt = t["games"][t["games"]["boxscore_id"].isna()]["week"].min()
+        md = styles_report(style, dprof, labels, splits, est, scheme, coach, plays,
+                           sos=sos, misses=mk.misses(int(nxt)) if mk.enabled and pd.notna(nxt) else None,
+                           team_def=t.get("team_defense"))
         (paths["out"] / "styles.md").write_text(md)
         style.to_csv(paths["out"] / "offense_style.csv", index=False)
         dprof.to_csv(paths["out"] / "defense_profile.csv", index=False)
@@ -160,6 +167,14 @@ def main(argv=None):
             print("Stopped. Edit config/projection.toml and re-run.")
             return
     overrides = pd.read_csv(paths["overrides"], dtype=str).fillna("") if paths["overrides"].exists() else None
+    from .availability import auto_overrides, merge_overrides
+    wk = games[games["week"] == week]
+    auto, avail_flags = auto_overrides(week, t.get("injuries"), t.get("depth_qb"), t["player_games"],
+                                       sorted(set(wk["home"]) | set(wk["away"])), cfg)
+    overrides = merge_overrides(overrides, auto)
+    auto.to_csv(paths["out"] / f"week_{week:02d}_availability.csv", index=False)
+    for f in avail_flags:
+        print("availability:", f)
     from .sim import Simulator, apply_lines, wide_means
     proj = Projector(plays, t["player_games"], games, cfg, labels, overrides, scheme, coach)
     _, ctx = proj.project_week(week)
@@ -178,7 +193,8 @@ def main(argv=None):
     with sqlite3.connect(paths["db"]) as con:
         for name, df in ((f"projections_week_{week:02d}", wide), (f"props_week_{week:02d}", props_out)):
             df.to_sql(name, con, if_exists="replace", index=False)
-    md = week_report(week, wide, ctx, style, dprof, labels, cfg, est, strength, scheme, coach, plays)
+    md = week_report(week, wide, ctx, style, dprof, labels, cfg, est, strength, scheme, coach, plays,
+                     overrides=overrides, flags=avail_flags, market=proj.market)
     if "p_over" in props_out:
         edge = props_out[props_out["line"].notna()].assign(
             best=lambda d: d[["p_over", "p_under"]].max(axis=1)).sort_values("best", ascending=False)

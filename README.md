@@ -141,11 +141,30 @@ play-by-play. A heavy-blitz team that isn't getting sacks shows up as a mismatch
    bucket relative to league average (shrunk), × this offense's scheme interaction effect.
 5. **Players**: each player's share of targets or carries in each bucket × his own shrunk
    efficiency there. Passing totals go to the starting QB.
+6. **Strength of schedule**: pass yards/dropback, run yards/carry and points/game are re-rated
+   against the opponents each team actually faced (additive offense + defense ratings, ridge-shrunk,
+   `[sos]`). Each raw input is scaled by adjusted ÷ raw, capped at ±15%. An offense that padded its
+   numbers against soft defenses is scaled down; a defense that faced strong offenses gets credit.
+7. **Market team totals** (`[market]`): the implied team total from the closing spread and
+   over/under, plus a correction for teams that keep missing (or beating) their implied totals
+   (their average miss, shrunk by `miss_shrink_games`). That target is blended with the model's
+   own points (`weight` = 0.6 market). TD rates scale to hit the blend, yardage moves by the
+   0.3 power of that, and the spread shifts the dropback rate (favorites run more).
+   `week_NN_report.md` lists the teams falling furthest short of their implied totals.
+8. **Availability** (`[availability]`): the injury report marks Out (and Doubtful) players out.
+   Before the week's report posts (Wed-Fri), players Out last week who also missed last week's
+   game are carried as out. The starting QB is the depth chart's QB1 unless he's out or hasn't
+   played recently, in which case last game's starter is used and the report flags it. Your
+   `player_overrides.csv` always wins. Rows written to `week_NN_availability.csv`.
 
 ## What the data can and can't tell you
 
 - PBP gives down, distance, depth (short/deep), direction, run gap, sacks, EPA, and score.
-- It does **not** give coverage shell or per-down blitz rate. The automatic `third_down_pressure`
+- FTN charting (free, via nflverse) adds per-play blitzers, pass rushers, box count, play action,
+  screens, RPOs and motion. The projection uses the per-play blitz split: how much better or
+  worse THIS offense does when blitzed than the league does, weighted by how often the opponent
+  blitzes. `styles.md` lists every defense's blitz rate (overall and 3rd down) and PFR pressures.
+- Still **no** coverage shell (Cover 0-6): the free per-play coverage labels stop after 2024. The automatic `third_down_pressure`
   label uses PFR's season blitz % when available (PFR source only), otherwise the 3rd-down sack
   rate as a proxy.
   Use `defense_tags.csv` for real coverage and blitz labels.
@@ -166,6 +185,9 @@ nfl_proj/adaptation.py  "do more of what worked" test + last-game signal
 nfl_proj/project.py     projection inputs (volume, mix, matchup, player shares)
 nfl_proj/sim.py         Monte Carlo game simulation -> every prop
 nfl_proj/coaches.py     coach experience, career pass lean, star reliance
+nfl_proj/ratings.py     strength of schedule (opponent-adjusted ratings)
+nfl_proj/market.py      implied team totals, teams missing them, market blend
+nfl_proj/availability.py injury report + depth chart -> outs and starting QB
 nfl_proj/external.py    online scheme data (Sharp scraper), scheme labels, PBP cross-check
 nfl_proj/report.py      markdown reports
 tests/                  parser + nflverse mapping tests, end-to-end run on synthetic pages

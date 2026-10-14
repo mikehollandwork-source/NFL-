@@ -81,7 +81,8 @@ def test_games_mark_played_by_pbp():
                       "gameday": ["2026-09-13", "2026-10-18"], "away_team": ["ARI", "GB"],
                       "home_team": ["LAC", "DAL"], "location": ["Home", "Home"],
                       "game_id": ["2026_01_ARI_LAC", "2026_06_GB_DAL"],
-                      "pfr": ["202609130sdg", "202610180dal"]})
+                      "pfr": ["202609130sdg", "202610180dal"], "spread_line": [3.5, -2.5],
+                      "total_line": [44.5, 47.5], "home_score": [24, None], "away_score": [20, None]})
     out = nflverse.parse_games(g, 2026, {"2026_01_ARI_LAC"})
     assert out.loc[0, "boxscore_id"] == "202609130sdg" and out.loc[0, "home"] == "LAC"
     assert pd.isna(out.loc[1, "boxscore_id"]) and out.loc[1, "away"] == "GNB"

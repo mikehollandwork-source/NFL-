@@ -39,40 +39,40 @@ beta +0.12 (t +1.2, n 923): **not clearly supported: last game's results barely 
 
 ## Defense labels
 
-| team   | deep_pass_d   | third_down_pressure   | run_d     | pressure_source      | base_coverage   |
-|:-------|:--------------|:----------------------|:----------|:---------------------|:----------------|
-| ARI    | soft_deep     | light                 | stout_run | third_down_sack_rate |                 |
-| ATL    | avg           | light                 | avg       | third_down_sack_rate |                 |
-| BAL    | soft_deep     | light                 | avg       | third_down_sack_rate |                 |
-| BUF    | avg           | avg                   | soft_run  | third_down_sack_rate |                 |
-| CAR    | avg           | light                 | avg       | third_down_sack_rate |                 |
-| CHI    | soft_deep     | heavy                 | soft_run  | third_down_sack_rate |                 |
-| CIN    | avg           | avg                   | soft_run  | third_down_sack_rate |                 |
-| CLE    | tight_deep    | heavy                 | soft_run  | third_down_sack_rate |                 |
-| DAL    | soft_deep     | light                 | soft_run  | third_down_sack_rate |                 |
-| DEN    | tight_deep    | heavy                 | soft_run  | third_down_sack_rate |                 |
-| DET    | soft_deep     | heavy                 | avg       | third_down_sack_rate |                 |
-| GNB    | tight_deep    | avg                   | soft_run  | third_down_sack_rate |                 |
-| HOU    | soft_deep     | heavy                 | stout_run | third_down_sack_rate |                 |
-| IND    | avg           | heavy                 | soft_run  | third_down_sack_rate |                 |
-| JAX    | avg           | light                 | stout_run | third_down_sack_rate |                 |
-| KAN    | tight_deep    | light                 | stout_run | third_down_sack_rate |                 |
-| LAC    | avg           | heavy                 | avg       | third_down_sack_rate |                 |
-| LAR    | tight_deep    | heavy                 | stout_run | third_down_sack_rate |                 |
-| LVR    | avg           | heavy                 | avg       | third_down_sack_rate |                 |
-| MIA    | soft_deep     | light                 | avg       | third_down_sack_rate |                 |
-| MIN    | tight_deep    | avg                   | stout_run | third_down_sack_rate |                 |
-| NOR    | soft_deep     | avg                   | soft_run  | third_down_sack_rate |                 |
-| NWE    | soft_deep     | avg                   | soft_run  | third_down_sack_rate |                 |
-| NYG    | tight_deep    | avg                   | soft_run  | third_down_sack_rate |                 |
-| NYJ    | avg           | heavy                 | stout_run | third_down_sack_rate |                 |
-| PHI    | tight_deep    | light                 | avg       | third_down_sack_rate |                 |
-| PIT    | avg           | light                 | avg       | third_down_sack_rate |                 |
-| SEA    | tight_deep    | heavy                 | stout_run | third_down_sack_rate |                 |
-| SFO    | tight_deep    | light                 | stout_run | third_down_sack_rate |                 |
-| TAM    | tight_deep    | avg                   | stout_run | third_down_sack_rate |                 |
-| TEN    | soft_deep     | avg                   | avg       | third_down_sack_rate |                 |
-| WAS    | soft_deep     | avg                   | stout_run | third_down_sack_rate |                 |
+| team   | deep_pass_d   | third_down_pressure   | run_d     | pressure_source   | base_coverage   |
+|:-------|:--------------|:----------------------|:----------|:------------------|:----------------|
+| ARI    | soft_deep     | light                 | stout_run | blitz_pct         |                 |
+| ATL    | avg           | light                 | avg       | blitz_pct         |                 |
+| BAL    | soft_deep     | avg                   | avg       | blitz_pct         |                 |
+| BUF    | avg           | light                 | soft_run  | blitz_pct         |                 |
+| CAR    | avg           | heavy                 | avg       | blitz_pct         |                 |
+| CHI    | soft_deep     | heavy                 | soft_run  | blitz_pct         |                 |
+| CIN    | avg           | light                 | soft_run  | blitz_pct         |                 |
+| CLE    | tight_deep    | light                 | soft_run  | blitz_pct         |                 |
+| DAL    | soft_deep     | avg                   | soft_run  | blitz_pct         |                 |
+| DEN    | tight_deep    | heavy                 | soft_run  | blitz_pct         |                 |
+| DET    | soft_deep     | avg                   | avg       | blitz_pct         |                 |
+| GNB    | tight_deep    | heavy                 | soft_run  | blitz_pct         |                 |
+| HOU    | soft_deep     | light                 | stout_run | blitz_pct         |                 |
+| IND    | avg           | light                 | soft_run  | blitz_pct         |                 |
+| JAX    | avg           | avg                   | stout_run | blitz_pct         |                 |
+| KAN    | tight_deep    | avg                   | stout_run | blitz_pct         |                 |
+| LAC    | avg           | avg                   | avg       | blitz_pct         |                 |
+| LAR    | tight_deep    | avg                   | stout_run | blitz_pct         |                 |
+| LVR    | avg           | light                 | avg       | blitz_pct         |                 |
+| MIA    | soft_deep     | avg                   | avg       | blitz_pct         |                 |
+| MIN    | tight_deep    | heavy                 | stout_run | blitz_pct         |                 |
+| NOR    | soft_deep     | heavy                 | soft_run  | blitz_pct         |                 |
+| NWE    | soft_deep     | heavy                 | soft_run  | blitz_pct         |                 |
+| NYG    | tight_deep    | heavy                 | soft_run  | blitz_pct         |                 |
+| NYJ    | avg           | heavy                 | stout_run | blitz_pct         |                 |
+| PHI    | tight_deep    | light                 | avg       | blitz_pct         |                 |
+| PIT    | avg           | avg                   | avg       | blitz_pct         |                 |
+| SEA    | tight_deep    | light                 | stout_run | blitz_pct         |                 |
+| SFO    | tight_deep    | avg                   | stout_run | blitz_pct         |                 |
+| TAM    | tight_deep    | heavy                 | stout_run | blitz_pct         |                 |
+| TEN    | soft_deep     | light                 | avg       | blitz_pct         |                 |
+| WAS    | soft_deep     | heavy                 | stout_run | blitz_pct         |                 |
 
 ## League: play family vs defense label
 
@@ -96,24 +96,24 @@ beta +0.12 (t +1.2, n 923): **not clearly supported: last game's results barely 
 | deep_pass_d         | tight_deep | 3rd/4th      | deep_pass  |     106 | -0.50 |      0.21 |    6.11 |
 | deep_pass_d         | tight_deep | 3rd/4th      | run        |     161 |  0.21 |      0.63 |    4.29 |
 | deep_pass_d         | tight_deep | 3rd/4th      | short_pass |     407 | -0.03 |      0.38 |    5.41 |
-| third_down_pressure | avg        | 1st/2nd      | deep_pass  |     201 |  0.48 |      0.42 |   11.34 |
-| third_down_pressure | avg        | 1st/2nd      | run        |    1000 | -0.09 |      0.48 |    4.09 |
-| third_down_pressure | avg        | 1st/2nd      | short_pass |     952 |  0.12 |      0.54 |    6.21 |
-| third_down_pressure | avg        | 3rd/4th      | deep_pass  |      93 |  0.26 |      0.35 |    9.12 |
-| third_down_pressure | avg        | 3rd/4th      | run        |     130 |  0.06 |      0.60 |    3.65 |
-| third_down_pressure | avg        | 3rd/4th      | short_pass |     366 |  0.08 |      0.41 |    6.34 |
-| third_down_pressure | heavy      | 1st/2nd      | deep_pass  |     230 |  0.57 |      0.48 |   13.54 |
-| third_down_pressure | heavy      | 1st/2nd      | run        |    1125 | -0.08 |      0.49 |    4.31 |
-| third_down_pressure | heavy      | 1st/2nd      | short_pass |     999 |  0.12 |      0.52 |    5.82 |
-| third_down_pressure | heavy      | 3rd/4th      | deep_pass  |     103 |  0.12 |      0.35 |   10.73 |
-| third_down_pressure | heavy      | 3rd/4th      | run        |     155 | -0.06 |      0.57 |    3.29 |
-| third_down_pressure | heavy      | 3rd/4th      | short_pass |     376 |  0.01 |      0.39 |    5.53 |
-| third_down_pressure | light      | 1st/2nd      | deep_pass  |     215 |  0.60 |      0.48 |   13.92 |
-| third_down_pressure | light      | 1st/2nd      | run        |    1076 | -0.11 |      0.47 |    4.07 |
-| third_down_pressure | light      | 1st/2nd      | short_pass |     957 |  0.06 |      0.52 |    5.85 |
-| third_down_pressure | light      | 3rd/4th      | deep_pass  |     103 |  0.10 |      0.31 |    8.67 |
-| third_down_pressure | light      | 3rd/4th      | run        |     147 | -0.04 |      0.52 |    3.35 |
-| third_down_pressure | light      | 3rd/4th      | short_pass |     400 |  0.25 |      0.45 |    6.30 |
+| third_down_pressure | avg        | 1st/2nd      | deep_pass  |     194 |  0.68 |      0.52 |   14.53 |
+| third_down_pressure | avg        | 1st/2nd      | run        |    1027 | -0.10 |      0.47 |    4.11 |
+| third_down_pressure | avg        | 1st/2nd      | short_pass |     900 |  0.06 |      0.53 |    5.84 |
+| third_down_pressure | avg        | 3rd/4th      | deep_pass  |      88 |  0.06 |      0.32 |    8.30 |
+| third_down_pressure | avg        | 3rd/4th      | run        |     140 | -0.10 |      0.54 |    2.30 |
+| third_down_pressure | avg        | 3rd/4th      | short_pass |     352 |  0.22 |      0.46 |    5.93 |
+| third_down_pressure | heavy      | 1st/2nd      | deep_pass  |     200 |  0.55 |      0.47 |   13.55 |
+| third_down_pressure | heavy      | 1st/2nd      | run        |    1056 | -0.08 |      0.49 |    4.29 |
+| third_down_pressure | heavy      | 1st/2nd      | short_pass |     985 |  0.07 |      0.52 |    5.82 |
+| third_down_pressure | heavy      | 3rd/4th      | deep_pass  |      91 | -0.02 |      0.27 |    7.87 |
+| third_down_pressure | heavy      | 3rd/4th      | run        |     137 | -0.01 |      0.61 |    4.10 |
+| third_down_pressure | heavy      | 3rd/4th      | short_pass |     387 | -0.01 |      0.39 |    5.93 |
+| third_down_pressure | light      | 1st/2nd      | deep_pass  |     252 |  0.46 |      0.41 |   11.35 |
+| third_down_pressure | light      | 1st/2nd      | run        |    1118 | -0.09 |      0.49 |    4.08 |
+| third_down_pressure | light      | 1st/2nd      | short_pass |    1023 |  0.15 |      0.53 |    6.20 |
+| third_down_pressure | light      | 3rd/4th      | deep_pass  |     120 |  0.36 |      0.40 |   11.67 |
+| third_down_pressure | light      | 3rd/4th      | run        |     155 |  0.05 |      0.54 |    3.83 |
+| third_down_pressure | light      | 3rd/4th      | short_pass |     403 |  0.15 |      0.41 |    6.30 |
 | run_d               | avg        | 1st/2nd      | deep_pass  |     202 |  0.62 |      0.50 |   14.42 |
 | run_d               | avg        | 1st/2nd      | run        |    1027 | -0.08 |      0.48 |    4.18 |
 | run_d               | avg        | 1st/2nd      | short_pass |     916 |  0.07 |      0.53 |    5.83 |
@@ -132,6 +132,123 @@ beta +0.12 (t +1.2, n 923): **not clearly supported: last game's results barely 
 | run_d               | stout_run  | 3rd/4th      | deep_pass  |     103 | -0.23 |      0.26 |    7.78 |
 | run_d               | stout_run  | 3rd/4th      | run        |     135 |  0.04 |      0.53 |    3.53 |
 | run_d               | stout_run  | 3rd/4th      | short_pass |     407 |  0.03 |      0.37 |    5.69 |
+
+## Strength of schedule
+
+Ratings vs league average (yards per dropback, per run; points per game). `raw` is the team's own numbers, `adj` re-rates them against the opponents actually faced, `sched` is the average strength of those opponents (for an offense: the defenses it faced, positive = faced generous defenses; for a defense: the offenses it faced, positive = faced good offenses). For defenses, lower is better.
+
+| team   |   off_pass_raw |   off_pass_adj |   off_pass_sched |   def_pass_raw |   def_pass_adj |   def_pass_sched |   off_points_raw |   off_points_adj |   def_points_raw |   def_points_adj |   def_points_sched |
+|:-------|---------------:|---------------:|-----------------:|---------------:|---------------:|-----------------:|-----------------:|-----------------:|-----------------:|-----------------:|-------------------:|
+| ARI    |          -0.96 |          -0.76 |            -0.29 |          +1.12 |          +1.07 |            +0.08 |            -1.07 |            -1.05 |            +5.68 |            +5.34 |              +0.55 |
+| ATL    |          +0.63 |          +0.60 |            +0.05 |          -0.55 |          -0.72 |            +0.25 |            +0.30 |            -0.32 |            +0.68 |            -0.08 |              +1.22 |
+| BAL    |          +0.85 |          +0.72 |            +0.20 |          -0.02 |          +0.02 |            -0.06 |            +3.68 |            +2.61 |            +0.30 |            +0.80 |              -0.79 |
+| BUF    |          +1.42 |          +1.62 |            -0.30 |          +0.35 |          +0.08 |            +0.36 |            +5.93 |            +6.14 |            +3.05 |            +3.42 |              -0.58 |
+| CAR    |          +0.31 |          +0.39 |            -0.13 |          +0.17 |          +0.11 |            +0.09 |            +3.96 |            +3.93 |            +2.25 |            +1.79 |              +0.79 |
+| CHI    |          -0.13 |          +0.18 |            -0.46 |          +0.72 |          +0.79 |            -0.11 |            +0.30 |            +1.07 |            -2.57 |            -2.20 |              -0.59 |
+| CIN    |          +0.19 |          -0.02 |            +0.30 |          -0.02 |          +0.02 |            -0.07 |            +1.43 |            +2.37 |            -0.95 |            -0.05 |              -1.44 |
+| CLE    |          -0.78 |          -0.73 |            -0.08 |          -0.55 |          -0.50 |            -0.07 |            -2.95 |            -2.03 |            -0.57 |            -0.64 |              +0.10 |
+| DAL    |          +0.39 |          +0.34 |            +0.07 |          +1.11 |          +1.21 |            -0.16 |            +2.68 |            +2.38 |            +2.43 |            +2.93 |              -0.81 |
+| DEN    |          -0.63 |          -0.47 |            -0.25 |          -0.33 |          -0.65 |            +0.45 |            -2.45 |            -1.33 |            -0.70 |            -1.18 |              +0.78 |
+| DET    |          +0.49 |          +0.39 |            +0.15 |          +0.17 |          +0.19 |            -0.03 |            +5.93 |            +4.46 |            +3.93 |            +3.16 |              +1.23 |
+| GNB    |          +0.48 |          +0.60 |            -0.19 |          -0.63 |          -0.49 |            -0.21 |            -1.57 |            -0.19 |            -0.57 |            +0.04 |              -0.99 |
+| HOU    |          +0.55 |          +0.20 |            +0.50 |          -0.22 |          -0.21 |            -0.01 |            -0.82 |            -1.90 |            -0.57 |            -1.17 |              +0.96 |
+| IND    |          -0.80 |          -0.95 |            +0.23 |          +0.50 |          +0.40 |            +0.14 |            +0.93 |            +0.82 |            +2.68 |            +2.35 |              +0.52 |
+| JAX    |          +0.59 |          +0.78 |            -0.28 |          +0.07 |          +0.30 |            -0.32 |            +0.80 |            +1.56 |            -5.82 |            -5.29 |              -0.86 |
+| KAN    |          +0.67 |          +0.46 |            +0.36 |          +0.07 |          +0.31 |            -0.37 |            +3.53 |            +2.92 |            -2.32 |            -1.86 |              -0.82 |
+| LAC    |          -0.84 |          -0.70 |            -0.21 |          -0.17 |          -0.29 |            +0.18 |            -4.07 |            -5.20 |            +1.55 |            +0.60 |              +1.52 |
+| LAR    |          +0.43 |          +0.54 |            -0.15 |          -0.21 |          -0.30 |            +0.14 |            +0.30 |            +0.38 |            +0.43 |            -0.06 |              +0.78 |
+| LVR    |          +0.27 |          +0.25 |            +0.02 |          +0.78 |          +0.77 |            +0.01 |            +1.93 |            +2.12 |            +1.55 |            +2.51 |              -1.54 |
+| MIA    |          -0.78 |          -0.79 |            +0.00 |          +0.53 |          +0.50 |            +0.05 |            -5.82 |            -4.88 |            +1.93 |            +0.61 |              +2.11 |
+| MIN    |          -0.42 |          -0.63 |            +0.30 |          -1.01 |          -0.87 |            -0.21 |            -0.95 |            -1.08 |            -6.57 |            -5.88 |              -1.10 |
+| NOR    |          -0.53 |          -0.47 |            -0.09 |          +0.38 |          +0.29 |            +0.14 |            +0.18 |            +0.11 |            +4.30 |            +3.33 |              +1.56 |
+| NWE    |          +1.06 |          +0.98 |            +0.12 |          -0.34 |          -0.75 |            +0.62 |            -0.82 |            -0.65 |            -2.82 |            -4.22 |              +2.24 |
+| NYG    |          -0.44 |          -0.83 |            +0.55 |          -0.07 |          +0.11 |            -0.25 |            -0.95 |            -2.48 |            -1.32 |            -0.59 |              -1.18 |
+| NYJ    |          -0.48 |          -0.46 |            -0.04 |          -0.92 |          -0.83 |            -0.12 |            -2.95 |            -2.99 |            -2.57 |            -2.12 |              -0.73 |
+| PHI    |          -0.83 |          -1.06 |            +0.33 |          +0.24 |          -0.00 |            +0.34 |            -3.07 |            -2.64 |            -0.57 |            -0.00 |              -0.91 |
+| PIT    |          -0.31 |          -0.11 |            -0.28 |          +0.26 |          +0.48 |            -0.32 |            -0.70 |            -0.37 |            -0.95 |            -0.97 |              +0.04 |
+| SEA    |          +0.31 |          +0.38 |            -0.10 |          -1.09 |          -1.22 |            +0.19 |            +2.18 |            +1.74 |            -1.45 |            -1.03 |              -0.67 |
+| SFO    |          +1.16 |          +1.38 |            -0.33 |          -0.84 |          -0.65 |            -0.29 |            +4.68 |            +4.22 |            -2.95 |            -2.31 |              -1.03 |
+| TAM    |          -0.65 |          -0.56 |            -0.13 |          +0.23 |          +0.24 |            -0.01 |            -2.07 |            -1.62 |            -0.57 |            -0.76 |              +0.29 |
+| TEN    |          -0.76 |          -0.68 |            -0.13 |          +0.62 |          +0.73 |            -0.17 |            -7.32 |            -6.94 |            -0.95 |            -0.02 |              -1.48 |
+| WAS    |          -0.10 |          -0.19 |            +0.13 |          -0.04 |          +0.31 |            -0.47 |            -0.20 |            -0.66 |            +4.05 |            +4.07 |              -0.03 |
+
+## Market: points vs implied team totals
+
+Implied total from the closing spread and over/under. `correction` (shrunk average miss) is applied to next week's implied total.
+
+| team   |   games |   avg_miss |   under_rate |   implied_avg |   scored_avg |   correction |
+|:-------|--------:|-----------:|-------------:|--------------:|-------------:|-------------:|
+| LAC    |       5 |      -5.60 |         0.80 |         22.40 |        16.80 |        -2.55 |
+| TEN    |       5 |      -5.45 |         0.60 |         17.05 |        11.60 |        -2.48 |
+| MIA    |       5 |      -3.10 |         0.80 |         17.10 |        14.00 |        -1.41 |
+| PHI    |       5 |      -3.10 |         0.40 |         21.50 |        18.40 |        -1.41 |
+| DEN    |       5 |      -3.05 |         0.60 |         22.45 |        19.40 |        -1.39 |
+| GNB    |       5 |      -1.95 |         0.80 |         22.75 |        20.80 |        -0.89 |
+| NYJ    |       5 |      -1.65 |         0.60 |         20.25 |        18.60 |        -0.75 |
+| LAR    |       5 |      -1.40 |         0.20 |         25.20 |        23.80 |        -0.64 |
+| TAM    |       5 |      -1.35 |         0.60 |         21.35 |        20.00 |        -0.61 |
+| HOU    |       5 |      -1.00 |         0.40 |         23.00 |        22.00 |        -0.45 |
+| MIN    |       5 |      -0.85 |         0.40 |         22.65 |        21.80 |        -0.39 |
+| NWE    |       5 |      -0.25 |         0.60 |         22.25 |        22.00 |        -0.11 |
+| ARI    |       5 |       0.20 |         0.40 |         21.40 |        21.60 |         0.09 |
+| CHI    |       5 |       0.25 |         0.60 |         23.55 |        23.80 |         0.11 |
+| JAX    |       5 |       0.65 |         0.60 |         23.95 |        24.60 |         0.30 |
+| CIN    |       5 |       0.80 |         0.40 |         24.80 |        25.60 |         0.36 |
+| CLE    |       5 |       1.00 |         0.40 |         17.60 |        18.60 |         0.45 |
+| NYG    |       5 |       1.25 |         0.40 |         20.55 |        21.80 |         0.57 |
+| PIT    |       5 |       1.35 |         0.40 |         20.85 |        22.20 |         0.61 |
+| DAL    |       5 |       1.55 |         0.40 |         26.05 |        27.60 |         0.70 |
+| NOR    |       5 |       2.15 |         0.40 |         21.45 |        23.60 |         0.98 |
+| WAS    |       5 |       2.55 |         0.40 |         20.45 |        23.00 |         1.16 |
+| SEA    |       5 |       2.85 |         0.20 |         23.95 |        26.80 |         1.30 |
+| ATL    |       5 |       3.00 |         0.60 |         20.80 |        23.80 |         1.36 |
+| IND    |       5 |       3.25 |         0.20 |         21.55 |        24.80 |         1.48 |
+| BAL    |       5 |       3.50 |         0.40 |         25.70 |        29.20 |         1.59 |
+| KAN    |       4 |       3.88 |         0.25 |         25.62 |        29.50 |         1.55 |
+| DET    |       5 |       4.80 |         0.20 |         28.00 |        32.80 |         2.18 |
+| SFO    |       5 |       5.60 |         0.20 |         25.20 |        30.80 |         2.55 |
+| BUF    |       5 |       5.60 |         0.40 |         27.20 |        32.80 |         2.55 |
+| LVR    |       5 |       5.85 |         0.20 |         20.55 |        26.40 |         2.66 |
+| CAR    |       4 |       7.44 |         0.25 |         22.81 |        30.25 |         2.98 |
+
+## Blitz and pressure (FTN charting + PFR advanced defense)
+
+Blitz = any blitzer or 5+ rushers on a charted dropback. Pressures per dropback sum individual defenders' pressures, so it's an index, not a play rate.
+
+| team   |   blitz_pct |   third_down_blitz_rate |   avg_rushers |   pressure_per_db_pct |
+|:-------|------------:|------------------------:|--------------:|----------------------:|
+| MIN    |        70.4 |                    64.5 |           4.9 |                  35.8 |
+| WAS    |        45.8 |                    45.6 |           4.6 |                  21.2 |
+| TAM    |        41.6 |                    46.3 |           4.6 |                  20.2 |
+| NYG    |        40.0 |                    44.0 |           4.5 |                  11.1 |
+| CHI    |        38.7 |                    39.6 |           4.6 |                  26.7 |
+| NYJ    |        38.5 |                    36.4 |           4.5 |                  14.4 |
+| DEN    |        37.6 |                    26.9 |           4.4 |                  18.3 |
+| CAR    |        35.7 |                    36.5 |           4.4 |                  26.2 |
+| NOR    |        35.1 |                    43.8 |           4.4 |                  17.2 |
+| NWE    |        34.6 |                    52.9 |           4.5 |                  17.9 |
+| GNB    |        33.9 |                    36.5 |           4.4 |                  22.0 |
+| BAL    |        31.4 |                    33.3 |           4.4 |                  16.0 |
+| SFO    |        30.7 |                    33.9 |           4.4 |                  20.1 |
+| DET    |        29.3 |                    23.4 |           4.4 |                  21.1 |
+| JAX    |        29.3 |                    32.7 |           4.3 |                  19.7 |
+| KAN    |        28.7 |                    34.0 |           4.4 |                  24.8 |
+| LAC    |        27.4 |                    36.7 |           4.3 |                  24.8 |
+| MIA    |        27.4 |                    25.0 |           4.3 |                  17.2 |
+| DAL    |        27.3 |                    30.2 |           4.3 |                  23.0 |
+| LAR    |        27.3 |                    48.0 |           3.7 |                  18.8 |
+| PIT    |        26.9 |                    24.0 |           4.3 |                  15.4 |
+| ATL    |        26.7 |                    28.6 |           4.3 |                  22.7 |
+| ARI    |        25.6 |                    34.0 |           4.3 |                  17.3 |
+| CLE    |        25.3 |                    30.9 |           4.3 |                  16.0 |
+| LVR    |        25.0 |                    38.6 |           4.3 |                  30.4 |
+| BUF    |        24.9 |                    21.1 |           3.3 |                  24.9 |
+| PHI    |        23.1 |                    29.0 |           4.2 |                  11.8 |
+| TEN    |        22.1 |                    32.0 |           4.2 |                  16.6 |
+| SEA    |        21.3 |                    23.4 |           4.3 |                  25.1 |
+| IND    |        20.0 |                    21.4 |           4.2 |                  16.8 |
+| HOU    |        20.0 |                    15.8 |           4.3 |                  21.5 |
+| CIN    |        16.1 |                    20.0 |           4.1 |                  23.8 |
 
 ## Coaches
 
@@ -176,33 +293,33 @@ Blitz labels come from online charting; `third_down_pressure` comes from 3rd-dow
 |:-------|:--------|:----------------------|:---------|:----------------|
 | ARI    | avg     | light                 | True     | online (low)    |
 | ATL    | avg     | light                 | True     | online (high)   |
-| BAL    | avg     | light                 | True     | online (high)   |
-| BUF    | avg     | avg                   | True     | online (high)   |
-| CAR    | heavy   | light                 | False    | online (high)   |
+| BAL    | avg     | avg                   | True     | online (high)   |
+| BUF    | avg     | light                 | True     | online (high)   |
+| CAR    | heavy   | heavy                 | True     | online (high)   |
 | CHI    | heavy   | heavy                 | True     | online (high)   |
-| CIN    | light   | avg                   | False    | online (high)   |
-| CLE    | avg     | heavy                 | True     | online (high)   |
-| DAL    | avg     | light                 | True     | online (high)   |
+| CIN    | light   | light                 | True     | online (high)   |
+| CLE    | avg     | light                 | True     | online (high)   |
+| DAL    | avg     | avg                   | True     | online (high)   |
 | DEN    | heavy   | heavy                 | True     | online (high)   |
-| DET    | avg     | heavy                 | True     | online (high)   |
-| GNB    | avg     | avg                   | True     | online (high)   |
-| HOU    | light   | heavy                 | False    | online (high)   |
-| IND    | avg     | heavy                 | True     | online (high)   |
-| JAX    | avg     | light                 | True     | online (high)   |
-| KAN    | avg     | light                 | True     | online (high)   |
-| LAC    | avg     | heavy                 | True     | online (high)   |
-| LAR    | avg     | heavy                 | True     | online (high)   |
-| LVR    | avg     | heavy                 | True     | online (high)   |
-| MIA    | avg     | light                 | True     | online (high)   |
-| MIN    | heavy   | avg                   | False    | online (high)   |
-| NOR    | avg     | avg                   | True     | online (high)   |
-| NWE    | heavy   | avg                   | False    | online (high)   |
-| NYG    | heavy   | avg                   | False    | online (high)   |
+| DET    | avg     | avg                   | True     | online (high)   |
+| GNB    | avg     | heavy                 | True     | online (high)   |
+| HOU    | light   | light                 | True     | online (high)   |
+| IND    | avg     | light                 | True     | online (high)   |
+| JAX    | avg     | avg                   | True     | online (high)   |
+| KAN    | avg     | avg                   | True     | online (high)   |
+| LAC    | avg     | avg                   | True     | online (high)   |
+| LAR    | avg     | avg                   | True     | online (high)   |
+| LVR    | avg     | light                 | True     | online (high)   |
+| MIA    | avg     | avg                   | True     | online (high)   |
+| MIN    | heavy   | heavy                 | True     | online (high)   |
+| NOR    | avg     | heavy                 | True     | online (high)   |
+| NWE    | heavy   | heavy                 | True     | online (high)   |
+| NYG    | heavy   | heavy                 | True     | online (high)   |
 | NYJ    | heavy   | heavy                 | True     | online (high)   |
 | PHI    | avg     | light                 | True     | online (high)   |
-| PIT    | avg     | light                 | True     | online (high)   |
-| SEA    | avg     | heavy                 | True     | online (high)   |
-| SFO    | avg     | light                 | True     | online (high)   |
-| TAM    | heavy   | avg                   | False    | online (high)   |
-| TEN    | avg     | avg                   | True     | online (high)   |
-| WAS    | heavy   | avg                   | False    | online (high)   |
+| PIT    | avg     | avg                   | True     | online (high)   |
+| SEA    | avg     | light                 | True     | online (high)   |
+| SFO    | avg     | avg                   | True     | online (high)   |
+| TAM    | heavy   | heavy                 | True     | online (high)   |
+| TEN    | avg     | light                 | True     | online (high)   |
+| WAS    | heavy   | heavy                 | True     | online (high)   |

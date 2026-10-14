@@ -47,7 +47,16 @@ def season_files(season: int) -> dict[str, str]:
         "player_week": f"{RELEASES}/stats_player/stats_player_week_{season}.csv.gz",
         "snaps": f"{RELEASES}/snap_counts/snap_counts_{season}.csv.gz",
         "rosters": f"{RELEASES}/weekly_rosters/roster_weekly_{season}.csv.gz",
+        # FTN charting: blitzers, pass rushers, play action, screens, box count per play
+        "ftn": f"{RELEASES}/ftn_charting/ftn_charting_{season}.csv",
+        "injuries": f"{RELEASES}/injuries/injuries_{season}.csv.gz",
+        "depth": f"{RELEASES}/depth_charts/depth_charts_{season}.csv.gz",
+        # PFR advanced defense per defender per game (pressures, hurries, QB hits)
+        "adv_def": f"{RELEASES}/pfr_advstats/advstats_week_def_{season}.csv.gz",
     }
+
+# Files the build can run without (charting and injury feeds can lag).
+OPTIONAL = {"ftn", "injuries", "depth", "adv_def"}
 
 
 class Downloader:
@@ -76,8 +85,13 @@ class Downloader:
 def download_season(season: int, cache_dir: Path, log=print) -> None:
     d = Downloader(cache_dir, log)
     d.get(GAMES_URL, refresh=True)
-    for url in season_files(season).values():
-        d.get(url, refresh=True)
+    for key, url in season_files(season).items():
+        try:
+            d.get(url, refresh=True)
+        except requests.HTTPError as exc:
+            if key not in OPTIONAL:
+                raise
+            log(f"warning: optional {key} file unavailable ({exc}); continuing without it")
 
 
 # --------------------------------------------------------------------------
@@ -94,6 +108,9 @@ def parse_games(games: pd.DataFrame, season: int, played_ids: set[str]) -> pd.Da
         "away": g["away_team"].map(team), "home": g["home_team"].map(team),
         "boxscore_id": np.where(g["game_id"].isin(played_ids), g["pfr"], None),
         "neutral": g["location"].eq("Neutral"), "nv_game_id": g["game_id"],
+        # Market: spread_line > 0 means the home team is favored by that many points.
+        "spread_line": g["spread_line"], "total_line": g["total_line"],
+        "home_score": g["home_score"], "away_score": g["away_score"],
     })
     return out.reset_index(drop=True)
 
@@ -213,7 +230,8 @@ def build_plays(pbp: pd.DataFrame, games: pd.DataFrame, season: int) -> pd.DataF
             down = int(r["down"]) if pd.notna(r["down"]) else None
             ytg = float(r["ydstogo"]) if pd.notna(r["ydstogo"]) else None
             rows.append({
-                "boxscore_id": box.get(gid), "season": season, "week": int(r["week"]),
+                "boxscore_id": box.get(gid), "nv_game_id": gid, "play_id": r["play_id"],
+                "season": season, "week": int(r["week"]),
                 "seq": seq, "quarter": int(r["qtr"]) if pd.notna(r["qtr"]) else None,
                 "clock": r["time"] if isinstance(r["time"], str) else "",
                 "down": down, "ytg": ytg,
@@ -305,6 +323,9 @@ def build_player_games(stats: pd.DataFrame, snaps: pd.DataFrame, rosters: pd.Dat
 def build_defenders(stats: pd.DataFrame, games: pd.DataFrame) -> pd.DataFrame:
     box = dict(zip(games["nv_game_id"], games["boxscore_id"]))
     st = stats[(stats["season_type"] == "REG") & stats["game_id"].map(box).notna()]
+    # Defensive players only: offensive players credited with a tackle after
+    # a turnover would otherwise get a second, defensive projection row.
+    st = st[st["position_group"].isin(["DL", "LB", "DB"])]
     tackles = st[["def_tackles_solo", "def_tackles_with_assist", "def_tackle_assists"]].fillna(0).sum(axis=1)
     d = pd.DataFrame({"boxscore_id": st["game_id"].map(box), "week": st["week"].astype(int),
                       "player_id": st["player_id"], "player": st["player_display_name"],
@@ -332,7 +353,7 @@ def build_season(season: int, cache_dir: Path, db_path: Path, log=print) -> dict
     files = season_files(season)
     paths = {k: d.path(u) for k, u in files.items()}
     paths["games"] = d.path(GAMES_URL)
-    missing = [p.name for p in paths.values() if not p.exists()]
+    missing = [p.name for k, p in paths.items() if not p.exists() and k not in OPTIONAL]
     if missing:
         raise FileNotFoundError(f"missing {missing} in {cache_dir}; run `scrape` first.")
     pbp = pd.read_csv(paths["pbp"], low_memory=False)
@@ -340,6 +361,11 @@ def build_season(season: int, cache_dir: Path, db_path: Path, log=print) -> dict
     games = parse_games(pd.read_csv(paths["games"], low_memory=False), season, set(pbp["game_id"]))
     stats = pd.read_csv(paths["player_week"], low_memory=False)
     plays = build_plays(pbp, games, season)
+    opt = {k: paths[k] for k in OPTIONAL if paths[k].exists()}
+    if "ftn" in opt:
+        plays = add_ftn(plays, pd.read_csv(opt["ftn"], low_memory=False))
+    else:
+        log("warning: no FTN charting file; blitz / play-action columns left empty")
     tables = {
         "games": games.drop(columns="nv_game_id"),
         "plays": plays,
@@ -348,14 +374,79 @@ def build_season(season: int, cache_dir: Path, db_path: Path, log=print) -> dict
         "defenders": build_defenders(stats, games),
         "kickers": build_kickers(stats, games),
     }
+    tables["team_defense"] = team_defense(plays, pd.read_csv(opt["adv_def"]) if "adv_def" in opt else None)
+    if "injuries" in opt:
+        tables["injuries"] = injuries_table(pd.read_csv(opt["injuries"], low_memory=False))
+    if "depth" in opt:
+        tables["depth_qb"] = depth_qbs(pd.read_csv(opt["depth"], low_memory=False))
     db_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(db_path) as con:
-        con.execute("drop table if exists team_defense")
+        for name in ("team_defense", "injuries", "depth_qb"):
+            con.execute(f"drop table if exists {name}")
         for name, df in tables.items():
             df.to_sql(name, con, if_exists="replace", index=False)
     log(f"built {db_path}: {games['boxscore_id'].notna().sum()} games, {len(plays)} plays, "
         f"{len(tables['player_games'])} player-game rows")
     return tables
+
+
+# --------------------------------------------------------------------------
+# Charting, pressure, injuries, depth charts
+# --------------------------------------------------------------------------
+
+FTN_COLS = {"n_blitzers": "n_blitzers", "n_pass_rushers": "n_rushers", "n_defense_box": "box",
+            "is_play_action": "play_action", "is_screen_pass": "screen", "is_rpo": "rpo",
+            "is_motion": "motion"}
+
+
+def add_ftn(plays: pd.DataFrame, ftn: pd.DataFrame) -> pd.DataFrame:
+    """Join FTN charting onto plays by (nflverse game id, play id).
+    ``is_blitz`` = 5+ rushers or any blitzer (NaN where FTN didn't chart the play)."""
+    f = ftn.rename(columns={"nflverse_game_id": "nv_game_id", "nflverse_play_id": "play_id", **FTN_COLS})
+    f = f[["nv_game_id", "play_id", *FTN_COLS.values()]].drop_duplicates(["nv_game_id", "play_id"])
+    out = plays.drop(columns=[c for c in FTN_COLS.values() if c in plays], errors="ignore") \
+               .merge(f, on=["nv_game_id", "play_id"], how="left")
+    out["is_blitz"] = np.where(out["n_rushers"].isna(), np.nan,
+                            ((out["n_blitzers"].fillna(0) > 0) | (out["n_rushers"] >= 5)).astype(float))
+    return out
+
+
+def team_defense(plays: pd.DataFrame, adv: pd.DataFrame | None) -> pd.DataFrame:
+    """Season blitz rate (FTN, per charted dropback, overall and on 3rd/4th
+    down) and pressures per dropback (PFR, summed over defenders, so a play
+    with two pressuring defenders counts twice: an index, not a rate)."""
+    drop = plays[plays["play_type"].isin(["pass", "sack", "scramble"]) & ~plays["no_play"]]
+    rows = []
+    for tm, g in drop.groupby("defense"):
+        ch = g[g["is_blitz"].notna()] if "is_blitz" in g else g.iloc[0:0]
+        third = ch[ch["down"].isin([3, 4])]
+        rows.append({"team": tm, "dropbacks_faced": len(g),
+                     "blitz_pct": 100 * ch["is_blitz"].mean() if len(ch) else np.nan,
+                     "third_down_blitz_rate": 100 * third["is_blitz"].mean() if len(third) else np.nan,
+                     "avg_rushers": ch["n_rushers"].mean() if len(ch) else np.nan})
+    out = pd.DataFrame(rows)
+    if adv is not None and not adv.empty:
+        a = adv[adv["game_type"] == "REG"].assign(team=lambda d: d["team"].map(team))
+        pr = a.groupby("team")[["def_pressures", "def_times_hurried", "def_times_hitqb"]].sum()
+        out = out.merge(pr, left_on="team", right_index=True, how="left")
+        out["pressure_per_db_pct"] = 100 * out["def_pressures"] / out["dropbacks_faced"]
+    return out
+
+
+def injuries_table(inj: pd.DataFrame) -> pd.DataFrame:
+    i = inj[inj["game_type"] == "REG"]
+    return pd.DataFrame({"week": i["week"], "team": i["team"].map(team), "player_id": i["gsis_id"],
+                         "player": i["full_name"], "pos": i["position"],
+                         "report_status": i["report_status"], "injury": i["report_primary_injury"],
+                         "practice_status": i["practice_status"]})
+
+
+def depth_qbs(depth: pd.DataFrame) -> pd.DataFrame:
+    """Latest depth-chart snapshot, quarterbacks only, ranked."""
+    last = depth[depth["dt"] == depth["dt"].max()]
+    q = last[last["pos_abb"] == "QB"].sort_values(["team", "pos_rank"]).drop_duplicates(["team", "gsis_id"])
+    return pd.DataFrame({"as_of": q["dt"], "team": q["team"].map(team), "player_id": q["gsis_id"],
+                         "player": q["player_name"], "rank": q["pos_rank"]})
 
 
 # --------------------------------------------------------------------------
