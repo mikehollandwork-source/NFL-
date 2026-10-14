@@ -79,6 +79,22 @@ def run(tables: dict, cfg: dict, paths: dict, weeks: list[int], n_sims: int = 20
     return out
 
 
+def _with_base(df: pd.DataFrame, base_rates: pd.Series) -> pd.DataFrame:
+    """Add the no-information hit rate for each call: how often that stat
+    landed on that side of its baseline across all calls (skew included)."""
+    d = df[df["result"].isin(["hit", "miss"])].copy()
+    d["hit"] = d["result"].eq("hit")
+    under = d["stat"].map(base_rates)
+    d["base"] = np.where(d["direction"] == "under", under, 1 - under)
+    return d
+
+
+def _lift_table(d: pd.DataFrame, by) -> pd.DataFrame:
+    return d.groupby(by, observed=True).apply(lambda g: pd.Series({
+        "calls": len(g), "hit rate": g["hit"].mean(), "no-info rate": g["base"].mean(),
+        "lift": g["hit"].mean() - g["base"].mean()}), include_groups=False)
+
+
 def _rate(df: pd.DataFrame) -> str:
     d = df[df["result"].isin(["hit", "miss"])]
     if d.empty:
@@ -121,6 +137,23 @@ def report(o: dict, weeks: list[int]) -> str:
                 lambda s: f"{(s == 'hit').sum()}/{len(s)} ({(s == 'hit').mean():.0%})")
             out += ["Hit rate by model edge (quartiles): does a bigger edge win more often?", "",
                     t.to_frame("hit rate").to_markdown(), ""]
+    if not c.empty:
+        cc = c[c["result"].isin(["hit", "miss"])]
+        base_rates = (cc["actual"] < cc["baseline"]).groupby(cc["stat"]).mean()
+        dc = _with_base(c, base_rates)
+        dc["trend"] = dc["usage"].astype(str).str.split(" ").str[0]
+        dc["usage trend agrees"] = np.where(dc["direction"] == "over", dc["trend"].eq("up"), dc["trend"].eq("down"))
+        out += ["## Does each filter add anything? (lift over a no-information call)", "",
+                "`no-info rate` = how often a call on that side of the baseline would hit with no model at all "
+                "(yardage stats land under their own average more often than not, so unders start ahead). "
+                "`lift` = hit rate minus that. Subgroups of 20-130 calls: differences under ~10 points are noise.", "",
+                "Unfiltered calls overall:", "", _lift_table(dc.assign(all="all"), "all").to_markdown(floatfmt=".2f"), "",
+                "Usage trend agrees with the call (the qualification rule):", "",
+                _lift_table(dc, "usage trend agrees").to_markdown(floatfmt=".2f"), "",
+                "Number of agreeing signals:", "", _lift_table(dc, "n_signals").to_markdown(floatfmt=".2f"), ""]
+        if not p.empty:
+            out += ["Top-5 picks:", "", _lift_table(_with_base(p, base_rates).assign(all="picks"), "all")
+                    .to_markdown(floatfmt=".2f"), ""]
     e = o["proj_err"]
     if not e.empty:
         s = e.groupby("stat").apply(lambda d: pd.Series({
