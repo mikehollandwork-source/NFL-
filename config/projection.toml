@@ -202,6 +202,11 @@ volume_prior_games = 3.0     # plays per game: 2025 counts as this many games
 # Measured share of a team's 2025 edge over league that repeats (2021-25
 # season pairs); replaces regress / regress_defense per stat. A new
 # play-caller scales the offense values by regress_new_caller / regress.
+# Defensive play caller (data/external/coordinators.csv): same caller as last
+# season -> defense carryover x def_same_caller_scale, new caller -> x
+# def_new_caller_scale (2022-25: carryover ~0 with a new caller; 57% keep theirs).
+def_same_caller_scale = 1.5
+def_new_caller_scale = 0.25
 carryover = {off_pass = 0.46, off_run = 0.29, off_cmp = 0.48, off_pass_td = 0.37, off_run_td = 0.27, off_plays = 0.15, def_pass = 0.20, def_run = 0.23, def_cmp = 0.22, def_pass_td = 0.05, def_run_td = 0.13}
 
 [player_adaptation]

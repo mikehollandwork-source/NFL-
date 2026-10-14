@@ -396,15 +396,16 @@ def corner_history(d: dict, max_seasons_back: int = 3) -> tuple[pd.DataFrame, st
 
 # -------------------------------------------------- 4. defensive coordinator
 def coordinator_test(ts: pd.DataFrame, coord: pd.DataFrame) -> tuple[pd.DataFrame, str]:
-    c = coord[["season", "team", "def_coordinator"]].copy()
-    c["dc"] = c["def_coordinator"].fillna("").str.split(" / ").str[0].str.strip()
+    col = "def_play_caller" if "def_play_caller" in coord else "def_coordinator"
+    c = coord[["season", "team", col]].copy()
+    c["dc"] = c[col].fillna("").str.split(" / ").str[0].str.strip()
     metrics = ["rush_ypc", "rush_epa", "sack_rate", "dropback_epa", "blitz_rate", "light_box_rate",
                "wr_rec_yds_allowed", "te_rec_yds_allowed", "rb_rec_yds_allowed", "te_rec_allowed",
                "rb_rec_allowed"]
     a = _dev(ts[ts["side"] == "def"], metrics).merge(c[["season", "team", "dc"]], on=["season", "team"], how="left")
     prev = a.assign(season=a["season"] + 1)
     pair = a.merge(prev, on=["season", "team"], suffixes=("", "_prev"))
-    pair = pair[pair["season"] <= 2025]
+    pair = pair[(pair["season"] <= 2025) & pair["dc"].fillna("").ne("") & pair["dc_prev"].fillna("").ne("")]
     pair["new_dc"] = (pair["dc"] != pair["dc_prev"]).astype(float)
     # Defenses whose new coordinator ran another defense last season
     by_dc = prev.dropna(subset=["dc"]).set_index(["season", "dc"])
@@ -433,12 +434,13 @@ def coordinator_test(ts: pd.DataFrame, coord: pd.DataFrame) -> tuple[pd.DataFram
                     "movers": n_mv, "follows_dc": follow, "t_follow": t_follow,
                     "verdict_follow": _verdict(t_follow, follow > 0) if np.isfinite(t_follow) else "too few"})
     tab = pd.DataFrame(out)
-    md = ["## 4. Defensive coordinator (season-to-season, 2021->25)", "",
+    md = ["## 4. Defensive play caller (season-to-season, 2022->25)", "",
           "carryover_same_dc / new_dc = share of last season's deviation from league that repeats when the "
           "coordinator stays / changes (t_change tests the difference). follows_dc = for coordinators who "
           "moved teams, how much of their OLD defense's deviation shows up in their new defense, beyond the "
-          "new team's own last season. Coordinators from Wikipedia team-season pages "
-          "(data/external/coordinators.csv); a head coach who calls the defense is not separated.", "",
+          "new team's own last season. Coordinators from "
+          "(data/external/coordinators.csv, 2022-25 from public staff lists); the defensive play caller is used "
+          "where it isn't the coordinator (e.g. a head coach who calls the defense).", "",
           tab.to_markdown(index=False, floatfmt=".2f"), ""]
     return tab, "\n".join(md)
 

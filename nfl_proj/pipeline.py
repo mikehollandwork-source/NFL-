@@ -91,9 +91,11 @@ def run_week(tables: dict, cfg: dict, paths: dict, week: int, asof: bool = False
                       set(outs.get("player_id", pd.Series(dtype=str))) - {""},
                       set(outs.get("player", pd.Series(dtype=str))), cfg)
 
-    from .priors import Priors, load_prev_plays
+    from .priors import Priors, def_caller_change, load_prev_plays
     prev = cfg.get("priors", {}).get("season")
-    priors = Priors(load_prev_plays(paths["db"].parent / f"nfl_{int(prev)}.db", cfg) if prev else None, cfg, coach)
+    priors = Priors(load_prev_plays(paths["db"].parent / f"nfl_{int(prev)}.db", cfg) if prev else None, cfg, coach,
+                    def_callers=def_caller_change(paths["db"].parent / "external" / "coordinators.csv",
+                                                  int(cfg["season"]), int(prev)) if prev else None)
     t = dict(t)
     t["_streaks"] = streak_persistence(paths, cfg)
     proj = Projector(plays, t["player_games"], games, cfg, labels, overrides, scheme, coach,

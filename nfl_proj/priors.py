@@ -22,7 +22,8 @@ import pandas as pd
 
 
 class Priors:
-    def __init__(self, plays_prev: pd.DataFrame | None, cfg: dict, coach: pd.DataFrame | None = None):
+    def __init__(self, plays_prev: pd.DataFrame | None, cfg: dict, coach: pd.DataFrame | None = None,
+                 def_callers: dict | None = None):
         c = cfg.get("priors", {})
         self.enabled = c.get("enabled", True) and plays_prev is not None and not plays_prev.empty
         self.r_off = c.get("regress", 0.5)
@@ -33,6 +34,11 @@ class Priors:
         # flat regress values when present. A new play-caller scales the offense's carryover.
         self.carry = c.get("carryover", {})
         self.new_caller_scale = self.r_new / self.r_off if self.r_off else 1.0
+        # Defensive play caller: last season's defense repeats only when the same person calls it
+        # (factor_tests section 4: carryover ~0 with a new caller). team -> True if same caller.
+        self.def_same = def_callers or {}
+        self.def_same_scale = c.get("def_same_caller_scale", 1.5)
+        self.def_new_scale = c.get("def_new_caller_scale", 0.25)
         self.new_caller = set()
         if coach is not None and not coach.empty:
             self.new_caller = set(coach[coach["new_caller_2026"].astype(bool)]["team"])
@@ -63,6 +69,8 @@ class Priors:
         key = f"{side}_{stat}" if stat else None
         if key in self.carry:
             r = float(self.carry[key])
+            if side == "def" and team in self.def_same:
+                return min(r * (self.def_same_scale if self.def_same[team] else self.def_new_scale), 0.9)
             return r * self.new_caller_scale if side == "off" and team in self.new_caller else r
         if side == "def":
             return self.r_def
@@ -81,6 +89,17 @@ class Priors:
         if not self.enabled or team not in self.plays_pg:
             return 1.0
         return float(1 + self._regress("off", team, "plays") * (self.plays_pg[team] - 1))
+
+
+def def_caller_change(path: Path, season: int, prev: int) -> dict:
+    """team -> True when the defensive play caller is the same as in ``prev``."""
+    if not Path(path).exists():
+        return {}
+    c = pd.read_csv(path)
+    a = c[c["season"] == prev].set_index("team")["def_play_caller"]
+    b = c[c["season"] == season].set_index("team")["def_play_caller"]
+    both = a.index.intersection(b.index)
+    return {t: str(a[t]).strip() == str(b[t]).strip() for t in both if isinstance(a[t], str) and isinstance(b[t], str)}
 
 
 def load_prev_plays(db_path: Path, cfg: dict) -> pd.DataFrame | None:
