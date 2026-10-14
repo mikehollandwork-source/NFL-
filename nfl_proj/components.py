@@ -19,7 +19,8 @@ def actual_components(plays: pd.DataFrame, games: pd.DataFrame) -> pd.DataFrame:
     rows = []
     pts = pd.concat([games[["boxscore_id", "home", "home_score"]].rename(columns={"home": "team", "home_score": "points"}),
                      games[["boxscore_id", "away", "away_score"]].rename(columns={"away": "team", "away_score": "points"})])
-    pts = pts.set_index(["boxscore_id", "team"])["points"]
+    pts = pts.dropna(subset=["boxscore_id"]).drop_duplicates(["boxscore_id", "team"])
+    pts = {(b, t): float(v) for b, t, v in zip(pts["boxscore_id"], pts["team"], pts["points"])}
     for (box, team), g in scrim.groupby(["boxscore_id", "offense"]):
         allg = live[(live["boxscore_id"] == box) & (live["offense"] == team)]
         drives = g["drive"].dropna().unique() if "drive" in g else []

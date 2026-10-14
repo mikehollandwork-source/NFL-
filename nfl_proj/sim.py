@@ -114,7 +114,8 @@ class Simulator:
             for i, pid in enumerate(pids):
                 k = per[:, i]
                 e = eff.loc[(pid, b)] if (pid, b) in eff.index else None
-                ypt = (e["ypp_s"] if e is not None else e_b["ypp"]) * e_b["m_ypp"] * cbf.get(pid, 1.0)
+                ypt = (e["ypp_s"] if e is not None else e_b["ypp"]) * e_b["m_ypp"] * cbf.get(pid, 1.0) * \
+                    P.sig_mult(team, opp, pid, "pass").get(b, 1.0)
                 cr = min((e["cmp_s"] if e is not None else e_b["cmp"]) * e_b["m_cmp"], 0.95)
                 comp = rng.binomial(k, max(cr, 0.01))
                 scale = ypt / max(cr, 0.01) / pool_mean if pool_mean > 0 else 1.0
@@ -170,7 +171,7 @@ class Simulator:
             for i, pid in enumerate(sb["rusher_id"]):
                 k = per[:, i]
                 e = reff_p.loc[(pid, b)] if (pid, b) in reff_p.index else None
-                ypc = (e["ypp_s"] if e is not None else reff[b]["ypp"]) * reff[b]["m_ypp"]
+                ypc = (e["ypp_s"] if e is not None else reff[b]["ypp"]) * reff[b]["m_ypp"] * P.sig_mult(team, opp, pid, "run").get(b, 1.0)
                 yds, longest = _draw_sum_max(rng, k, pool, shift=ypc - pool.mean())
                 if pid in rtd.index:
                     rate = shrink(rtd.loc[pid, "td"] / rtd.loc[pid, "n"], rtd.loc[pid, "n"],

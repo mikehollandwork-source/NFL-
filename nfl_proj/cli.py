@@ -224,6 +224,15 @@ def main(argv=None):
         md += "\n## Your prop lines\n\n" + edge[["player", "stat", "line", "median", "p_over", "p_under"]] \
             .to_markdown(index=False, floatfmt=".2f") + "\n"
     Path(f"{stem}_report.md").write_text(md)
+    plays_md = [m for c in r["ctx"] for m in c.get("_plays_md", [])]
+    if plays_md:
+        Path(f"{stem}_player_plays.md").write_text(
+            f"# Week {week}: each player's plays from last game\n\n"
+            "Every play the main players were involved in last game. `cancelled` = netted zero or less, a "
+            "turnover or a failed 3rd/4th down; `kept` = everything else. Next week their volume goes to the "
+            "kinds of plays they were kept on. The opponent column is how this week's defense handles that exact "
+            "kind of play (play action, screens) beyond its overall numbers in that direction.\n\n"
+            + "\n".join(plays_md))
     print(f"wrote {stem}_projections.csv, _props.csv, _team_totals.csv, _picks.csv, _report.md "
           f"({wide['player'].nunique()} players, {len(r['ctx']) // 2} games)")
 

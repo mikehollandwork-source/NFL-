@@ -55,6 +55,12 @@ class Projector:
                  corners=None, tables: dict | None = None, priors=None):
         self.cfg = cfg
         self.corners = corners
+        self.playview = None
+        self._sig_cache = {}
+        sc = cfg.get("streaks", {})
+        self.streak_cfg = {"enabled": sc.get("enabled", True),
+                           "cap": {"rec": sc.get("cap_rec_yards", 40.0), "rush": sc.get("cap_rush_yards", 30.0)}}
+        self.streak = (tables or {}).get("_streaks", {}) or {}
         from .priors import Priors
         self.priors = priors if priors is not None else Priors(None, cfg)
         self._cb_cache = {}
@@ -498,6 +504,10 @@ class Projector:
         grid = pd.MultiIndex.from_product([players.index, df[bucket_col].unique()], names=[id_col, bucket_col])
         pb = pb.set_index([id_col, bucket_col]).reindex(grid).reset_index()
         pb["share"] = pb["share"].fillna(pb[id_col].map(players) * 0.5)
+        # Volume streaks: keep only the measured share of a two-game run
+        vf = self._streak_factors(df, id_col, "rec" if id_col == "target_id" else "rush", "vol")
+        if vf:
+            pb["share"] = pb["share"] * pb[id_col].map(vf).fillna(1.0)
         pb["share"] = pb["share"] / pb.groupby(bucket_col)["share"].transform("sum")
         if team is not None and kind is not None and not players.empty:
             # Coach angle: pull the top player's share toward the play-caller's
@@ -512,14 +522,80 @@ class Projector:
         return pb[[id_col, bucket_col, "share"]]
 
     def _player_eff(self, df, id_col, bucket_col, team_eff: dict, k: float) -> pd.DataFrame:
+        """Per player and play type: yards per play and catch rate, shrunk
+        toward the team's rate. Long plays are capped when measuring the
+        player (they mostly don't repeat); the player's capped rate is
+        compared with the team's capped rate and that ratio is applied to
+        the team's normal rate, so the league level is unchanged. Then a
+        recent hot / cold streak is kept only to the measured extent."""
         d = df[df[id_col].notna()]
-        g = bucket_rates(d, [id_col, bucket_col])
+        fam = "rec" if id_col == "target_id" else "rush"
+        cap = self.streak_cfg["cap"][fam]
+        dc = d.assign(yards=d["yards"].clip(upper=cap))
+        g = bucket_rates(dc, [id_col, bucket_col])
+        team_c = bucket_rates(dc, [bucket_col]).set_index(bucket_col)["ypp"]
         g["team_ypp"] = g[bucket_col].map(lambda b: team_eff.get(b, {}).get("ypp", np.nan))
         g["team_cmp"] = g[bucket_col].map(lambda b: team_eff.get(b, {}).get("cmp", np.nan))
-        g["ypp_s"] = shrink(g["ypp"], g["n_raw"], g["team_ypp"], k)
+        tc = g[bucket_col].map(team_c)
+        ratio = shrink(g["ypp"] / tc.replace(0, np.nan), g["n_raw"], 1.0, k)
+        g["ypp_s"] = np.where(tc > 0, ratio * g["team_ypp"], shrink(g["ypp"], g["n_raw"], g["team_ypp"], k))
         g["cmp_s"] = shrink(g["cmp"], g["n_raw"], g["team_cmp"], k)
+        f = self._streak_factors(dc, id_col, fam, "eff")
+        if f:
+            g["ypp_s"] = g["ypp_s"] * g[id_col].map(f).fillna(1.0)
         td = d.groupby(id_col).agg(td=("touchdown", "sum"), n=("touchdown", "size"))
         return g.set_index([id_col, bucket_col]), td
+
+    # ------------------------------------------------------ play-level matchup
+    def sig_mult(self, team: str, opp: str, pid: str, family: str) -> dict:
+        """{bucket: yards multiplier} from how this defense handles the exact
+        kinds of plays (play action, screens) the player was kept on last game."""
+        if not self.cfg.get("player_adaptation", {}).get("play_level", True) or self.player_cut() <= 0:
+            return {}
+        key = (team, opp, pid, family)
+        if key not in self._sig_cache:
+            if self.playview is None:
+                from .plays_view import PlayView
+                self.playview = PlayView(self.all, self.cfg)
+            self._sig_cache[key] = self.playview.player_factors(team, opp, pid, family)
+        return self._sig_cache[key]
+
+    # ------------------------------------------------------ streak regression
+    def _streak_factors(self, d: pd.DataFrame, id_col: str, fam: str, what: str) -> dict:
+        """player -> multiplier that keeps only the measured share of a
+        two-game streak. ``what`` = "eff" (yards per play) or "vol" (share
+        of the team's targets / carries)."""
+        p = self.streak.get(f"{fam}_{what}", {}).get("persist")
+        if p is None or not self.streak_cfg["enabled"] or d.empty:
+            return {}
+        weeks = sorted(d["week"].unique())
+        if len(weeks) < 3:
+            return {}
+        recent_w, base_w = weeks[-2:], weeks[:-2]
+        out = {}
+        if what == "eff":
+            for pid, g in d.groupby(id_col):
+                base, rec = g[g["week"].isin(base_w)], g[g["week"].isin(recent_w)]
+                if len(base) < 4 or len(rec) < 4:
+                    continue
+                b, r = base["yards"].mean(), rec["yards"].mean()
+                cur = np.average(g["yards"], weights=g["w"])
+                target = b + p * (r - b)
+                if cur > 0 and target > 0:
+                    out[pid] = float(np.clip(target / cur, 0.7, 1.3))
+        else:
+            tot = d.groupby("week").size()
+            for pid, g in d.groupby(id_col):
+                n = g.groupby("week").size().reindex(weeks, fill_value=0)
+                sh = n / tot.reindex(weeks)
+                base, rec = sh[base_w].mean(), sh[recent_w].mean()
+                if n[base_w].sum() < 4:
+                    continue
+                cur = float((g["w"].sum()) / d["w"].sum())
+                target = base + p * (rec - base)
+                if cur > 0 and target > 0:
+                    out[pid] = float(np.clip(target / cur, 0.6, 1.4))
+        return out
 
     # ------------------------------------------------------ player adaptation
     def player_signal(self, team: str, family: str) -> pd.DataFrame:
@@ -683,7 +759,7 @@ class Projector:
             x = row(pid)
             x["targets"] = x.get("targets", 0) + tgts
             x["receptions"] = x.get("receptions", 0) + tgts * min(cr * peff[b]["m_cmp"], 0.98)
-            yds = tgts * ypt * peff[b]["m_ypp"]
+            yds = tgts * ypt * peff[b]["m_ypp"] * self.sig_mult(team, opp, pid, "pass").get(b, 1.0)
             rec_raw += yds
             rec_adj += yds * cbf.get(pid, 1.0)
             x["rec_yds"] = x.get("rec_yds", 0) + yds * cbf.get(pid, 1.0)
@@ -708,7 +784,8 @@ class Projector:
             ypc = e["ypp_s"] if e is not None else reff[b]["ypp"]
             x = row(pid)
             x["carries"] = x.get("carries", 0) + car
-            x["rush_yds"] = x.get("rush_yds", 0) + car * ypc * reff[b]["m_ypp"]
+            x["rush_yds"] = x.get("rush_yds", 0) + car * ypc * reff[b]["m_ypp"] * \
+                self.sig_mult(team, opp, pid, "run").get(b, 1.0)
         for pid, x in rows.items():
             if pid in rtd.index:
                 rate = shrink(rtd.loc[pid, "td"] / rtd.loc[pid, "n"], rtd.loc[pid, "n"],

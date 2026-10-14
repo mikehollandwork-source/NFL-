@@ -174,6 +174,10 @@ def week_report(week: int, proj: pd.DataFrame, contexts: list[dict], style: pd.D
             cl2 = corners.describe(opp)
             if cl2:
                 out.append(f"**{opp} secondary:** {cl2}.")
+        if projector is not None and projector.player_cut() > 0:
+            plays_md = _player_plays_md(projector, team, opp, week, proj)
+            if plays_md:
+                ctx.setdefault("_plays_md", []).append(plays_md)
         if projector is not None and ctx.get("player_changes"):
             view = projector.adaptation_view(team, opp, week, ctx["player_changes"])
             if not view.empty:
@@ -270,3 +274,23 @@ def styles_report(style: pd.DataFrame, dprof: pd.DataFrame, labels: pd.DataFrame
                 "pressure comes without blitzing), which is worth knowing before betting on it.", "",
                 chk.to_markdown(index=False) if not chk.empty else "(no online blitz data)", ""]
     return "\n".join(out)
+
+
+def _player_plays_md(projector, team: str, opp: str, week: int, proj: pd.DataFrame) -> str:
+    """Each main player's individual plays from last game (kept / cancelled)
+    and how this defense handles the kept ones."""
+    from .plays_view import PlayView
+    if projector.playview is None:
+        projector.playview = PlayView(projector.all, projector.cfg)
+    t = proj[proj["team"] == team]
+    main = t.assign(vol=t["targets"] + t["carries"]).sort_values("vol", ascending=False).head(5)
+    out = [f"## {team} vs {opp}", ""]
+    for r in main.itertuples():
+        for fam, label in (("pass", "targets"), ("run", "carries")):
+            tab = projector.playview.table(team, opp, r.player_id, fam, week)
+            if tab.empty:
+                continue
+            kept = (tab["result"] == "kept").sum()
+            out += [f"**{r.player}** ({label} last game: {len(tab)}, kept {kept}, cancelled {len(tab) - kept})", "",
+                    tab.to_markdown(index=False), ""]
+    return "\n".join(out) if len(out) > 2 else ""

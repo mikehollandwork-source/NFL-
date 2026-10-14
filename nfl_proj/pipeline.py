@@ -94,6 +94,8 @@ def run_week(tables: dict, cfg: dict, paths: dict, week: int, asof: bool = False
     from .priors import Priors, load_prev_plays
     prev = cfg.get("priors", {}).get("season")
     priors = Priors(load_prev_plays(paths["db"].parent / f"nfl_{int(prev)}.db", cfg) if prev else None, cfg, coach)
+    t = dict(t)
+    t["_streaks"] = streak_persistence(paths, cfg)
     proj = Projector(plays, t["player_games"], games, cfg, labels, overrides, scheme, coach,
                      corners=corners, tables=t, priors=priors)
     _context_effects(proj, t, cfg, paths, week, teams, overrides, asof, log)
@@ -179,3 +181,29 @@ def _context_effects(proj, t, cfg, paths, week, teams, overrides, asof, log):
             m = oline.effect(est, len(miss))
             m["missing"] = list(miss["player"])
             proj.oline[team] = m
+
+
+
+def streak_persistence(paths, cfg) -> dict:
+    """Share of a two-game streak that persists, measured on last season
+    (so replays of this season use nothing from the future). Cached."""
+    import json
+    import sqlite3
+    if not cfg.get("streaks", {}).get("enabled", True):
+        return {}
+    prev = cfg.get("priors", {}).get("season")
+    if not prev:
+        return {}
+    cache = paths["nflverse"].parent / f"streaks_{int(prev)}.json"
+    if cache.exists():
+        return json.loads(cache.read_text())
+    db = paths["db"].parent / f"nfl_{int(prev)}.db"
+    if not db.exists():
+        return {}
+    from .streaks import measure
+    with sqlite3.connect(db) as con:
+        plays = pd.read_sql("select * from plays", con)
+    plays["season"] = int(prev)
+    res = measure(plays)
+    cache.write_text(json.dumps(res, indent=1))
+    return res

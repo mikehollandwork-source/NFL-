@@ -186,6 +186,7 @@ volume_prior_games = 3.0     # plays per game: 2025 counts as this many games
 mode = "assume"
 cut = 1.0
 min_plays = 1                # plays of a type last game before it can be cut
+play_level = true            # judge kept plays by their exact kind (play action, screens) vs this defense
 
 [weather]
 # Wind / cold / rain effects measured from 2025-26 outdoor games; forecasts
@@ -197,3 +198,12 @@ enabled = true
 # Missing starting offensive linemen: per-starter effects measured from
 # 2025-26 team-games, applied for starters listed out this week.
 enabled = true
+
+[streaks]
+# Regression after hot / cold streaks. The share of a two-game streak that
+# carries into the next game is measured on last season (efficiency and
+# volume separately) and only that share is kept. Long plays are capped
+# when measuring a player's efficiency (they mostly don't repeat).
+enabled = true
+cap_rec_yards = 40.0
+cap_rush_yards = 30.0
