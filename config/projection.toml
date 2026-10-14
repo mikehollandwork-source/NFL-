@@ -100,7 +100,9 @@ max_factor = 1.15
 
 [market]
 # Betting-market team totals (closing spread and over/under from nflverse).
-enabled = true
+# OFF: projections come from the model alone. Turning it on blends the
+# market's implied team totals into scoring and uses the spread for game script.
+enabled = false
 # Share of the projected team total taken from the market (rest = model).
 weight = 0.6
 # Teams that keep missing (or beating) their implied totals: the average miss
@@ -128,3 +130,9 @@ shadow_share = 0.7           # share of WR1's routes spent against an active sha
 te_weight = 0.5              # tight ends get this share of the corner-group effect
 min_factor = 0.8
 max_factor = 1.2
+
+[script]
+# Game script from the model's own projected margin (used when [market] is off):
+# the team projected to lead passes less, the trailing team passes more.
+enabled = true
+pass_rate_per_point = 0.004

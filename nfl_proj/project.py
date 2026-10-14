@@ -250,7 +250,8 @@ class Projector:
 
     # ---------------------------------------------------------- adjustments
     def adjustments(self, team: str, opp: str, week: int) -> dict:
-        """Strength-of-schedule factors and the market blend for one matchup."""
+        """Strength-of-schedule factors and game script for one matchup. The
+        betting-market blend only runs if [market] enabled = true (off by default)."""
         key = (team, opp, week, self._market_on)
         if key in self._adj_cache:
             return self._adj_cache[key]
@@ -262,20 +263,36 @@ class Projector:
                      "def_run": 1 + dw * (f("run", "def", opp) - 1),
                      "def_pts": 1 + dw * (f("points", "def", opp) - 1)},
              "market": None, "td_factor": 1.0, "ypp_factor": 1.0, "dropback_shift": 0.0}
-        self._adj_cache[key] = a  # provisional, so the base projection below sees no market
-        line = self.market.line(team, week) if self._market_on else None
-        if line is not None:
+        self._adj_cache[key] = a  # provisional, so the base projections below see no adjustment
+        if not self._market_on:
+            return a
+        line = self.market.line(team, week)
+        script = self.cfg.get("script", {})
+        if line is not None or script.get("enabled", True):
             self._market_on = False
             try:
-                base, _ = self.project_team(team, opp, week)
+                pts = self.model_points(team, opp, week)
+                opp_pts = self.model_points(opp, team, week) if line is None else None
             finally:
                 self._market_on = True
-            model_tds = float(base.get("pass_td", pd.Series(dtype=float)).sum()
-                              + base.get("rush_td", pd.Series(dtype=float)).sum())
-            m = self.market.blend(line, model_tds * self.pts_per_td)
-            a.update(market=m, td_factor=m["td_factor"], ypp_factor=m["ypp_factor"],
-                     dropback_shift=m["dropback_shift"])
+            if line is not None:
+                m = self.market.blend(line, pts)
+                a.update(market=m, td_factor=m["td_factor"], ypp_factor=m["ypp_factor"],
+                         dropback_shift=m["dropback_shift"])
+            else:
+                # Game script from our own projected margin: the team we project
+                # to lead runs more, the trailing team throws more.
+                margin = pts - opp_pts
+                a["script"] = {"model_pts": pts, "opp_model_pts": opp_pts, "margin": margin}
+                a["dropback_shift"] = -script.get("pass_rate_per_point", 0.004) * margin
         return a
+
+    def model_points(self, team: str, opp: str, week: int) -> float:
+        """Projected points from the model alone: projected TDs x points per TD."""
+        base, _ = self.project_team(team, opp, week)
+        tds = float(base.get("pass_td", pd.Series(dtype=float)).sum()
+                    + base.get("rush_td", pd.Series(dtype=float)).sum())
+        return tds * self.pts_per_td
 
     def td_mults(self, team: str, opp: str, week: int) -> dict:
         """Opponent TD / INT multipliers after schedule and market adjustments."""

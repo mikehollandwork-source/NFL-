@@ -94,6 +94,10 @@ def _adjust_lines(ctx: dict) -> list[str]:
         out.append(f"**Market:** implied team total {m['implied']:.1f} (spread {m['spread']:+.1f}){miss}. "
                    f"Model {m['model_pts']:.1f} → blended {m['blended_pts']:.1f}: TD rates x{m['td_factor']:.2f}, "
                    f"yards x{m['ypp_factor']:.2f}, dropback rate {m['dropback_shift']:+.1%}.")
+    sc = a.get("script")
+    if sc:
+        out.append(f"**Model game script:** projected {sc['model_pts']:.1f} – {sc['opp_model_pts']:.1f} "
+                   f"(margin {sc['margin']:+.1f}) → dropback rate {a['dropback_shift']:+.1%}.")
     s = a["sos"]
     moved = {k: v for k, v in s.items() if abs(v - 1) >= 0.02}
     if moved:

@@ -145,12 +145,11 @@ play-by-play. A heavy-blitz team that isn't getting sacks shows up as a mismatch
    against the opponents each team actually faced (additive offense + defense ratings, ridge-shrunk,
    `[sos]`). Each raw input is scaled by adjusted ÷ raw, capped at ±15%. An offense that padded its
    numbers against soft defenses is scaled down; a defense that faced strong offenses gets credit.
-7. **Market team totals** (`[market]`): the implied team total from the closing spread and
-   over/under, plus a correction for teams that keep missing (or beating) their implied totals
-   (their average miss, shrunk by `miss_shrink_games`). That target is blended with the model's
-   own points (`weight` = 0.6 market). TD rates scale to hit the blend, yardage moves by the
-   0.3 power of that, and the spread shifts the dropback rate (favorites run more).
-   `week_NN_report.md` lists the teams falling furthest short of their implied totals.
+7. **Game script** (`[script]`): the model projects both teams' points on its own, and the team
+   it projects to lead passes less (0.4% dropback rate per point of projected margin), the
+   trailing team more. **No betting-market input**: `[market]` is off by default. Turning it on
+   blends Vegas implied team totals into scoring and uses the spread for game script instead;
+   it's kept only for comparison runs.
 8. **Availability** (`[availability]`): the injury report marks Out (and Doubtful) players out.
    Before the week's report posts (Wed-Fri), players Out last week who also missed last week's
    game are carried as out. The starting QB is the depth chart's QB1 unless he's out or hasn't
