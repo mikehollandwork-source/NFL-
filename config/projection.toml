@@ -186,6 +186,9 @@ def_sack = 1075
 def_pass_td = 50000   # defense TD rates don't repeat at all
 def_run_td = 3000
 def_int = 1600
+def_pass_rate = 1030  # how much opponents throw against this defense
+def_deep_share = 830  # how often opponents throw deep against it (attempts)
+def_deep_eff = 205    # deep yards/attempt allowed beyond its overall pass defense (deep attempts)
 
 [priors]
 # Last season's team rates, regressed toward league average, as the

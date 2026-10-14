@@ -116,6 +116,18 @@ class Projector:
         self.off_pass_all = bucket_rates(self.passes, ["offense"]).set_index("offense")
         self.def_pass_all = bucket_rates(dweight(self.passes), ["defense"]).set_index("defense")
         self.off_run_all = bucket_rates(self.runs, ["offense"]).set_index("offense")
+        # Repeatable in-season pass-defense traits beyond overall rate (factor_tests section 7):
+        # how often opponents throw deep against them, and deep efficiency allowed.
+        pd_ = dweight(self.passes).assign(deep=lambda x: x["pb"].str.contains("_deep_").astype(float))
+        pd_ = pd_.assign(wd=pd_["w"] * pd_["deep"], wyd=pd_["w"] * pd_["deep"] * pd_["yards"].fillna(0),
+                         wy=pd_["w"] * pd_["yards"].fillna(0))
+        g = pd_.groupby("defense")[["w", "wd", "wyd", "wy"]].sum()
+        g["n"] = pd_.groupby("defense").size()
+        g["n_deep"] = pd_.groupby("defense")["deep"].sum()
+        self.def_deep = g
+        tot = g.sum()
+        self.lg_deep = {"share": tot["wd"] / tot["w"], "ypp": tot["wyd"] / tot["wd"] if tot["wd"] else np.nan,
+                        "all": tot["wy"] / tot["w"]}
         self.lg_run_all = bucket_rates(self.runs.assign(_all="run"), ["_all"]).set_index("_all").loc["run"]
         self.def_run_all = bucket_rates(dweight(self.runs), ["defense"]).set_index("defense")
 
@@ -412,7 +424,11 @@ class Projector:
 
         t, d = p[p["offense"] == team], p[p["defense"] == opp]
         db_rate = _wmean(t, "dropback")
-        db_rate += self.dw * (_wmean(d, "dropback") - self.lg_dropback) * 0.5
+        if self.measured and "def_pass_rate" in self.k:
+            # How much opponents throw against this defense, shrunk by its measured constant
+            db_rate += shrink(_wmean(d, "dropback"), len(d), self.lg_dropback, self.k["def_pass_rate"]) - self.lg_dropback
+        else:
+            db_rate += self.dw * (_wmean(d, "dropback") - self.lg_dropback) * 0.5
         c = self._coach(team)
         if c is not None and not pd.isna(c.get("pass_lean", np.nan)):
             # Early in the season lean on the play-caller's career pass tendency.
@@ -455,7 +471,8 @@ class Projector:
             tot = sum(share.values()) or 1.0
             share = {b: v / tot for b, v in share.items()}
         if family == "pass" and opp is not None:
-            ds = self.scheme_effect(team, opp)["deep_share"]
+            # Measured: the defense's own deep share faced this season (shrunk); legacy: scheme data
+            ds = self.deep_factors(opp)["share"] if self.measured else self.scheme_effect(team, opp)["deep_share"]
             if ds != 1.0:
                 share = {b: v * (ds if "_deep_" in b else 1.0) for b, v in share.items()}
                 tot = sum(share.values()) or 1.0
@@ -503,6 +520,20 @@ class Projector:
         return {"ypp": float(team_ypp), "cmp": float(team_cmp), "td": float(lgr["td"]),
                 "m_ypp": m_ypp, "m_cmp": m_cmp}
 
+    def deep_factors(self, opp: str) -> dict:
+        """Deep share faced and deep efficiency allowed (relative to the
+        defense's overall pass rate), shrunk by their measured constants."""
+        out = {"share": 1.0, "eff": 1.0}
+        if not self.measured or opp not in self.def_deep.index or not self.lg_deep["share"]:
+            return out
+        g, lg = self.def_deep.loc[opp], self.lg_deep
+        share = shrink(g["wd"] / g["w"] if g["w"] else np.nan, g["n"], lg["share"], self.k.get("def_deep_share", 830))
+        out["share"] = float(share / lg["share"])
+        if g["wd"] > 0 and g["wy"] > 0 and lg["ypp"] and np.isfinite(lg["ypp"]):
+            rel = (g["wyd"] / g["wd"] / lg["ypp"]) / (g["wy"] / g["w"] / lg["all"])
+            out["eff"] = float(shrink(rel, g["n_deep"], 1.0, self.k.get("def_deep_eff", 205)))
+        return out
+
     def _matchup_measured(self, team, opp, family, b, lgr, week):
         """Bucket rate = league rate for this bucket x the offense's overall
         ratio x the defense's overall ratio, each shrunk by its measured
@@ -530,6 +561,8 @@ class Projector:
         m_ypp = float(shrink(d["ypp"] if d is not None else np.nan, d["n_raw"] if d is not None else 0,
                              lg_all["ypp"] * pf("def", opp, fam), kd) / lg_all["ypp"])
         sfam = "run" if fam == "run" else ("deep" if "_deep_" in b else "short")
+        if sfam == "deep":
+            m_ypp *= self.deep_factors(opp)["eff"]
         m_ypp *= self.scheme_effect(team, opp)["ypp"][sfam]
         m_ypp *= self.comps.effect(team, opp)[fam]
         if week is not None:
