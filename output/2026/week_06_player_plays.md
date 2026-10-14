@@ -531,12 +531,6 @@ Every play the main players were involved in last game. `cancelled` = netted zer
 |     4 | 3&19   | deep right   |     0 | cancelled | —                  | (2:21) (Shotgun) 4-D.Watson pass incomplete deep right to 12-D.Boston (1-A.Thomas) [9-W.McDonald].           |
 |     4 | 2&6    | short right  |     0 | cancelled | —                  | (1:12) (No Huddle, Shotgun) 4-D.Watson pass incomplete short right to 12-D.Boston (1-A.Thomas) [56-D.Davis]. |
 
-**KC Concepcion** (targets last game: 1, kept 1, cancelled 0)
-
-|   qtr | down   | play       |   yds | result   | BAL on this play   | description                                                                                                    |
-|------:|:-------|:-----------|------:|:---------|:-------------------|:---------------------------------------------------------------------------------------------------------------|
-|     1 | 2&6    | short left |     5 | kept     | —                  | (7:04) (Shotgun) 4-D.Watson pass short left to 1-K.Concepcion to CLE 46 for 5 yards (29-M.Fitzpatrick). PENALT |
-
 **Deshaun Watson** (carries last game: 3, kept 1, cancelled 2)
 
 |   qtr | down   | play              |   yds | result    | BAL on this play   | description                                                                                                    |
@@ -544,6 +538,12 @@ Every play the main players were involved in last game. `cancelled` = netted zer
 |     1 | 1&10   | run outside left  |     4 | kept      | —                  | (4:53) (Shotgun) 4-D.Watson left end to NYJ 8 for 4 yards (29-M.Fitzpatrick). ** Injury Update: CLE-71-T.Howar |
 |     2 | 1&10   | run outside right |     0 | cancelled | —                  | (11:06) (Shotgun) 4-D.Watson right end to NYJ 23 for no gain (96-J.Heflin).                                    |
 |     3 | 3&2    | run               |     0 | cancelled | —                  | (4:32) (Shotgun) 4-D.Watson FUMBLES (Aborted) at CLE 9, recovered by CLE-23-R.Sanders at CLE 11. 23-R.Sanders  |
+
+**KC Concepcion** (targets last game: 1, kept 1, cancelled 0)
+
+|   qtr | down   | play       |   yds | result   | BAL on this play   | description                                                                                                    |
+|------:|:-------|:-----------|------:|:---------|:-------------------|:---------------------------------------------------------------------------------------------------------------|
+|     1 | 2&6    | short left |     5 | kept     | —                  | (7:04) (Shotgun) 4-D.Watson pass short left to 1-K.Concepcion to CLE 46 for 5 yards (29-M.Fitzpatrick). PENALT |
 
 **Harold Fannin Jr.** (targets last game: 4, kept 1, cancelled 3)
 
