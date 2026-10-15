@@ -139,19 +139,38 @@ def select(ev: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     return out
 
 
-def lock(props, lines, player_games, week, cfg, paper_dir: Path, root: Path, force=False) -> tuple[pd.DataFrame, Path]:
+def lock(props, lines, player_games, week, cfg, paper_dir: Path, root: Path, force=False,
+         teams: set | None = None) -> tuple[pd.DataFrame, Path]:
+    """Lock bets. With ``teams`` only games involving those teams are locked
+    (e.g. Thursday's game before the Sunday slate); bets already locked for
+    other games are kept unchanged and a game can be locked only once."""
     paper_dir.mkdir(parents=True, exist_ok=True)
     path = paper_dir / f"week_{week:02d}_locked.csv"
-    if path.exists() and not force:
+    prev = pd.read_csv(path) if path.exists() else pd.DataFrame()
+    if not prev.empty and teams is None and not force:
         raise FileExistsError(f"{path} is already locked; pass --force only if you mean to replace it")
     ev = evaluate(props, lines, player_games, week, cfg)
+    if teams is not None and not ev.empty:
+        ev = ev[ev["team"].isin(teams) | ev["opp"].isin(teams)]
+    if not prev.empty and not force:
+        done = set(prev["game"])
+        clash = set(ev["game"]) & done if not ev.empty else set()
+        if clash:
+            raise FileExistsError(f"already locked: {', '.join(sorted(clash))}")
     if not ev.empty:
+        tag = "" if teams is None else "_" + "_".join(sorted(teams))
         ev.drop(columns=[c for c in ev.columns if c.startswith("_")], errors="ignore") \
-          .to_csv(paper_dir / f"week_{week:02d}_all_lines_evaluated.csv", index=False)
-    bets = select(ev, cfg)
+          .to_csv(paper_dir / f"week_{week:02d}_all_lines_evaluated{tag}.csv", index=False)
+    c = dict(cfg)
+    if teams is not None and not prev.empty:
+        # The weekly cap counts bets already locked this week
+        c = {**cfg, "paper": {**cfg.get("paper", {}),
+                              "max_bets": max(cfg.get("paper", {}).get("max_bets", 15) - len(prev), 0)}}
+    bets = select(ev, c)
     bets = bets.assign(locked_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
                        model_commit=_git_rev(root))
-    bets.to_csv(path, index=False)
+    out = bets if (prev.empty or force) else pd.concat([prev, bets], ignore_index=True)
+    out.to_csv(path, index=False)
     return bets, path
 
 

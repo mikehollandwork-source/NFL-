@@ -104,6 +104,7 @@ def main(argv=None):
     lk = sub.add_parser("lock")
     lk.add_argument("--week", type=int)
     lk.add_argument("--force", action="store_true")
+    lk.add_argument("--teams", help="lock only games involving these teams, e.g. SEA,DEN (Thursday game)")
     gr = sub.add_parser("grade")
     gr.add_argument("--week", type=int, required=True)
     sub.add_parser("paper-summary")
@@ -212,7 +213,8 @@ def main(argv=None):
         r = run_week(t, cfg, paths, wk)
         for f in r["flags"]:
             print("availability:", f)
-        bets, path = lock(r["props"], lines, r["tables"]["player_games"], wk, cfg, paper_dir, ROOT, args.force)
+        teams = {x.strip().upper() for x in args.teams.split(",")} if args.teams else None
+        bets, path = lock(r["props"], lines, r["tables"]["player_games"], wk, cfg, paper_dir, ROOT, args.force, teams)
         print(f"locked {len(bets)} bets -> {path}")
         if not bets.empty:
             print(bets[["player", "stat", "side", "line", "odds", "p_cal", "ev", "stake"]].to_markdown(

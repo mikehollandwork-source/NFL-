@@ -37,6 +37,12 @@ def _draw_sum_max(rng, counts, pool, scale=1.0, shift=0.0):
     return total, np.where(counts > 0, longest, 0.0)
 
 
+
+def norm_cdf(x: float) -> float:
+    from math import erf, sqrt
+    return 0.5 * (1 + erf(x / sqrt(2)))
+
+
 class Simulator:
     def __init__(self, proj: Projector, player_games: pd.DataFrame, defenders: pd.DataFrame | None,
                  kickers: pd.DataFrame | None, n_sims: int = 5000, seed: int = 0):
@@ -152,6 +158,15 @@ class Simulator:
             acc(qb, "rush_yds", syds)
             acc(qb, "rush_td", rng.binomial(scr, min(P.scramble_td_rate(team) * tm["run_td"], 0.5)))
             acc(qb, "longest_rush", slong, "max")
+            # Kneel-downs: official rushing attempts (what books settle on) include them, the
+            # play model doesn't. 2023-25: winners kneel 1.34 per game, losers 0.22 (ends of halves).
+            kc = P.cfg.get("sim", {}).get("kneels", {"loser": 0.22, "winner": 1.34, "margin_sd": 13.5})
+            if kc:
+                script = P.adjustments(team, opp, week).get("script", {}) if week is not None else {}
+                p_win = float(norm_cdf(script.get("margin", 0.0) / kc["margin_sd"]))
+                kn = rng.poisson(kc["loser"] + (kc["winner"] - kc["loser"]) * p_win, n)
+                acc(qb, "carries", kn)
+                acc(qb, "rush_yds", -kn)
 
         # --- rushing
         tr = P.runs[P.runs["offense"] == team]
