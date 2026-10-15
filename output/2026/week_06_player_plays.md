@@ -531,6 +531,12 @@ Every play the main players were involved in last game. `cancelled` = netted zer
 |     4 | 3&19   | deep right   |     0 | cancelled | —                  | (2:21) (Shotgun) 4-D.Watson pass incomplete deep right to 12-D.Boston (1-A.Thomas) [9-W.McDonald].           |
 |     4 | 2&6    | short right  |     0 | cancelled | —                  | (1:12) (No Huddle, Shotgun) 4-D.Watson pass incomplete short right to 12-D.Boston (1-A.Thomas) [56-D.Davis]. |
 
+**KC Concepcion** (targets last game: 1, kept 1, cancelled 0)
+
+|   qtr | down   | play       |   yds | result   | BAL on this play   | description                                                                                                    |
+|------:|:-------|:-----------|------:|:---------|:-------------------|:---------------------------------------------------------------------------------------------------------------|
+|     1 | 2&6    | short left |     5 | kept     | —                  | (7:04) (Shotgun) 4-D.Watson pass short left to 1-K.Concepcion to CLE 46 for 5 yards (29-M.Fitzpatrick). PENALT |
+
 **Deshaun Watson** (carries last game: 3, kept 1, cancelled 2)
 
 |   qtr | down   | play              |   yds | result    | BAL on this play   | description                                                                                                    |
@@ -538,12 +544,6 @@ Every play the main players were involved in last game. `cancelled` = netted zer
 |     1 | 1&10   | run outside left  |     4 | kept      | —                  | (4:53) (Shotgun) 4-D.Watson left end to NYJ 8 for 4 yards (29-M.Fitzpatrick). ** Injury Update: CLE-71-T.Howar |
 |     2 | 1&10   | run outside right |     0 | cancelled | —                  | (11:06) (Shotgun) 4-D.Watson right end to NYJ 23 for no gain (96-J.Heflin).                                    |
 |     3 | 3&2    | run               |     0 | cancelled | —                  | (4:32) (Shotgun) 4-D.Watson FUMBLES (Aborted) at CLE 9, recovered by CLE-23-R.Sanders at CLE 11. 23-R.Sanders  |
-
-**KC Concepcion** (targets last game: 1, kept 1, cancelled 0)
-
-|   qtr | down   | play       |   yds | result   | BAL on this play   | description                                                                                                    |
-|------:|:-------|:-----------|------:|:---------|:-------------------|:---------------------------------------------------------------------------------------------------------------|
-|     1 | 2&6    | short left |     5 | kept     | —                  | (7:04) (Shotgun) 4-D.Watson pass short left to 1-K.Concepcion to CLE 46 for 5 yards (29-M.Fitzpatrick). PENALT |
 
 **Harold Fannin Jr.** (targets last game: 4, kept 1, cancelled 3)
 
@@ -703,6 +703,17 @@ Every play the main players were involved in last game. `cancelled` = netted zer
 |------:|:-------|:-----------|------:|:---------|:-------------------|:--------------------------------------------------------|
 |     2 | 4&1    | run middle |     1 | kept     | —                  | (7:48) 84-T.Warren up the middle for 1 yard, TOUCHDOWN. |
 
+**Josh Downs** (targets last game: 6, kept 2, cancelled 4)
+
+|   qtr | down   | play                    |   yds | result    | TEN on this play   | description                                                                                                    |
+|------:|:-------|:------------------------|------:|:----------|:-------------------|:---------------------------------------------------------------------------------------------------------------|
+|     1 | 3&5    | short left              |     0 | cancelled | —                  | (7:15) (Shotgun) 17-D.Jones pass short left to 2-J.Downs to PIT 38 for no gain (5-J.Ramsey). Penalty on IND-13 |
+|     2 | 1&15   | deep right, play action |    42 | kept      | x0.88              | (13:12) (Shotgun) 17-D.Jones pass deep right to 2-J.Downs to PIT 34 for 42 yards (3-J.Brisker).                |
+|     3 | 1&10   | short left              |     5 | kept      | —                  | (14:10) (Shotgun) 17-D.Jones pass short left to 2-J.Downs to PIT 40 for 5 yards (22-A.Samuel).                 |
+|     3 | 2&8    | short left              |     0 | cancelled | —                  | (2:27) (Shotgun) 17-D.Jones pass incomplete short left to 2-J.Downs.                                           |
+|     4 | 4&17   | deep left               |     0 | cancelled | —                  | (4:17) (Shotgun) 17-D.Jones pass incomplete deep left to 2-J.Downs (41-P.Wilson).                              |
+|     4 | 1&10   | deep middle             |     0 | cancelled | —                  | (2:58) (No Huddle, Shotgun) 17-D.Jones pass incomplete deep middle to 2-J.Downs (3-J.Brisker).                 |
+
 **Seth McGowan** (targets last game: 1, kept 1, cancelled 0)
 
 |   qtr | down   | play       |   yds | result   | TEN on this play   | description                                                                                                |
@@ -718,17 +729,6 @@ Every play the main players were involved in last game. `cancelled` = netted zer
 |     3 | 1&10   | run inside left   |     2 | kept      | —                  | (12:49) (Shotgun) 20-S.McGowan left tackle to PIT 32 for 2 yards (97-C.Heyward; 3-J.Brisker). |
 |     3 | 2&1    | run middle        |     3 | kept      | —                  | (3:46) 20-S.McGowan up the middle to PIT 24 for 3 yards (94-Y.Black; 6-P.Queen).              |
 |     3 | 1&10   | run inside left   |     2 | kept      | —                  | (3:08) 20-S.McGowan left guard to PIT 22 for 2 yards (5-J.Ramsey; 96-G.Rubio).                |
-
-**Josh Downs** (targets last game: 6, kept 2, cancelled 4)
-
-|   qtr | down   | play                    |   yds | result    | TEN on this play   | description                                                                                                    |
-|------:|:-------|:------------------------|------:|:----------|:-------------------|:---------------------------------------------------------------------------------------------------------------|
-|     1 | 3&5    | short left              |     0 | cancelled | —                  | (7:15) (Shotgun) 17-D.Jones pass short left to 2-J.Downs to PIT 38 for no gain (5-J.Ramsey). Penalty on IND-13 |
-|     2 | 1&15   | deep right, play action |    42 | kept      | x0.88              | (13:12) (Shotgun) 17-D.Jones pass deep right to 2-J.Downs to PIT 34 for 42 yards (3-J.Brisker).                |
-|     3 | 1&10   | short left              |     5 | kept      | —                  | (14:10) (Shotgun) 17-D.Jones pass short left to 2-J.Downs to PIT 40 for 5 yards (22-A.Samuel).                 |
-|     3 | 2&8    | short left              |     0 | cancelled | —                  | (2:27) (Shotgun) 17-D.Jones pass incomplete short left to 2-J.Downs.                                           |
-|     4 | 4&17   | deep left               |     0 | cancelled | —                  | (4:17) (Shotgun) 17-D.Jones pass incomplete deep left to 2-J.Downs (41-P.Wilson).                              |
-|     4 | 1&10   | deep middle             |     0 | cancelled | —                  | (2:58) (No Huddle, Shotgun) 17-D.Jones pass incomplete deep middle to 2-J.Downs (3-J.Brisker).                 |
 
 **Keenan Allen** (targets last game: 9, kept 5, cancelled 4)
 
@@ -848,12 +848,6 @@ Every play the main players were involved in last game. `cancelled` = netted zer
 |     1 | 2&10   | deep middle, play action |    16 | kept      | x0.97              | (12:43) (Shotgun) 10-D.Maye pass deep middle to 87-R.Doubs to LV 35 for 16 yards (35-H.Masses) [98-M.Crosby]. |
 |     2 | 1&10   | deep left                |     0 | cancelled | —                  | (11:34) (Shotgun) 10-D.Maye pass incomplete deep left to 87-R.Doubs (26-D.Porter).                            |
 
-**Drake Maye** (carries last game: 1, kept 1, cancelled 0)
-
-|   qtr | down   | play             |   yds | result   | NYJ on this play   | description                                                 |
-|------:|:-------|:-----------------|------:|:---------|:-------------------|:------------------------------------------------------------|
-|     3 | 3&1    | run outside left |     3 | kept     | —                  | (3:14) (Shotgun) 10-D.Maye left end for 3 yards, TOUCHDOWN. |
-
 **Hunter Henry** (targets last game: 4, kept 3, cancelled 1)
 
 |   qtr | down   | play                |   yds | result    | NYJ on this play   | description                                                                                                    |
@@ -862,6 +856,12 @@ Every play the main players were involved in last game. `cancelled` = netted zer
 |     1 | 4&3    | short middle        |     7 | kept      | —                  | (2:34) (Shotgun) 10-D.Maye pass short middle to 85-H.Henry to LV 1 for 7 yards (31-T.Stukes).                  |
 |     2 | 2&13   | short right, screen |    26 | kept      | x0.96              | (:38) (Shotgun) 10-D.Maye pass short right to 85-H.Henry to LV 11 for 26 yards (7-Q.Walker; 26-D.Porter).      |
 |     2 | 1&10   | short middle        |    11 | kept      | —                  | (:28) (Shotgun) 10-D.Maye pass short middle to 85-H.Henry for 11 yards, TOUCHDOWN [98-M.Crosby]. Penalty on LV |
+
+**Drake Maye** (carries last game: 1, kept 1, cancelled 0)
+
+|   qtr | down   | play             |   yds | result   | NYJ on this play   | description                                                 |
+|------:|:-------|:-----------------|------:|:---------|:-------------------|:------------------------------------------------------------|
+|     3 | 3&1    | run outside left |     3 | kept     | —                  | (3:14) (Shotgun) 10-D.Maye left end for 3 yards, TOUCHDOWN. |
 
 ## NYJ vs NWE
 
@@ -2078,6 +2078,17 @@ Every play the main players were involved in last game. `cancelled` = netted zer
 |     4 | 1&10   | run middle       |     8 | kept     | —                  | (6:50) 23-C.McCaffrey up the middle to SF 40 for 8 yards (39-T.Okada; 99-L.Williams).     |
 |     4 | 2&2    | run outside left |    13 | kept     | —                  | (6:09) 23-C.McCaffrey left end to SEA 47 for 13 yards (58-D.Hall; 20-J.Love).             |
 
+**Kaelon Black** (carries last game: 6, kept 3, cancelled 3)
+
+|   qtr | down   | play              |   yds | result    | WAS on this play   | description                                                                                                   |
+|------:|:-------|:------------------|------:|:----------|:-------------------|:--------------------------------------------------------------------------------------------------------------|
+|     2 | 1&10   | run inside left   |     5 | kept      | —                  | (12:04) 26-K.Black left tackle to SEA 47 for 5 yards (20-J.Love).                                             |
+|     2 | 2&5    | run inside left   |     0 | cancelled | —                  | (11:26) (Shotgun) 26-K.Black left tackle to SEA 47 for no gain (95-B.Pili; 32-D.Thomas).                      |
+|     4 | 1&10   | run outside right |    -4 | cancelled | —                  | (14:21) 26-K.Black right end to SF 47 for -4 yards (39-T.Okada). Penalty on SF-84-B.Cooks, Offensive Holding, |
+|     4 | 2&7    | run inside right  |    11 | kept      | —                  | (4:44) 26-K.Black right guard to SEA 33 for 11 yards (7-U.Nwosu).                                             |
+|     4 | 2&6    | run inside left   |     5 | kept      | —                  | (3:23) 26-K.Black left guard to SEA 24 for 5 yards (3-N.Emmanwori).                                           |
+|     4 | 3&1    | run middle        |    -1 | cancelled | —                  | (2:44) 26-K.Black up the middle to SEA 25 for -1 yards (91-B.Murphy, 7-U.Nwosu).                              |
+
 **Mike Evans** (targets last game: 10, kept 7, cancelled 3)
 
 |   qtr | down   | play                      |   yds | result    | WAS on this play   | description                                                                                                    |
@@ -2092,17 +2103,6 @@ Every play the main players were involved in last game. `cancelled` = netted zer
 |     4 | 2&5    | short middle, play action |     9 | kept      | x0.89              | (15:00) 13-B.Purdy pass short middle to 5-M.Evans to SEA 49 for 9 yards (29-J.Jobe).                           |
 |     4 | 3&10   | deep middle               |    23 | kept      | —                  | (13:11) (Shotgun) 13-B.Purdy pass deep middle to 5-M.Evans to SEA 26 for 23 yards (20-J.Love). ** Injury Updat |
 |     4 | 2&21   | deep right                |    28 | kept      | —                  | (12:26) (Shotgun) 13-B.Purdy pass deep right to 5-M.Evans pushed ob at SEA 9 for 28 yards (29-J.Jobe).         |
-
-**Kaelon Black** (carries last game: 6, kept 3, cancelled 3)
-
-|   qtr | down   | play              |   yds | result    | WAS on this play   | description                                                                                                   |
-|------:|:-------|:------------------|------:|:----------|:-------------------|:--------------------------------------------------------------------------------------------------------------|
-|     2 | 1&10   | run inside left   |     5 | kept      | —                  | (12:04) 26-K.Black left tackle to SEA 47 for 5 yards (20-J.Love).                                             |
-|     2 | 2&5    | run inside left   |     0 | cancelled | —                  | (11:26) (Shotgun) 26-K.Black left tackle to SEA 47 for no gain (95-B.Pili; 32-D.Thomas).                      |
-|     4 | 1&10   | run outside right |    -4 | cancelled | —                  | (14:21) 26-K.Black right end to SF 47 for -4 yards (39-T.Okada). Penalty on SF-84-B.Cooks, Offensive Holding, |
-|     4 | 2&7    | run inside right  |    11 | kept      | —                  | (4:44) 26-K.Black right guard to SEA 33 for 11 yards (7-U.Nwosu).                                             |
-|     4 | 2&6    | run inside left   |     5 | kept      | —                  | (3:23) 26-K.Black left guard to SEA 24 for 5 yards (3-N.Emmanwori).                                           |
-|     4 | 3&1    | run middle        |    -1 | cancelled | —                  | (2:44) 26-K.Black up the middle to SEA 25 for -1 yards (91-B.Murphy, 7-U.Nwosu).                              |
 
 **George Kittle** (targets last game: 6, kept 4, cancelled 2)
 
