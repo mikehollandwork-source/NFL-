@@ -146,3 +146,9 @@ rate allowed, as a scoring multiplier ([scoring] drive_eff, capped +/-15%).
 Not used: defense 3rd-down rate allowed (noise, section 7), sacks (already in
 the model through sack rate on volume; nothing extra for scoring), yards per
 drive (nothing beyond success rate).
+
+Full-model backtest with the multiplier on vs off (backtest_DE_*): 2025
+weeks 6-18 team MAE 7.768 -> 7.734 (pick lift 0.100 -> 0.099); 2026 weeks
+2-5 team MAE 7.856 -> 7.987 (pick lift 0.167 -> 0.147); projections spread
+widened (sd 3.6 -> 4.4). Not consistently better, so it is **off**
+([scoring] drive_eff = {}); the weights stay in the config comment.
