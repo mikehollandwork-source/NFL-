@@ -261,6 +261,14 @@ ppd_shrink_games = 8.0       # plays per drive barely repeats: shrink hard
 pace_shrink_games = 3.0
 pace_prior_regress = 0.7     # 2025 pace kept at 70% as the starting point
 
+[scoring]
+# Drive sustaining, beyond yards/play and TD rate (2021-25, each season held
+# out: team points MAE 7.724 -> 7.692, better in 4 of 5 seasons). Points per
+# drive change per unit of: offense 3rd-down conversion rate, offense
+# success rate, defense success rate allowed (deviation from league).
+# Defense 3rd-down rate allowed, sacks and yards per drive added nothing.
+drive_eff = {conv3 = 1.526, succ_off = 2.715, succ_def = 2.331, lg_ppd = 2.13, clip = 0.15}
+
 [auto]
 # A game is locked on the scheduled run that falls within this many hours of
 # its kickoff (after the final injury report and game-day inactives).

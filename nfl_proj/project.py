@@ -388,11 +388,38 @@ class Projector:
         a = self.adjustments(team, opp, week)
         s = a["sos"]["off_pts"] * a["sos"]["def_pts"] * a["td_factor"]
         pf = self.priors.factor
+        s *= self.drive_eff(team, opp)
         return {"pass_td": self._ratio(_wmean(d_pass, "touchdown"), self.lg_pass_td, len(d_pass),
                                        pf("def", opp, "pass_td"), "def_pass_td") * s,
                 "run_td": self._ratio(_wmean(d_run, "touchdown"), self.lg_run_td, len(d_run),
                                       pf("def", opp, "run_td"), "def_run_td") * s,
                 "int": self._ratio(_wmean(d_pass, "interception"), self.lg_int, len(d_pass), key="def_int")}
+
+    def drive_eff(self, team: str, opp: str) -> float:
+        """Scoring multiplier from sustaining drives, beyond yards per play and
+        TD rate: the offense's 3rd-down conversion rate and success rate and
+        the defense's success rate allowed (season to date, vs league).
+        Weights fitted on 2021-25 points per drive, each season predicted out
+        of sample (output/2026/factor_tests.md section 8)."""
+        c = self.cfg.get("scoring", {}).get("drive_eff")
+        if not c:
+            return 1.0
+        key = (team, opp)
+        cache = self.__dict__.setdefault("_de_cache", {})
+        if key in cache:
+            return cache[key]
+        sc = self.p[self.p["play_type"].isin(["pass", "run", "sack", "scramble"])]
+        third = sc[sc["down"] == 3]
+        lg = {"conv3": third["converted"].astype(float).mean(), "succ": sc["success"].astype(float).mean()}
+        o3 = third[third["offense"] == team]["converted"].astype(float)
+        os_ = sc[sc["offense"] == team]["success"].astype(float)
+        ds = sc[sc["defense"] == opp]["success"].astype(float)
+        dev = (c["conv3"] * ((o3.mean() - lg["conv3"]) if len(o3) else 0.0)
+               + c["succ_off"] * ((os_.mean() - lg["succ"]) if len(os_) else 0.0)
+               + c["succ_def"] * ((ds.mean() - lg["succ"]) if len(ds) else 0.0))
+        f = float(np.clip(1 + dev / c.get("lg_ppd", 2.13), 1 - c.get("clip", 0.15), 1 + c.get("clip", 0.15)))
+        cache[key] = f
+        return f
 
     # ---------------------------------------------------------------- team
     def _ratio(self, d_val, lg_val, n, prior_mult: float = 1.0, key: str | None = None):

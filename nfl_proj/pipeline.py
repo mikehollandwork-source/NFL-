@@ -85,10 +85,10 @@ def run_week(tables: dict, cfg: dict, paths: dict, week: int, asof: bool = False
     if not asof and cfg.get("availability", {}).get("live_espn", True):
         # Live statuses (final report, game-day decisions) over the daily nflverse file
         try:
-            from .espn_injuries import fetch as espn_fetch, merge as espn_merge
+            from .espn_injuries import live as live_injuries, merge as espn_merge
             rp = paths["nflverse"] / f"roster_weekly_{int(cfg['season'])}.csv.gz"
             roster = pd.read_csv(rp, low_memory=False) if rp.exists() else None
-            injuries = espn_merge(injuries, espn_fetch(roster, log=lambda *a: None), week)
+            injuries = espn_merge(injuries, live_injuries(roster, log=lambda *a: None), week)
         except Exception as e:  # never block a run on the live feed
             print(f"ESPN injury feed unavailable ({e}); using nflverse report only")
     auto, flags = auto_overrides(week, injuries, for_week(t.get("depth_qb")), t["player_games"],
