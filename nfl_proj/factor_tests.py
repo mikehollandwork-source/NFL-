@@ -252,6 +252,66 @@ def corner_quality(raw: Path) -> tuple[pd.DataFrame, str]:
     return tab, "\n".join(md)
 
 
+# ------------------------------------------- 7. in-season defensive traits
+def defense_traits(raw: Path, seasons) -> tuple[pd.DataFrame, str]:
+    """What a defense "keeps giving up": which of its rates repeat between
+    odd and even weeks of a season, and how much trust 5 games earn."""
+    cols = ["season", "season_type", "week", "posteam", "defteam", "play_type", "qb_dropback", "pass_attempt",
+            "qb_scramble", "sack", "yards_gained", "air_yards", "yards_after_catch", "complete_pass", "down",
+            "first_down", "yardline_100", "wp", "two_point_attempt", "touchdown", "td_team", "interception",
+            "fumble_lost"]
+    fr = []
+    for y in seasons:
+        q = pd.read_csv(raw / f"play_by_play_{y}.csv.gz", usecols=cols, low_memory=False)
+        fr.append(q[(q["season_type"] == "REG") & q["play_type"].isin(["run", "pass"])
+                    & (q["two_point_attempt"].fillna(0) == 0)])
+    p = pd.concat(fr, ignore_index=True)
+    for c in ("posteam", "defteam", "td_team"):
+        p[c] = p[c].map(nv_team)
+    p = p[p["wp"].between(0.05, 0.95)].copy()
+    p["half"] = p["week"] % 2
+    att = p["pass_attempt"] == 1
+    run = (p["play_type"] == "run") & (p["qb_scramble"].fillna(0) == 0)
+    db = p["qb_dropback"] == 1
+    y = p["yards_gained"]
+    tests = {
+        "completion % allowed": (att, p["complete_pass"]),
+        "run yards/carry allowed": (run, y.clip(upper=30)),
+        "explosive run rate (10+) allowed": (run, y >= 10),
+        "pass rate faced (1st/2nd down)": (p["down"].isin([1, 2]), p["qb_dropback"]),
+        "deep attempt share faced (air 15+)": (att & p["air_yards"].notna(), p["air_yards"] >= 15),
+        "deep yards/attempt allowed": (att & (p["air_yards"] >= 15), y.clip(-10, 60)),
+        "pass yards/attempt allowed": (att, y.clip(-10, 40)),
+        "sack rate": (db, p["sack"]),
+        "yards after catch allowed": (att & (p["complete_pass"] == 1), p["yards_after_catch"].clip(-5, 40)),
+        "turnovers forced per play": (p["play_type"].notna(),
+                                      (p["interception"].fillna(0) + p["fumble_lost"].fillna(0)).clip(upper=1)),
+        "3rd/4th down conversion allowed": (p["down"] >= 3, p["first_down"].fillna(0)),
+        "red-zone TD rate allowed": (p["yardline_100"] <= 20, (p["touchdown"] == 1) & (p["td_team"] == p["posteam"])),
+        "explosive pass rate (20+) allowed": (att, y >= 20),
+        "scramble rate allowed": (db, p["qb_scramble"].fillna(0)),
+    }
+    rows = []
+    for name, (m, v) in tests.items():
+        q = p[m].assign(v=v[m].astype(float))
+        g = q.groupby(["season", "defteam", "half"])["v"].agg(["mean", "size"]).unstack("half")
+        mm = g["mean"].sub(g["mean"].groupby(level=0).transform("mean"))
+        r = float(mm[0].corr(mm[1]))
+        n = float(g["size"].mean().mean())
+        k = n * (1 - r) / r if r > 0 else np.inf
+        n5 = n * 5 / 8.5
+        rows.append({"what the defense gives up": name, "odd_vs_even_r": r, "plays_per_half": n,
+                     "k_plays": k, "trust_after_5_games": n5 / (n5 + k) if np.isfinite(k) else 0.0})
+    tab = pd.DataFrame(rows).sort_values("odd_vs_even_r", ascending=False)
+    tab["verdict"] = np.where(tab["odd_vs_even_r"] >= 0.15, "repeats", "noise")
+    md = ["## 7. What a defense keeps giving up this season (2021-25, odd vs even weeks)", "",
+          "Repeats = the same defense shows it in both halves of a season. Also tested beyond the defense's "
+          "overall pass rate: deep yards/attempt r = 0.19 and yards after catch r = 0.20 (both real); "
+          "direction (left / middle / right) r = 0.05 (noise).", "",
+          tab.to_markdown(index=False, floatfmt=".2f"), ""]
+    return tab, "\n".join(md)
+
+
 # ----------------------------------------------------- team-season metrics
 def team_seasons(d: dict) -> pd.DataFrame:
     p = d["pbp"]
@@ -489,6 +549,8 @@ def run_all(raw: Path, coord_path: Path, out: Path, seasons=(2021, 2022, 2023, 2
     res["positions"], m = position_groups(d)
     md.append(m)
     res["corner_quality"], m = corner_quality(raw)
+    md.append(m)
+    res["defense_traits"], m = defense_traits(raw, seasons)
     md.append(m)
     log("corners done")
     out.write_text("\n".join(md))
