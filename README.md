@@ -300,3 +300,28 @@ nfl_proj/external.py    online scheme data (Sharp scraper), scheme labels, PBP c
 nfl_proj/report.py      markdown reports
 tests/                  parser + nflverse mapping tests, end-to-end run on synthetic pages
 ```
+
+## Automated paper trading (weekly)
+
+`python -m nfl_proj auto --mode lock` locks every game kicking off within
+`[auto] lock_window_hours` (2.25 h) that isn't locked yet, after refreshing
+data and merging live ESPN injury statuses (final report + game-day
+inactives). Every game of the week is recorded in
+`output/<season>/paper/week_NN_lock_log.csv` (locked / no lines / no
+qualifying bets / missed). `--mode grade` grades finished weeks.
+
+Scheduled runs (ET): Thu 10:50, 14:50, 18:50 · Sun 08:05, 11:50, 14:50,
+18:50 · Mon 18:50 · grading Tue + Wed 10:50 · Fri/Sat 11:50, 14:50, 18:50
+for holiday and December games.
+
+Environment variables (cloud environment settings, never in the repo):
+
+| variable | what for |
+|---|---|
+| `TELEGRAM_BOT_TOKEN` | message @BotFather, `/newbot`, copy the token |
+| `TELEGRAM_CHAT_ID` | send your bot any message, then open `https://api.telegram.org/bot<token>/getUpdates` and copy `message.chat.id` |
+| `ODDS_API_KEY` | free key from the-odds-api.com; real DraftKings prices recorded at lock and used **only** to grade (picks are chosen at the assumed price) |
+
+Records: `paper/ledger.csv` (every bet, win/loss/push/void, profit at the
+real price when recorded), `paper/calls_ledger.csv` (right/wrong on the
+model's lean for every posted line), `paper/summary.md`.
