@@ -108,6 +108,10 @@ def main(argv=None):
     gr = sub.add_parser("grade")
     gr.add_argument("--week", type=int, required=True)
     sub.add_parser("paper-summary")
+    au = sub.add_parser("auto", help="lock games due soon / grade finished weeks, with Telegram messages")
+    au.add_argument("--mode", choices=["lock", "grade"], default="lock")
+    au.add_argument("--window", type=float, help="hours before kickoff a game becomes due ([auto] lock_window_hours)")
+    au.add_argument("--no-refresh", action="store_true")
     sub.add_parser("factor-tests", help="out-of-sample tests of candidate factors (2021-25)")
     pj = sub.add_parser("project")
     pj.add_argument("--week", type=int, help="defaults to the next week with unplayed games")
@@ -116,6 +120,14 @@ def main(argv=None):
 
     cfg = load_cfg(Path(args.config))
     paths = _paths(cfg)
+
+    if args.cmd == "auto":
+        from .auto import run_grade, run_lock
+        if args.mode == "lock":
+            print(run_lock(cfg, paths, ROOT, window_h=args.window, refresh=not args.no_refresh))
+        else:
+            print(run_grade(cfg, paths, ROOT, refresh=not args.no_refresh))
+        return
 
     if args.cmd == "factor-tests":
         from .factor_tests import run_all

@@ -140,7 +140,7 @@ def select(ev: pd.DataFrame, cfg: dict) -> pd.DataFrame:
 
 
 def lock(props, lines, player_games, week, cfg, paper_dir: Path, root: Path, force=False,
-         teams: set | None = None) -> tuple[pd.DataFrame, Path]:
+         teams: set | None = None, price_fn=None) -> tuple[pd.DataFrame, Path]:
     """Lock bets. With ``teams`` only games involving those teams are locked
     (e.g. Thursday's game before the Sunday slate); bets already locked for
     other games are kept unchanged and a game can be locked only once."""
@@ -169,6 +169,8 @@ def lock(props, lines, player_games, week, cfg, paper_dir: Path, root: Path, for
     bets = select(ev, c)
     bets = bets.assign(locked_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
                        model_commit=_git_rev(root))
+    if price_fn is not None and not bets.empty:
+        bets = price_fn(bets)  # real book prices, recorded for grading only
     out = bets if (prev.empty or force) else pd.concat([prev, bets], ignore_index=True)
     out.to_csv(path, index=False)
     return bets, path
@@ -180,6 +182,10 @@ def grade(week: int, player_games: pd.DataFrame, paper_dir: Path, close: pd.Data
     out = []
     for r in bets.itertuples():
         col = STATS[r.stat][0]
+        # Real book price (recorded at lock) when the book's line matched ours; else the assumed price
+        bo, bl = getattr(r, "book_odds", np.nan), getattr(r, "book_line", np.nan)
+        real = pd.notna(bo) and pd.notna(bl) and float(bl) == float(r.line)
+        price, price_src = (float(bo), "book") if real else (float(r.odds), "assumed")
         a = player_games[(player_games["player_id"] == r.player_id) & (player_games["week"] == week)]
         if a.empty:
             res, actual, profit = "void", np.nan, 0.0
@@ -190,7 +196,7 @@ def grade(week: int, player_games: pd.DataFrame, paper_dir: Path, close: pd.Data
             else:
                 won = actual > r.line if r.side == "over" else actual < r.line
                 res = "win" if won else "loss"
-                profit = r.stake * (american_to_decimal(r.odds) - 1) if won else -r.stake
+                profit = r.stake * (american_to_decimal(price) - 1) if won else -r.stake
         clv_line = clv_prob = np.nan
         if close is not None and not close.empty:
             m = close[(close["player"].map(norm_name) == norm_name(r.player)) & (close["stat"] == r.stat)]
@@ -204,6 +210,7 @@ def grade(week: int, player_games: pd.DataFrame, paper_dir: Path, close: pd.Data
                 pi, po = 1 / american_to_decimal(cp), 1 / american_to_decimal(op)
                 clv_prob = pi / (pi + po) - r.breakeven if m["line"] == r.line else np.nan
         out.append({**r._asdict(), "actual": actual, "result": res, "profit": round(profit, 3),
+                    "price_used": price, "price_used_source": price_src,
                     "clv_line": clv_line, "clv_prob": clv_prob})
     g = pd.DataFrame(out).drop(columns=["Index"], errors="ignore")
     g.to_csv(paper_dir / f"week_{week:02d}_graded.csv", index=False)
@@ -212,7 +219,43 @@ def grade(week: int, player_games: pd.DataFrame, paper_dir: Path, close: pd.Data
     if not old.empty:
         old = old[old["week"] != week]
     pd.concat([old, g], ignore_index=True).to_csv(ledger, index=False)
+    grade_calls(week, player_games, paper_dir)
     return g
+
+
+def grade_calls(week: int, player_games: pd.DataFrame, paper_dir: Path) -> pd.DataFrame:
+    """Right / wrong on the model's lean for EVERY posted line evaluated at
+    lock (not just the bets): the side with the higher calibrated probability."""
+    files = sorted(paper_dir.glob(f"week_{week:02d}_all_lines_evaluated*.csv"))
+    if not files:
+        return pd.DataFrame()
+    ev = pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
+    lean = ev.sort_values("p_cal", ascending=False).drop_duplicates(["player_id", "stat", "line"])
+    rows = []
+    pw = player_games[player_games["week"] == week]
+    for r in lean.itertuples():
+        a = pw[pw["player_id"] == r.player_id]
+        if a.empty:
+            res, actual = "void", np.nan
+        else:
+            actual = float(a[STATS[r.stat][0]].sum())
+            res = "push" if actual == r.line else (
+                "right" if (actual > r.line) == (r.side == "over") else "wrong")
+        rows.append({"week": week, "game": r.game, "player": r.player, "player_id": r.player_id, "stat": r.stat,
+                     "line": r.line, "lean": r.side, "p_cal": r.p_cal, "model_median": r.model_median,
+                     "actual": actual, "result": res, "bet": False})
+    calls = pd.DataFrame(rows)
+    locked = paper_dir / f"week_{week:02d}_locked.csv"
+    if locked.exists() and not calls.empty:
+        b = pd.read_csv(locked)
+        keys = set(zip(b["player_id"], b["stat"], b["line"]))
+        calls["bet"] = [(p, s, l) in keys for p, s, l in zip(calls["player_id"], calls["stat"], calls["line"])]
+    led = paper_dir / "calls_ledger.csv"
+    old = pd.read_csv(led) if led.exists() else pd.DataFrame()
+    if not old.empty:
+        old = old[old["week"] != week]
+    pd.concat([old, calls], ignore_index=True).to_csv(led, index=False)
+    return calls
 
 
 def summary(paper_dir: Path) -> str:
@@ -231,12 +274,21 @@ def summary(paper_dir: Path) -> str:
              f"({(dec['result'] == 'win').mean():.1%} hit vs {dec['breakeven'].mean():.1%} needed at the average price)"
              if len(dec) else "- Record: —",
              f"- Units: {units:+.2f} on {staked:.2f} staked → **ROI {units / staked:+.1%}**" if staked else "- ROI: —",
-             f"- Prices: {(g.get('price_source', pd.Series(dtype=str)) == 'assumed').mean():.0%} of bets graded at an "
-             f"assumed price (ESPN lines carry none), so ROI is an estimate; hit rate and CLV are exact",
+             f"- Prices: {(g.get('price_used_source', pd.Series('assumed', index=g.index)) == 'book').mean():.0%} of bets "
+             f"graded at the real book price recorded at lock; the rest at the assumed price (ROI estimate)",
              f"- Average expected value at lock: {s['ev'].mean():+.1%}" if len(s) else "",
              f"- Closing-line value: line moved our way on {(g['clv_line'] > 0).mean():.0%} of bets with a closing "
              f"line (avg {g['clv_line'].mean():+.2f})" if g["clv_line"].notna().any() else
              "- Closing-line value: no closing snapshots yet (pull `odds --label close` before kickoff)", ""]
+    led = paper_dir / "calls_ledger.csv"
+    if led.exists():
+        c = pd.read_csv(led)
+        c = c[c["result"].isin(["right", "wrong"])]
+        if len(c):
+            lines.append(f"- Model lean on every posted line: {(c['result'] == 'right').mean():.1%} right "
+                         f"({len(c)} lines); by stat: " + ", ".join(
+                f"{k} {v:.0%}" for k, v in c.groupby("stat")["result"].apply(lambda x: (x == "right").mean()).items()))
+            lines.append("")
     if len(dec):
         by = dec.groupby("stat").apply(lambda d: pd.Series({
             "bets": len(d), "hit": (d["result"] == "win").mean(), "units": d["profit"].sum(),

@@ -188,6 +188,75 @@ def fetch(games: pd.DataFrame, week: int, cfg: dict, roster: pd.DataFrame | None
     return fetch_espn(games, week, cfg, roster, log=log)
 
 
+STAT_TO_MARKET = {"pass_yds": "player_pass_yds", "completions": "player_pass_completions",
+                  "receptions": "player_receptions", "rec_yds": "player_reception_yds",
+                  "rush_yds": "player_rush_yds", "carries": "player_rush_attempts",
+                  "pass_att": "player_pass_attempts"}
+ODDS_TEAM = {  # The Odds API full names -> codes used here
+    "Arizona Cardinals": "ARI", "Atlanta Falcons": "ATL", "Baltimore Ravens": "BAL", "Buffalo Bills": "BUF",
+    "Carolina Panthers": "CAR", "Chicago Bears": "CHI", "Cincinnati Bengals": "CIN", "Cleveland Browns": "CLE",
+    "Dallas Cowboys": "DAL", "Denver Broncos": "DEN", "Detroit Lions": "DET", "Green Bay Packers": "GNB",
+    "Houston Texans": "HOU", "Indianapolis Colts": "IND", "Jacksonville Jaguars": "JAX", "Kansas City Chiefs": "KAN",
+    "Las Vegas Raiders": "LVR", "Los Angeles Chargers": "LAC", "Los Angeles Rams": "LAR", "Miami Dolphins": "MIA",
+    "Minnesota Vikings": "MIN", "New England Patriots": "NWE", "New Orleans Saints": "NOR", "New York Giants": "NYG",
+    "New York Jets": "NYJ", "Philadelphia Eagles": "PHI", "Pittsburgh Steelers": "PIT", "San Francisco 49ers": "SFO",
+    "Seattle Seahawks": "SEA", "Tampa Bay Buccaneers": "TAM", "Tennessee Titans": "TEN", "Washington Commanders": "WAS"}
+
+
+def fetch_prices(bets: pd.DataFrame, cfg: dict, key: str | None = None, log=print) -> pd.DataFrame:
+    """Real sportsbook prices for locked bets, recorded at lock and used only
+    to grade them (picks are chosen at the assumed price, never from these).
+
+    One The Odds API call per game with bets, only the markets bet on, one
+    book: about 2-4 credits per game (free tier: 500 a month). Adds
+    book_line / book_odds / book_odds_at (NaN when the book's line differs
+    from the locked line or the call fails)."""
+    out = bets.copy()
+    for c in ("book_line", "book_odds"):
+        out[c] = float("nan")
+    out["book_odds_at"] = ""
+    key = key or os.environ.get("ODDS_API_KEY")
+    if not key or out.empty:
+        if not key:
+            log("No ODDS_API_KEY: bets will be graded at the assumed price")
+        return out
+    book = cfg.get("odds", {}).get("book", "draftkings")
+    try:
+        events = requests.get(f"{API}/events", params={"apiKey": key}, timeout=30).json()
+    except Exception as e:
+        log(f"odds api events failed: {e}")
+        return out
+    ev_by_teams = {}
+    for ev in events:
+        h, a = ODDS_TEAM.get(ev.get("home_team")), ODDS_TEAM.get(ev.get("away_team"))
+        if h and a:
+            ev_by_teams[frozenset((h, a))] = ev["id"]
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    for teams, g in out.groupby(out.apply(lambda r: frozenset((r["team"], r["opp"])), axis=1)):
+        eid = ev_by_teams.get(teams)
+        markets = sorted({STAT_TO_MARKET[s] for s in g["stat"] if s in STAT_TO_MARKET})
+        if not eid or not markets:
+            continue
+        r = requests.get(f"{API}/events/{eid}/odds", timeout=30, params={
+            "apiKey": key, "bookmakers": book, "oddsFormat": "american", "markets": ",".join(markets)})
+        if r.status_code != 200:
+            log(f"odds api {sorted(teams)} failed ({r.status_code}): {r.text[:120]}")
+            continue
+        log(f"odds api {sorted(teams)}: ok (credits left {r.headers.get('x-requests-remaining')})")
+        offers = {}
+        for bk in r.json().get("bookmakers", []):
+            for mk in bk.get("markets", []):
+                stat = MARKET_TO_STAT.get(mk["key"])
+                for o in mk.get("outcomes", []):
+                    offers[(norm_name(o.get("description", "")), stat, o["name"].lower())] = (o.get("point"), o.get("price"))
+        for i in g.index:
+            hit = offers.get((norm_name(out.at[i, "player"]), out.at[i, "stat"], out.at[i, "side"]))
+            if hit:
+                out.at[i, "book_line"], out.at[i, "book_odds"] = hit
+                out.at[i, "book_odds_at"] = now
+    return out
+
+
 def pick_book(lines: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     """One line per player / stat: the configured book, else the first book offering it."""
     if lines.empty or "book" not in lines:

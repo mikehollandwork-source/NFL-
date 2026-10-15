@@ -261,6 +261,11 @@ ppd_shrink_games = 8.0       # plays per drive barely repeats: shrink hard
 pace_shrink_games = 3.0
 pace_prior_regress = 0.7     # 2025 pace kept at 70% as the starting point
 
+[auto]
+# A game is locked on the scheduled run that falls within this many hours of
+# its kickoff (after the final injury report and game-day inactives).
+lock_window_hours = 2.25
+
 [odds]
 # source: "auto" = The Odds API when ODDS_API_KEY is set, else ESPN's public
 # feed (no key; DraftKings lines, current + opening, but no prices: both
@@ -294,5 +299,5 @@ max_stake = 1.5              # units
 min_stake = 0.5
 max_per_game = 2             # correlated outcomes: cap exposure per game
 max_per_team_side = 1        # no stacking two same-team props in the same direction
-max_bets = 15
+max_bets = 32                # games are locked slate by slate, so the per-game cap (2) is the real limit
 require_usage_trend = true   # your rule: overs need rising usage, unders falling (stars / QBs exempt)
