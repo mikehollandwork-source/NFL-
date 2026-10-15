@@ -179,13 +179,13 @@ off_run_ypp = 325
 off_sack = 285
 off_pass_td = 410
 off_int = 4400
+# Defense TD / INT rates stay on the legacy shrink_plays + defense_weight: on their own
+# they don't repeat, but the 2025 full-season backtest is better with them (MAE 7.73
+# vs 7.97 with the measured constants), likely because they carry overall defense quality.
 def_pass_ypp = 1000
 def_cmp = 470
 def_run_ypp = 380
 def_sack = 1075
-def_pass_td = 50000   # defense TD rates don't repeat at all
-def_run_td = 3000
-def_int = 1600
 def_pass_rate = 1030  # how much opponents throw against this defense
 def_deep_share = 830  # how often opponents throw deep against it (attempts)
 def_deep_eff = 205    # deep yards/attempt allowed beyond its overall pass defense (deep attempts)
@@ -207,7 +207,7 @@ volume_prior_games = 3.0     # plays per game: 2025 counts as this many games
 # def_new_caller_scale (2022-25: carryover ~0 with a new caller; 57% keep theirs).
 def_same_caller_scale = 1.5
 def_new_caller_scale = 0.25
-carryover = {off_pass = 0.46, off_run = 0.29, off_cmp = 0.48, off_pass_td = 0.37, off_run_td = 0.27, off_plays = 0.15, def_pass = 0.20, def_run = 0.23, def_cmp = 0.22, def_pass_td = 0.05, def_run_td = 0.13}
+carryover = {off_pass = 0.46, off_run = 0.29, off_cmp = 0.48, off_pass_td = 0.37, off_run_td = 0.27, off_plays = 0.15, def_pass = 0.20, def_run = 0.23, def_cmp = 0.22, def_pass_td = 0.4, def_run_td = 0.4}
 
 [player_adaptation]
 # Per player: play types (buckets) that failed for him last game are cut by
