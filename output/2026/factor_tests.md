@@ -122,3 +122,27 @@ Repeats = the same defense shows it in both halves of a season. Also tested beyo
 | red-zone TD rate allowed           |            0.03 |            66.52 |   2377.22 |                  0.02 | noise     |
 | explosive pass rate (20+) allowed  |            0.02 |           255.98 |  11077.34 |                  0.01 | noise     |
 | scramble rate allowed              |           -0.07 |           269.42 |    inf    |                  0.00 | noise     |
+
+## 8. Third downs, sacks and moving the ball (2021-25, points per drive)
+
+Team-games from week 6 on, predicted from that season's earlier weeks
+(offense rate and opponent defense rate vs league); each season held out
+in turn. Baseline = what the model already uses (yards per play, TD rate).
+Points MAE = |predicted - actual points per drive| x drives.
+
+| added to baseline | points MAE | change | 95% CI | seasons better |
+|:--|--:|--:|:--|--:|
+| (league average only) | 8.117 | | | |
+| baseline: yards/play + TD rate | 7.724 | | | |
+| 3rd-down conversion (offense) | 7.699 | -0.025 | [-0.062, +0.012] | 4/5 |
+| success rate (offense + defense) | 7.702 | -0.022 | [-0.063, +0.021] | 4/5 |
+| **3rd-down (offense) + success rate** | **7.692** | **-0.033** | [-0.082, +0.015] | 4/5 |
+| + yards per drive | 7.695 | -0.030 | | 4/5 |
+| explosive plays | 7.720 | -0.004 | | |
+| sacks | 7.727 | +0.003 | [-0.015, +0.021] | 2/5 |
+
+Used: offense 3rd-down conversion, offense success rate, defense success
+rate allowed, as a scoring multiplier ([scoring] drive_eff, capped +/-15%).
+Not used: defense 3rd-down rate allowed (noise, section 7), sacks (already in
+the model through sack rate on volume; nothing extra for scoring), yards per
+drive (nothing beyond success rate).
