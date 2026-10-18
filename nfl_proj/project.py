@@ -646,6 +646,13 @@ class Projector:
         pb = pb.merge(overall, left_on=id_col, right_index=True)
         pb["team_b"] = pb[bucket_col].map(tot_b)
         pb["share"] = shrink(pb["wb"] / pb["team_b"], pb["team_b"], pb["overall"], k)
+        # Games a player missed aren't zero-share games: scale his share to the team volume in
+        # the games he played (a WR back from injury otherwise looks like a part-timer).
+        gp = self._games_played_factor(df, id_col)
+        if gp:
+            f = pb[id_col].map(gp).fillna(1.0)
+            pb["share"] = pb["share"] * f
+            overall = overall * overall.index.map(lambda i: gp.get(i, 1.0))
         pb = pb[pb[id_col].isin(active)]
         # Players with season volume but none in a bucket still get their overall share there.
         players = overall[overall.index.isin(active)]
@@ -669,6 +676,30 @@ class Projector:
                 pb.loc[pb[id_col] == top, "share"] *= f
                 pb["share"] = pb["share"] / pb.groupby(bucket_col)["share"].transform("sum")
         return pb[[id_col, bucket_col, "share"]]
+
+    def _games_played_factor(self, df: pd.DataFrame, id_col: str) -> dict:
+        """player -> team volume in all games / team volume in the games he
+        played (>= 1), for players who missed games; capped and only for
+        players with at least two games."""
+        c = self.cfg.get("players", {})
+        if not c.get("share_games_played", True) or "boxscore_id" not in df:
+            return {}
+        cap, min_g = c.get("games_played_cap", 2.0), c.get("games_played_min", 2)
+        pg = self.pg[self.pg["boxscore_id"].isin(set(df["boxscore_id"]))]
+        on = pg[(pg.get("off_snaps", 0).fillna(0) > 0) | (pg["targets"] > 0) | (pg["rush_att"] > 0)
+                | (pg["pass_att"] > 0)]
+        played = on.groupby("player_id")["boxscore_id"].apply(set)
+        w_game = df.groupby("boxscore_id")["w"].sum()
+        tot = w_game.sum()
+        out = {}
+        for pid in df[id_col].dropna().unique():
+            g = played.get(pid)
+            if not g or len(g) < min_g:
+                continue
+            wp = w_game[w_game.index.isin(g)].sum()
+            if 0 < wp < tot:
+                out[pid] = float(min(tot / wp, cap))
+        return out
 
     def _player_eff(self, df, id_col, bucket_col, team_eff: dict, k: float) -> pd.DataFrame:
         """Per player and play type: yards per play and catch rate, shrunk

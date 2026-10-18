@@ -70,6 +70,11 @@ shrink_targets = 25
 shrink_carries = 40
 # A player must have appeared in one of the team's last N games to be projected.
 active_within_games = 2
+# A player's target / carry share is measured over the games he played (games
+# he missed aren't zero-share games), capped at 2x, for players with 2+ games.
+share_games_played = true
+games_played_cap = 2.0
+games_played_min = 2
 
 [sim]
 # Simulated games per matchup. Every prop (medians, ranges, longest plays,

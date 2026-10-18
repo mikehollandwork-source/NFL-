@@ -146,6 +146,13 @@ def run_week(tables: dict, cfg: dict, paths: dict, week: int, asof: bool = False
             no_qb_history.add(r_.team)
             flags.append(f"{r_.team}: projected starter {r_.player} has no passes this season; "
                          f"{r_.team} props are skipped when locking")
+    # Manual one-week skips (e.g. a mid-season acquisition the model has no team data for)
+    sk = paths["overrides"].parent / "skip_teams.csv"
+    if not asof and sk.exists():
+        m = pd.read_csv(sk)
+        for r_ in m[m["week"] == week].itertuples():
+            no_qb_history.add(r_.team)
+            flags.append(f"{r_.team}: props skipped when locking ({r_.reason})")
     return {"no_qb_history": no_qb_history, "tables": t, "plays": plays, "style": style, "dprof": dprof, "labels": labels, "splits": splits,
             "scheme": scheme, "coach": coach, "est": est, "strength": strength, "overrides": overrides,
             "auto_overrides": auto, "flags": flags, "corners": corners, "proj": proj, "ctx": ctx,
