@@ -103,7 +103,8 @@ def run_lock(cfg: dict, paths: dict, root: Path, now: datetime | None = None, wi
     r = run_week(t, cfg, paths, week)
     teams = set(due["home"]) | set(due["away"])
     bets, path = lock(r["props"], lines, r["tables"]["player_games"], week, cfg, paper_dir, root,
-                      teams=teams, price_fn=lambda b: fetch_prices(b, cfg, log=log))
+                      teams=teams, price_fn=lambda b: fetch_prices(b, cfg, log=log),
+                      skip_teams=r.get("no_qb_history", set()))
     flags = [f for f in r["flags"] if any(tm in f for tm in teams) or "injury report" in f]
     for d in due.sort_values("kickoff").itertuples():
         n_lines = int(((lines_now["home"] == d.home) & (lines_now["away"] == d.away)).sum()) if not lines_now.empty else 0

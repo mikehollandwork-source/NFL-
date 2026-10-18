@@ -135,7 +135,18 @@ def run_week(tables: dict, cfg: dict, paths: dict, week: int, asof: bool = False
     from .picks import pick_week
     picks = pick_week(proj, props, t["player_games"], week, cfg)
 
-    return {"tables": t, "plays": plays, "style": style, "dprof": dprof, "labels": labels, "splits": splits,
+    # Teams whose projected starting QB hasn't thrown a pass this season: the model has no basis
+    # for him and would project the team's passing at the previous starter's level
+    pg_ = t["player_games"]
+    st = overrides[overrides["status"].str.lower() == "starter"] if not overrides.empty else overrides
+    no_qb_history = set()
+    for r_ in st.itertuples():
+        thrown = pg_[(pg_["player_id"] == getattr(r_, "player_id", "")) & (pg_["pass_att"] > 0)]
+        if thrown.empty and r_.team in teams:
+            no_qb_history.add(r_.team)
+            flags.append(f"{r_.team}: projected starter {r_.player} has no passes this season; "
+                         f"{r_.team} props are skipped when locking")
+    return {"no_qb_history": no_qb_history, "tables": t, "plays": plays, "style": style, "dprof": dprof, "labels": labels, "splits": splits,
             "scheme": scheme, "coach": coach, "est": est, "strength": strength, "overrides": overrides,
             "auto_overrides": auto, "flags": flags, "corners": corners, "proj": proj, "ctx": ctx,
             "props": props, "wide": wide, "totals": totals, "picks": picks, "sim": sim}

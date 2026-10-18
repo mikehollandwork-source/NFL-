@@ -226,7 +226,8 @@ def main(argv=None):
         for f in r["flags"]:
             print("availability:", f)
         teams = {x.strip().upper() for x in args.teams.split(",")} if args.teams else None
-        bets, path = lock(r["props"], lines, r["tables"]["player_games"], wk, cfg, paper_dir, ROOT, args.force, teams)
+        bets, path = lock(r["props"], lines, r["tables"]["player_games"], wk, cfg, paper_dir, ROOT, args.force, teams,
+                          skip_teams=r.get("no_qb_history", set()))
         print(f"locked {len(bets)} bets -> {path}")
         if not bets.empty:
             print(bets[["player", "stat", "side", "line", "odds", "p_cal", "ev", "stake"]].to_markdown(

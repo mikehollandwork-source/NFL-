@@ -605,6 +605,14 @@ class Projector:
         pg = self.pg[self.pg["team"] == team]
         weeks = sorted(pg["week"].unique())[-self.cfg["players"]["active_within_games"]:]
         active = pg[pg["week"].isin(weeks)][["player_id", "player", "pos"]].drop_duplicates("player_id")
+        # A designated starter (e.g. a QB back from injury) is active even if he missed recent games
+        st = self.overrides[(self.overrides["team"] == team) & (self.overrides["status"].str.lower() == "starter")]
+        if not st.empty:
+            back = pg[(pg["player_id"].isin(set(st.get("player_id", []))) | pg["player"].isin(set(st["player"])))
+                      & ~pg["player_id"].isin(set(active["player_id"]))]
+            if not back.empty:
+                active = pd.concat([active, back.sort_values("week")[["player_id", "player", "pos"]]
+                                    .drop_duplicates("player_id", keep="last")], ignore_index=True)
         ov = self.overrides[(self.overrides["team"] == team)
                             & (self.overrides["status"].str.lower() == "out")]
         ids = set(ov["player_id"]) if "player_id" in ov else set()

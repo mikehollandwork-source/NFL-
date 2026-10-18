@@ -68,6 +68,12 @@ def auto_overrides(week: int, injuries: pd.DataFrame | None, depth: pd.DataFrame
         if qb1 is not None and qb1["player_id"] not in out_ids and (
                 played_in(qb1["player_id"], team, recent) or active_now):
             pick, note = qb1, "depth chart QB1"
+        elif last_qb is not None and last_qb["player_id"] in out_ids and qbs[~qbs["player_id"].isin(out_ids)].shape[0]:
+            # Last game's starter is out too: next healthy QB on the depth chart
+            pick = qbs[~qbs["player_id"].isin(out_ids)].iloc[0]
+            note = "next healthy QB on the depth chart"
+            flags.append(f"{team}: {last_qb['player']} is listed out; projecting {pick['player']} (depth chart). "
+                         f"Check the week {week} report.")
         elif last_qb is not None:
             pick, note = last_qb, "started last game"
             if qb1 is not None and qb1["player_id"] != last_qb["player_id"]:

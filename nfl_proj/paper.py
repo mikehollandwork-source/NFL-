@@ -140,7 +140,7 @@ def select(ev: pd.DataFrame, cfg: dict) -> pd.DataFrame:
 
 
 def lock(props, lines, player_games, week, cfg, paper_dir: Path, root: Path, force=False,
-         teams: set | None = None, price_fn=None) -> tuple[pd.DataFrame, Path]:
+         teams: set | None = None, price_fn=None, skip_teams: set | None = None) -> tuple[pd.DataFrame, Path]:
     """Lock bets. With ``teams`` only games involving those teams are locked
     (e.g. Thursday's game before the Sunday slate); bets already locked for
     other games are kept unchanged and a game can be locked only once."""
@@ -150,6 +150,8 @@ def lock(props, lines, player_games, week, cfg, paper_dir: Path, root: Path, for
     if not prev.empty and teams is None and not force:
         raise FileExistsError(f"{path} is already locked; pass --force only if you mean to replace it")
     ev = evaluate(props, lines, player_games, week, cfg)
+    if skip_teams and not ev.empty:
+        ev = ev[~ev["team"].isin(skip_teams)]
     if teams is not None and not ev.empty:
         ev = ev[ev["team"].isin(teams) | ev["opp"].isin(teams)]
     if not prev.empty and not force:
