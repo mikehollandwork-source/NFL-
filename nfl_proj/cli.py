@@ -112,6 +112,8 @@ def main(argv=None):
     au.add_argument("--mode", choices=["lock", "grade"], default="lock")
     au.add_argument("--window", type=float, help="hours before kickoff a game becomes due ([auto] lock_window_hours)")
     au.add_argument("--no-refresh", action="store_true")
+    bd = sub.add_parser("board", help="rebuild the prop board HTML (games not yet kicked off)")
+    bd.add_argument("--refresh", action="store_true", help="download + rebuild data first")
     sub.add_parser("factor-tests", help="out-of-sample tests of candidate factors (2021-25)")
     pj = sub.add_parser("project")
     pj.add_argument("--week", type=int, help="defaults to the next week with unplayed games")
@@ -127,6 +129,11 @@ def main(argv=None):
             print(run_lock(cfg, paths, ROOT, window_h=args.window, refresh=not args.no_refresh))
         else:
             print(run_grade(cfg, paths, ROOT, refresh=not args.no_refresh))
+        return
+
+    if args.cmd == "board":
+        from .board import build
+        build(cfg, paths, ROOT, refresh=args.refresh)
         return
 
     if args.cmd == "factor-tests":

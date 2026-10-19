@@ -325,3 +325,9 @@ Environment variables (cloud environment settings, never in the repo):
 Records: `paper/ledger.csv` (every bet, win/loss/push/void, profit at the
 real price when recorded), `paper/calls_ledger.csv` (right/wrong on the
 model's lean for every posted line), `paper/summary.md`.
+
+### Prop board
+
+`python -m nfl_proj board [--refresh]` writes `output/<season>/board/prop-board.html`: every posted line for games
+not yet kicked off, the model's lean, win chance and season hit log. It opens on qualifying bets; already-locked bets
+are tagged. It is rebuilt after every scheduled lock run and on Wed/Fri/Sat evenings after injury reports.
