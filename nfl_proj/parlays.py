@@ -579,6 +579,165 @@ def _simple_md(title: str, note: str, par: list, col: str, what: str) -> list[st
     return L + [""]
 
 
+def jackpot(r: dict, cfg: dict, week: int, form: dict, used: set, target_payout: float = 25000.0,
+            max_legs: int = 25, per_game: int = 2):
+    """$1 -> ~$25k at fair odds: up to 25 realistic legs (calibrated ~62%+,
+    same realism filters as the regular milestone legs), from players in no
+    other parlay, at most two legs per game."""
+    c = candidates(r, cfg, week, form, target=0.62)
+    c = c[~c["player_id"].isin(used)].sort_values("score", ascending=False)
+    picked, per = [], {}
+    for x in c.itertuples():
+        if len(picked) >= max_legs or (picked and np.prod(c.loc[picked, "p"]) <= 1 / (1 + target_payout)):
+            break
+        if per.get(x.game, 0) >= per_game:
+            continue
+        picked.append(x.Index)
+        per[x.game] = per.get(x.game, 0) + 1
+    P = c.loc[picked]
+    if not len(P):
+        return [], P
+    used |= set(P["player_id"])
+    return [P], P
+
+
+def _career(season: int) -> pd.DataFrame:
+    from .td_model import RAW
+    fs = sorted(RAW.glob("stats_player_week_*.csv.gz"))
+    cols = ["player_id", "season", "week", "season_type", "team", "position", "carries", "rushing_yards",
+            "targets", "receptions", "receiving_yards", "attempts"]
+    out = []
+    for f in fs:
+        if int(f.name.split("_")[-1][:4]) < season - 8:
+            continue
+        d = pd.read_csv(f, usecols=lambda c: c in cols, low_memory=False)
+        out.append(d[d["season_type"] == "REG"])
+    return pd.concat(out, ignore_index=True)
+
+
+BIG_ROLE = {"RB": ("carries", 15), "WR": ("targets", 8), "TE": ("targets", 7)}
+ROLE_STATS = {"RB": [("rush_yds", "rushing_yards"), ("carries", "carries")],
+              "WR": [("rec_yds", "receiving_yards"), ("receptions", "receptions")],
+              "TE": [("rec_yds", "receiving_yards"), ("receptions", "receptions")]}
+
+
+def backups(r: dict, cfg: dict, week: int, used: set, n_parlays: int = 2, legs: int = 4):
+    """Backups who'd fill a big role if the starter ahead of them misses time.
+    Starter / backup = 1st / 2nd in projected workload at the position (RB
+    carries; WR, TE targets). Starter risk = share of his team's games he
+    missed in 2025-26 (floor 5% for an in-game injury), raised to 25%+ if he is
+    Questionable. The backup must have had a big-role game before (RB 15+
+    carries, WR 8+ targets, TE 7+ targets); the leg is the number he reached in
+    60% of those games. Chance = sim chance in his normal role + P(starter out)
+    x his hit rate in big-role games."""
+    w = r["wide"]
+    status = _status(r.get("injuries"), week)
+    car = _career(int(cfg["season"]))
+    recent = car[car["season"] >= int(cfg["season"]) - 1]
+    gp = recent.groupby("player_id").size()
+    season_g = recent.groupby("season")["week"].nunique()          # games played so far each season
+    seasons_in = recent.groupby("player_id")["season"].unique()    # only seasons he was in the league
+    props = r["props"][r["props"]["_samples"].notna()].rename(columns={"_samples": "samples"})
+    rows = []
+    for (team, pos), g in w[w["pos"].isin(list(BIG_ROLE))].groupby(["team", "pos"]):
+        key = "carries" if pos == "RB" else "targets"
+        g = g.sort_values(key, ascending=False)
+        if len(g) < 2:
+            continue
+        st, bk = g.iloc[0], g.iloc[1 if pos != "WR" else min(3, len(g) - 1)]
+        if pos == "WR":   # the 4th WR is the one who steps into a top-3 role
+            bk = g.iloc[min(3, len(g) - 1)]
+        if bk["player_id"] in used or status.get(bk["player_id"]) in ("Out", "Doubtful", "IR"):
+            continue
+        if st["player_id"] in gp.index:
+            possible = sum(int(season_g.get(y, 0)) for y in seasons_in[st["player_id"]])
+            miss = 1 - min(1.0, gp[st["player_id"]] / max(possible, 1))
+        else:
+            miss = 0.05
+        # Past absences cluster in long injuries, so cap the weekly risk unless he's on this week's report
+        p_out = min(max(miss, 0.05), 0.30)
+        if status.get(st["player_id"]) == "Questionable":
+            p_out = max(p_out, 0.25)
+        stat_col, thr = BIG_ROLE[pos]
+        hist = car[car["player_id"] == bk["player_id"]]
+        big = hist[hist[stat_col] >= thr]
+        if len(big) < 2:      # must have done it more than once
+            continue
+        for stat, col in ROLE_STATS[pos]:
+            k_raw = float(np.percentile(big[col], 40))   # reached in ~60% of his big-role games
+            ks = [k for k in MILESTONES[stat] if k <= k_raw]
+            if not ks:
+                continue
+            k = ks[-1]
+            if k < {"carries": 12, "rush_yds": 50, "receptions": 4, "rec_yds": 40}[stat]:
+                continue          # not a "massive role" number
+            p_role = float((big[col] >= k).mean())
+            pr = props[(props["player_id"] == bk["player_id"]) & (props["stat"] == stat)]
+            p_sim = calibrate(float((np.asarray(pr["samples"].iloc[0]) >= k).mean()), cfg, stat, "over") if len(pr) else 0.0
+            p = p_sim + (1 - p_sim) * p_out * p_role
+            rows.append({"player": bk["player"], "player_id": bk["player_id"], "team": team, "opp": bk["opp"],
+                         "pos": pos, "game": " @ ".join(sorted([team, bk["opp"]])), "stat": stat, "k": k, "p": p,
+                         "p_sim": p_sim, "p_out": p_out, "p_role": p_role, "starter": st["player"],
+                         "n_big": len(big), "best": float(big[col].max()), "median": np.nan, "last": [],
+                         "score": p_out * p_role,
+                         "pros": [f"{len(big)} career big-role games ({stat_col} {thr}+), reached {k}+ in {p_role:.0%} of them, best {big[col].max():.0f}",
+                                  f"{st['player']} ahead of him: {p_out:.0%} chance he misses or leaves"
+                                  + (" (Questionable)" if status.get(st['player_id']) == 'Questionable' else "")],
+                         "cons": [f"only {p_sim:.0%} in his normal backup role: needs the injury"]})
+    c = pd.DataFrame(rows)
+    if c.empty:
+        return [], c
+    c = c.sort_values("score", ascending=False).drop_duplicates("player_id")
+    out = []
+    for _ in range(n_parlays):
+        pick, games = [], set()
+        for x in c[~c["player_id"].isin(used)].itertuples():
+            if x.game in games:
+                continue
+            pick.append(x.Index)
+            games.add(x.game)
+            if len(pick) >= legs:
+                break
+        if len(pick) < 2:
+            break
+        P = c.loc[pick]
+        used |= set(P["player_id"])
+        out.append(P)
+    return out, c
+
+
+def _backup_md(par: list) -> list[str]:
+    L = ["## Backup / injury parlays", "",
+         "Backups who would step into a big role if the starter ahead of them misses or leaves the game. Each has done "
+         "it before (career big-role games). Leg = the number he reached in ~60% of those games; chance = his normal "
+         "backup-role chance + P(starter out) x his big-role hit rate. These mostly need an injury to cash.", ""]
+    if not par:
+        return L + ["No backup parlay qualified.", ""]
+    for i, P in enumerate(par, 1):
+        j = float(np.prod(P["p"]))
+        L += [f"### Backup #{i}: {len(P)} legs, all hit {j:.2%} (fair +{100 * (1 - j) / j:,.0f})", ""]
+        for x in P.itertuples():
+            L.append(f"- **{x.player}** ({x.team} {x.pos} vs {x.opp}, behind {x.starter}) **{x.k}+ {LABEL[x.stat]}**: "
+                     f"{x.p:.0%}\n  - ➕ {'; '.join(x.pros)}\n  - ➖ {'; '.join(x.cons)}")
+        L.append("")
+    return L
+
+
+def _jackpot_md(par: list) -> list[str]:
+    L = ["## Jackpot parlay ($1 → ~$25k at fair odds)", "",
+         "Career-floor legs can't get there: they hit ~95-98% each, so 25,000-to-1 would take ~200 legs. This uses "
+         "up to 25 realistic ~62-70% legs instead (same filters as the milestone parlays), from players in no other "
+         "parlay, at most two per game. Books cap leg counts (DraftKings ~25) and their margin compounds per leg, so "
+         "the real payout will be well below fair.", ""]
+    if not par:
+        return L + ["Not enough unused legs.", ""]
+    P = par[0]
+    j = float(np.prod(P["p"]))
+    L += [f"### {len(P)} legs, all hit {j:.4%} (fair ${(1 - j) / j:,.0f} on $1)", ""]
+    L += [f"- **{x.player}** ({x.team} {x.pos} vs {x.opp}) **{x.k}+ {LABEL[x.stat]}**: {x.p:.0%}" for x in P.itertuples()]
+    return L + [""]
+
+
 def _leg(x) -> str:
     what = f"Anytime TD" if x.stat == "anytime TD" else f"{x.k}+ {LABEL[x.stat]}"
     med = "" if pd.isna(x.median) else f", model median {x.median:.0f}"
@@ -642,8 +801,10 @@ def run(cfg: dict, paths: dict, week: int | None = None, log=print) -> Path | No
     two_p, two_c = two_td(td, used) if len(td) else ([], pd.DataFrame())
     qb_p, _ = qb_td(r, cfg, week, used)
     first_p, _ = first_td(r, td, used) if len(td) else ([], pd.DataFrame())
+    bk_p, _ = backups(r, cfg, week, used)
     parl = build(c, 5, 10, used=used) if len(c) else []
     tdp = build(td, 5, 7, per_stat=7, used=used) if len(td) else []
+    jp_p, _ = jackpot(r, cfg, week, form, used)
     md = report(week, parl, tdp, form, td, brk, [
         _surge_md(surge_p, surge), _two_td_md(two_p, two_c),
         _simple_md("First TD scorer parlay", "One leg per game: the player most likely to score his game's first "
@@ -651,7 +812,8 @@ def run(cfg: dict, paths: dict, week: int | None = None, log=print) -> Path | No
                    "model). Extreme long shot; this market is not backtested.", first_p, "p_first", "First TD scorer"),
         _simple_md("QB touchdown parlay", "Quarterback rushing TDs (how books grade \"QB anytime TD\"), one per game, "
                    "from the blended TD model (QB carries, red-zone and goal-line runs, scoring environment).",
-                   qb_p, "p", "Anytime TD (rushing)")])
+                   qb_p, "p", "Anytime TD (rushing)"),
+        _backup_md(bk_p), _jackpot_md(jp_p)])
     out = paths["out"] / "parlays" / f"week_{week:02d}.md"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(md)
