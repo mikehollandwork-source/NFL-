@@ -363,6 +363,169 @@ def _breakout_md(b: list, d: pd.DataFrame) -> list[str]:
     return L
 
 
+def two_td_prob(p_any):
+    """P(2+ TDs) from the anytime-TD chance, treating TDs as a Poisson count
+    (2021-25 out of sample this matched a direct 2+ TD model; log-loss
+    0.1614 vs 0.1612). Above 25% it ran hot (41% predicted, 33% actual),
+    so the top end is pulled in."""
+    p = np.clip(np.asarray(p_any, float), 1e-6, 0.999)
+    lam = -np.log(1 - p)
+    p2 = 1 - np.exp(-lam) * (1 + lam)
+    return np.where(p2 > 0.25, 0.25 + 0.6 * (p2 - 0.25), p2)
+
+
+def two_td(td: pd.DataFrame, used: set, min_payout: float = 10.0, max_legs: int = 4):
+    c = td.copy()
+    if c.empty:
+        return [], c
+    c["p2"] = two_td_prob(c["p"])
+    c = c.sort_values("p2", ascending=False)
+    pool = c[~c["player_id"].isin(used)]
+    picked, games = [], set()
+    for x in pool.itertuples():
+        if picked and np.prod(c.loc[picked, "p2"]) <= 1 / (1 + min_payout):
+            break
+        if x.game in games or len(picked) >= max_legs:
+            continue
+        picked.append(x.Index)
+        games.add(x.game)
+    P = c.loc[picked]
+    if not len(P) or float(np.prod(P["p2"])) > 1 / (1 + min_payout):
+        return [], c
+    used |= set(P["player_id"])
+    return [P], c
+
+
+def role_surge(r: dict, cfg: dict, week: int, cands: pd.DataFrame, td: pd.DataFrame, used: set,
+               min_payout: float = 10.0, max_legs: int = 8):
+    """Players whose role jumped in their last two games vs before (snap share
+    +15 pts with touches +35%, or touches +60%), where the model still
+    projects the bigger role this week (so a returning starter rules it out).
+    Milestone legs he cleared in BOTH of the last two games, plus anytime-TD
+    legs for the two surge players most likely to score."""
+    pg = r["tables"]["player_games"]
+    pg = pg[pg["week"] < week].copy()
+    if "off_pct" in pg and pg["off_pct"].max() > 1.5:
+        pg["off_pct"] = pg["off_pct"] / 100
+    pg["touch"] = pg["targets"] + pg["rush_att"]
+    wide = r["wide"].set_index("player_id")
+    status = _status(r.get("injuries"), week)
+    surge = {}
+    for (pid, team), h in pg[pg["pos"].isin(["WR", "TE", "RB"])].groupby(["player_id", "team"]):
+        h = h.sort_values("week")
+        if len(h) < 4 or pid in used or status.get(pid) in ("Out", "Doubtful", "IR"):
+            continue
+        last, before = h.tail(2), h.iloc[:-2]
+        t1, t0 = last["touch"].mean(), before["touch"].mean()
+        s1, s0 = last["off_pct"].mean(), before["off_pct"].mean()
+        big = (s1 - s0 >= 0.15 and t1 >= 1.35 * t0 and t1 - t0 >= 3) or (t1 >= 1.6 * t0 and t1 - t0 >= 4)
+        if not big or pid not in wide.index:
+            continue
+        w = wide.loc[pid]
+        if isinstance(w, pd.DataFrame):
+            w = w.iloc[0]
+        proj = float(w.get("targets", 0) + w.get("carries", 0))
+        if proj < 0.8 * t1:            # model doesn't see the bigger role continuing
+            continue
+        surge[pid] = {"snap0": s0, "snap1": s1, "t0": t0, "t1": t1, "proj": proj, "last2": last}
+    if not surge:
+        return [], surge
+    # Own legs from the simulations: the highest milestone he cleared in BOTH games of
+    # the new role that the model (calibrated) still gives 65%+.
+    props = r["props"][r["props"]["_samples"].notna()].rename(columns={"_samples": "samples"})
+    form_bad = {s_ for s_, (a, n) in stat_form(Path(cfg.get("_paper_dir", ""))).items() if n >= 15 and a < 0.5} \
+        if cfg.get("_paper_dir") else set()
+    excluded = set(cfg.get("paper", {}).get("exclude_stats", [])) | form_bad
+    rows = []
+    for x in props[props["player_id"].isin(list(surge)) & props["stat"].isin(list(MILESTONES))].itertuples():
+        if x.stat in excluded:
+            continue
+        col = STATS[x.stat][0]
+        last2 = surge[x.player_id]["last2"][col].tolist()
+        smp = np.asarray(x.samples, dtype=float)
+        best = None
+        for k in MILESTONES[x.stat]:
+            pc = calibrate(float((smp >= k).mean()), cfg, x.stat, "over")
+            if pc >= 0.65 and min(last2) >= k:
+                best = (k, pc)
+        if best:
+            rows.append({"player": x.player, "player_id": x.player_id, "team": x.team, "opp": x.opp, "pos": x.pos,
+                         "game": " @ ".join(sorted([x.team, x.opp])), "stat": x.stat, "k": best[0], "p": best[1],
+                         "median": float(np.median(smp)), "last": last2, "trend": "up", "score": best[1],
+                         "pros": [f"cleared {best[0]}+ in both games of the new role"], "cons": []})
+    M = pd.DataFrame(rows)
+    M = M.sort_values("p", ascending=False).drop_duplicates("player_id") if len(M) else M
+    T = td[td["player_id"].isin(list(surge))].sort_values("p", ascending=False).head(2)
+    if len(T) < 2:   # TD legs come from the full projection list, not just the 30%+ TD board
+        T = _surge_td(r, list(surge), T)
+    P = pd.concat([T, M], ignore_index=True)
+    picked = []
+    for i in P.index:
+        picked.append(i)
+        if len(picked) >= max_legs or (len(picked) >= len(T) + 1 and np.prod(P.loc[picked, "p"]) <= 1 / (1 + min_payout)):
+            break
+    P = P.loc[picked]
+    if float(np.prod(P["p"])) > 1 / (1 + min_payout):
+        return [], surge
+    used |= set(P["player_id"])
+    return [P], surge
+
+
+def _surge_td(r: dict, pids: list, T: pd.DataFrame) -> pd.DataFrame:
+    """Top up to two TD legs from the full projections (players under the 30% TD board floor)."""
+    have = set(T["player_id"]) if len(T) else set()
+    w = r["wide"][r["wide"]["player_id"].isin(pids) & ~r["wide"]["player_id"].isin(have)]
+    add = [{"player": x.player, "player_id": x.player_id, "team": x.team, "opp": x.opp, "pos": x.pos,
+            "game": " @ ".join(sorted([x.team, x.opp])), "stat": "anytime TD", "k": 1, "p": float(x.anytime_td),
+            "median": np.nan, "last": [], "trend": "up", "score": float(x.anytime_td), "pros": [],
+            "cons": ["TD chance under 30%"]}
+           for x in w.sort_values("anytime_td", ascending=False).head(2 - len(have)).itertuples()]
+    return pd.concat([T, pd.DataFrame(add)], ignore_index=True) if add else T
+
+
+def _surge_md(par: list, surge: dict) -> list[str]:
+    L = ["## Role-surge parlay", "",
+         "Players whose role jumped in their last two games (snap share +15 pts with touches +35%, or touches +60%) "
+         "and whose bigger role the model still projects this week; milestone legs each cleared in both of those games, "
+         "plus anytime TDs for the two surge players most likely to score.", ""]
+    if surge:
+        L.append("Role surges found: " + ", ".join(
+            f"{v['last2']['player'].iloc[-1]} ({v['last2']['team'].iloc[-1]}: {v['t0']:.1f} → {v['t1']:.1f} touches/game, "
+            f"snaps {v['snap0']:.0%} → {v['snap1']:.0%})" for v in surge.values()))
+        L.append("")
+    if not par:
+        L += ["No role-surge parlay qualified at +1000 without padding.", ""]
+        return L
+    P = par[0]
+    j = float(np.prod(P["p"]))
+    L += [f"### {len(P)} legs, all hit {j:.1%} (fair +{100 * (1 - j) / j:,.0f})", ""]
+    for x in P.itertuples():
+        s = surge.get(x.player_id, {})
+        role = f"role: {s.get('t0', 0):.1f} → {s.get('t1', 0):.1f} touches/game, snaps {s.get('snap0', 0):.0%} → {s.get('snap1', 0):.0%}"
+        L.append(_leg(x).replace("  - ➕ ", f"  - ➕ {role}; ", 1))
+    return L + [""]
+
+
+def _two_td_md(par: list, c: pd.DataFrame) -> list[str]:
+    L = ["## Two-touchdown parlay", "",
+         "2+ TD chance comes from each player's anytime-TD chance (simulation blended with the stats-driven TD model). "
+         "Tested 2021-25: carries drive multi-TD games more than targets, and dual-threat usage or past TD rate add "
+         "nothing beyond that, so goal-line backs on high-scoring teams lead.", "",
+         "| # | Player | vs | 2+ TDs | Fair | Anytime | Why |", "|---|---|---|---|---|---|---|"]
+    for i, x in enumerate(c.head(10).itertuples(), 1):
+        L.append(f"| {i} | {x.player} ({x.team} {x.pos}) | {x.opp} | {x.p2:.0%} | {american(x.p2)} | {x.p:.0%} | {(x.pros or ['—'])[0]} |")
+    L.append("")
+    if not par:
+        return L + ["No two-TD parlay qualified.", ""]
+    P = par[0]
+    j = float(np.prod(P["p2"]))
+    L += [f"### {len(P)} legs, all hit {j:.1%} (fair +{100 * (1 - j) / j:,.0f})", ""]
+    for x in P.itertuples():
+        L.append(f"- **{x.player}** ({x.team} {x.pos} vs {x.opp}) **2+ TDs**: {x.p2:.0%} (fair {american(x.p2)}; anytime {x.p:.0%})\n"
+                 f"  - ➕ {'; '.join(x.pros) or '—'}\n  - ➖ {'; '.join(x.cons) or '—'}")
+    return L + [""]
+
+
 def _leg(x) -> str:
     what = f"Anytime TD" if x.stat == "anytime TD" else f"{x.k}+ {LABEL[x.stat]}"
     med = "" if pd.isna(x.median) else f", model median {x.median:.0f}"
@@ -372,7 +535,7 @@ def _leg(x) -> str:
 
 
 def report(week: int, parlays: list, tds: list, form: dict, td_top: pd.DataFrame | None = None,
-           brk: tuple | None = None) -> str:
+           brk: tuple | None = None, extra: list | None = None) -> str:
     L = [f"# Week {week} long-shot parlays", "",
          "Every parlay is at least +1000 at fair odds and no player appears in more than one parlay; a parlay stops once it reaches +1000, and if the strong legs run out it is left out rather than padded. Legs are alternate milestones (\"X+\") the model gives about 70%+ after calibration, cleared in at least 3 of the player's last 5 games, with a projection not far above what he has actually done; TD legs blend the simulation with the stats-driven TD model (volume, red-zone and end-zone usage, scoring environment), on stat types the model has graded "
          "well this season, one leg per game so they're close to independent. Probabilities assume independence; "
@@ -398,6 +561,8 @@ def report(week: int, parlays: list, tds: list, form: dict, td_top: pd.DataFrame
             L += [_leg(x) for x in p.itertuples()] + [""]
     if brk is not None:
         L += _breakout_md(*brk)
+    for block in extra or []:
+        L += block
     return "\n".join(L)
 
 
@@ -417,10 +582,14 @@ def run(cfg: dict, paths: dict, week: int | None = None, log=print) -> Path | No
     c = candidates(r, cfg, week, form)
     td = td_candidates(r, cfg, week)
     used: set = set()
-    brk = breakout(r, cfg, week, used)                       # most specific first
+    cfg = {**cfg, "_paper_dir": str(paths["out"] / "paper")}
+    # Specialty parlays first (they need specific players), then the regular ones from who's left
+    brk = breakout(r, cfg, week, used)
+    surge_p, surge = role_surge(r, cfg, week, c, td, used)
+    two_p, two_c = two_td(td, used) if len(td) else ([], pd.DataFrame())
     parl = build(c, 5, 10, used=used) if len(c) else []
     tdp = build(td, 5, 7, per_stat=7, used=used) if len(td) else []
-    md = report(week, parl, tdp, form, td, brk)
+    md = report(week, parl, tdp, form, td, brk, [_surge_md(surge_p, surge), _two_td_md(two_p, two_c)])
     out = paths["out"] / "parlays" / f"week_{week:02d}.md"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(md)
