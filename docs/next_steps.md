@@ -37,3 +37,9 @@
   Log-loss: 2026 wks 4-5 0.675 -> 0.662, week 6 real 0.706 -> 0.698 (P>0 = 93%). Carries also improve.
   Week 6 lock replay: 12-7 (+18%) vs actual 13-7 (+21.5%) -> selection noise; overs fall from 12/20 to 5/19.
 - min_prob kept at 0.54: with the new calibration, higher floors don't clearly help on real lines.
+- Anytime-TD calibration ([sim] td_calib): raw TD odds too extreme (50-60% calls scored 41% in 2025, 37% in 2026).
+  Fit on 2025, 2026 log-loss 0.494 -> 0.485. TD study (2021-25, 16k player-games): volume + team scoring outlook
+  carry nearly all the signal; red-zone/inside-10/end-zone usage add little; last-week end-zone near misses, deep
+  share and air yards add nothing.
+- Game script: model applies ~4-5x too much (pass-rate slope per point of projected margin -0.0056 vs actual -0.0012;
+  big favorites' RB carries -17%, big underdogs' targets -19%, pass yds -18%). Testing pass_rate_per_point = 0.

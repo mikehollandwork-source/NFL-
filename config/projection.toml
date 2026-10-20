@@ -81,6 +81,11 @@ games_played_min = 2
 # anytime TD, over/under vs your lines) is read off these simulations.
 n_sims = 5000
 seed = 0
+# Anytime-TD probabilities are too spread out: players given 50-60% scored 41%
+# (2025 backtest, 3,773 WR/TE/RB games); long shots score a bit more often than
+# predicted. p' = sigmoid(a + b * logit(p)), fitted on 2025, improves 2026 weeks
+# 3-6 out of sample (log-loss 0.494 -> 0.485). 58% -> 50%, 38% -> 35%, 20% -> 21%.
+td_calib = { a = -0.248, b = 0.781 }
 
 # QB kneel-downs per game (official rushing attempts include them), by win chance
 kneels = {loser = 0.22, winner = 1.34, margin_sd = 13.5}
