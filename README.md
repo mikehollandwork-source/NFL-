@@ -352,3 +352,19 @@ for the next unplayed week: top anytime-TD picks, milestone long shots, anytime-
 vulnerable defenses, role-surge, two-TD, first-TD, QB rushing-TD, backup/injury and the jackpot. Same data and code
 give the same result (simulations are seeded); live injury feeds are pulled at run time. Rules: no player in more than
 one parlay (the jackpot excepted), +1000 fair minimum, parlays stop at +1000 and are never padded.
+
+### GitHub Actions (hands-off)
+
+`.github/workflows/nfl-props.yml` runs everything on GitHub's servers and sends it to Telegram:
+
+| When (ET) | What |
+|---|---|
+| Every 30 min around kickoffs (Thu, Sun, Mon; Fri/Sat late season) | cheap schedule check; when a game is ~2 h out: refresh data + injuries, lock its bets, send picks, send the updated prop board |
+| Tue ~11:30 AM (Wed retry) | grade last week + loss review, then build and send the week's parlays (once) |
+| Wed / Fri / Sat ~6:30 PM | refresh the prop board after injury reports and send qualifying / locked bets |
+
+Setup: add repository secrets `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (optional `ODDS_API_KEY`) under
+Settings → Secrets and variables → Actions. Scheduled runs only fire from the default branch, so merge this branch
+first. Any run can also be started by hand: Actions → NFL props → Run workflow → pick lock / grade / parlays / board.
+Each run commits its outputs (`output/<season>/paper`, `parlays`, `board`) back to the repo and keeps them as a run
+artifact for 30 days.
