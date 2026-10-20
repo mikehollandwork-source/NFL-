@@ -344,3 +344,11 @@ Each graded week also writes `paper/week_NN_review.md`:
 Change rule: act only on a pattern that holds 3+ weeks (~100 bets) and passes the 2021-25 backtest.
 Tools: `tools/calibration_fit.py` (prop calibration by stat family and side), `tools/td_study.py`
 (what predicts TDs), `tools/td_calibration.py` (anytime-TD calibration from `backtest_*_td.csv`).
+
+### Parlays
+
+`python -m nfl_proj parlays --refresh` (downloads fresh data, then builds) writes `output/<season>/parlays/week_NN.md`
+for the next unplayed week: top anytime-TD picks, milestone long shots, anytime-TD parlays, breakouts vs the two most
+vulnerable defenses, role-surge, two-TD, first-TD, QB rushing-TD, backup/injury and the jackpot. Same data and code
+give the same result (simulations are seeded); live injury feeds are pulled at run time. Rules: no player in more than
+one parlay (the jackpot excepted), +1000 fair minimum, parlays stop at +1000 and are never padded.
