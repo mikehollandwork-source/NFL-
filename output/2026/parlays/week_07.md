@@ -26,31 +26,31 @@ Stat form this season (model lean right %): carries 77% (31), rec yds 51% (99), 
 
 ## Long-shot parlays (milestones)
 
-### #1: 11 legs, all hit 8.12% (fair +1,131)
+### #1: 11 legs, all hit 7.17% (fair +1,295)
 
-- **Malik Willis** (MIA QB vs NYJ) **12+ completions**: 86% (fair -611), model median 17; last games: 15, 14, 20, 9, 15
-  - ➕ cleared 12+ in 4 of last 5
-  - ➖ model 50% right on completions this season
 - **Rhamondre Stevenson** (NWE RB vs CHI) **6+ rush attempts**: 82% (fair -468), model median 11; last games: 6, 7, 13, 13, 14
   - ➕ carries rising; cleared 6+ in 5 of last 5; model 77% right on carries this season
   - ➖ —
 - **Jalon Daniels** (TAM QB vs CAR) **15+ completions**: 85% (fair -549), model median 20; last games: 0, 19, 19, 22
   - ➕ cleared 15+ in 3 of last 4
   - ➖ model 50% right on completions this season
-- **Deshaun Watson** (CLE QB vs TEN) **6+ rush attempts**: 80% (fair -406), model median 11; last games: 7, 11, 7, 6, 8
-  - ➕ carries rising; cleared 6+ in 5 of last 5; model 77% right on carries this season
-  - ➖ —
 - **Emanuel Wilson** (SEA RB vs KAN) **10+ rush attempts**: 80% (fair -404), model median 16; last games: 21, 9, 21, 20, 14
   - ➕ carries rising; cleared 10+ in 4 of last 5; model 77% right on carries this season
   - ➖ —
-- **Jacoby Brissett** (ARI QB vs DEN) **150+ passing yds**: 80% (fair -395), model median 203; last games: 95, 280, 166, 292, 218
-  - ➕ cleared 150+ in 4 of last 5
-  - ➖ yardage: one big play swings it; model 50% right on pass yds this season
+- **J.K. Dobbins** (DEN RB vs ARI) **10+ rush attempts**: 79% (fair -376), model median 16; last games: 10, 17, 11, 18, 17
+  - ➕ carries rising; cleared 10+ in 5 of last 5; model 77% right on carries this season
+  - ➖ —
 - **Daniel Jones** (IND QB vs MIN) **15+ completions**: 79% (fair -380), model median 18; last games: 22, 24, 19, 24, 22
   - ➕ cleared 15+ in 5 of last 5
   - ➖ model 50% right on completions this season
+- **Dak Prescott** (DAL QB vs PHI) **22+ completions**: 79% (fair -374), model median 26; last games: 26, 25, 32, 24, 34
+  - ➕ cleared 22+ in 5 of last 5
+  - ➖ model 50% right on completions this season
 - **Kirk Cousins** (LVR QB vs LAR) **175+ passing yds**: 79% (fair -370), model median 240; last games: 253, 248, 365, 243, 313
   - ➕ cleared 175+ in 5 of last 5
+  - ➖ yardage: one big play swings it; model 50% right on pass yds this season
+- **Geno Smith** (NYJ QB vs MIA) **150+ passing yds**: 78% (fair -352), model median 201; last games: 247, 321, 119, 182, 252
+  - ➕ cleared 150+ in 4 of last 5
   - ➖ yardage: one big play swings it; model 50% right on pass yds this season
 - **C.J. Stroud** (HOU QB vs NYG) **200+ passing yds**: 77% (fair -327), model median 258; last games: 353, 167, 347, 261, 312
   - ➕ cleared 200+ in 4 of last 5
@@ -62,11 +62,8 @@ Stat form this season (model lean right %): carries 77% (31), rec yds 51% (99), 
   - ➕ team projected 27 pts
   - ➖ yardage: one big play swings it; model 50% right on pass yds this season
 
-### #2: 10 legs, all hit 8.18% (fair +1,123)
+### #2: 11 legs, all hit 6.67% (fair +1,400)
 
-- **J.K. Dobbins** (DEN RB vs ARI) **10+ rush attempts**: 79% (fair -376), model median 16; last games: 10, 17, 11, 18, 17
-  - ➕ carries rising; cleared 10+ in 5 of last 5; model 77% right on carries this season
-  - ➖ —
 - **Sam Darnold** (SEA QB vs KAN) **175+ passing yds**: 80% (fair -403), model median 238; last games: 13, 379, 168, 195, 278
   - ➕ —
   - ➖ yardage: one big play swings it; model 50% right on pass yds this season
@@ -79,142 +76,127 @@ Stat form this season (model lean right %): carries 77% (31), rec yds 51% (99), 
 - **Drake Maye** (NWE QB vs CHI) **15+ completions**: 80% (fair -395), model median 19; last games: 14, 14, 22, 26, 18
   - ➕ —
   - ➖ model 50% right on completions this season
+- **Jacoby Brissett** (ARI QB vs DEN) **150+ passing yds**: 80% (fair -395), model median 203; last games: 95, 280, 166, 292, 218
+  - ➕ cleared 150+ in 4 of last 5
+  - ➖ yardage: one big play swings it; model 50% right on pass yds this season
 - **Bryce Young** (CAR QB vs TAM) **175+ passing yds**: 79% (fair -379), model median 236; last games: 361, 287, 291, 329, 281
   - ➕ cleared 175+ in 5 of last 5
   - ➖ yardage: one big play swings it; model 50% right on pass yds this season
-- **Dak Prescott** (DAL QB vs PHI) **22+ completions**: 79% (fair -374), model median 26; last games: 26, 25, 32, 24, 34
-  - ➕ cleared 22+ in 5 of last 5
-  - ➖ model 50% right on completions this season
 - **Jared Goff** (DET QB vs GNB) **20+ completions**: 79% (fair -371), model median 24; last games: 26, 26, 25, 32, 19
   - ➕ cleared 20+ in 4 of last 5
   - ➖ model 50% right on completions this season
-- **Puka Nacua** (LAR WR vs LVR) **30+ receiving yds**: 72% (fair -259), model median 94; last games: 74, 125, 138, 80
-  - ➕ targets rising; cleared 30+ in 4 of last 4; team projected 27 pts
-  - ➖ yardage: one big play swings it; model 51% right on rec yds this season
-- **Drake London** (ATL WR vs SFO) **15+ receiving yds**: 72% (fair -256), model median 72; last games: 51, 194, 96, 118, 62
-  - ➕ targets rising; cleared 15+ in 5 of last 5
-  - ➖ yardage: one big play swings it; model 51% right on rec yds this season
-
-### #3: 10 legs, all hit 6.77% (fair +1,377)
-
-- **Bucky Irving** (TAM RB vs CAR) **12+ rush attempts**: 75% (fair -302), model median 18; last games: 17, 15, 16, 21, 19
-  - ➕ carries rising; cleared 12+ in 5 of last 5; model 77% right on carries this season
-  - ➖ —
-- **Geno Smith** (NYJ QB vs MIA) **150+ passing yds**: 78% (fair -352), model median 201; last games: 247, 321, 119, 182, 252
-  - ➕ cleared 150+ in 4 of last 5
-  - ➖ yardage: one big play swings it; model 50% right on pass yds this season
 - **Michael Penix Jr.** (ATL QB vs SFO) **15+ completions**: 82% (fair -444), model median 19; last games: 18, 15, 19, 19
   - ➕ cleared 15+ in 4 of last 4
   - ➖ Questionable on the injury report; model 50% right on completions this season
 - **Chase Brown** (CIN HB vs BAL) **8+ rush attempts**: 79% (fair -378), model median 14; last games: 16, 20, 13, 9, 13
   - ➕ cleared 8+ in 5 of last 5; model 77% right on carries this season
   - ➖ carries falling
+- **Puka Nacua** (LAR WR vs LVR) **30+ receiving yds**: 72% (fair -259), model median 94; last games: 74, 125, 138, 80
+  - ➕ targets rising; cleared 30+ in 4 of last 4; team projected 27 pts
+  - ➖ yardage: one big play swings it; model 51% right on rec yds this season
+- **Tony Pollard** (TEN RB vs CLE) **14+ rush attempts**: 71% (fair -245), model median 19; last games: 14, 17, 16, 14, 19
+  - ➕ carries rising; cleared 14+ in 5 of last 5; model 77% right on carries this season
+  - ➖ team projected only 16 pts
+
+### #3: 9 legs, all hit 7.41% (fair +1,250)
+
+- **Bucky Irving** (TAM RB vs CAR) **12+ rush attempts**: 75% (fair -302), model median 18; last games: 17, 15, 16, 21, 19
+  - ➕ carries rising; cleared 12+ in 5 of last 5; model 77% right on carries this season
+  - ➖ —
 - **Bo Nix** (DEN QB vs ARI) **15+ completions**: 77% (fair -330), model median 18; last games: 22, 17, 25, 16, 17
   - ➕ cleared 15+ in 5 of last 5
   - ➖ model 50% right on completions this season
-- **Jonathan Taylor** (IND RB vs MIN) **12+ rush attempts**: 79% (fair -371), model median 19; last games: 24, 23, 20, 15, 21
-  - ➕ cleared 12+ in 5 of last 5; model 77% right on carries this season
-  - ➖ carries falling
 - **Cam Ward** (TEN QB vs CLE) **15+ completions**: 76% (fair -322), model median 18; last games: 13, 23, 20, 23, 11
   - ➕ —
   - ➖ team projected only 16 pts; model 50% right on completions this season
 - **Jaxon Smith-Njigba** (SEA WR vs KAN) **25+ receiving yds**: 73% (fair -274), model median 87; last games: 155, 128, 76, 102, 134
   - ➕ targets rising; cleared 25+ in 5 of last 5
   - ➖ yardage: one big play swings it; model 51% right on rec yds this season
-- **Malik Nabers** (NYG WR vs HOU) **15+ receiving yds**: 73% (fair -266), model median 69; last games: 1, 26, 112, 121, 165
-  - ➕ targets rising; cleared 15+ in 4 of last 5
-  - ➖ yardage: one big play swings it; model 51% right on rec yds this season
-- **Amon-Ra St. Brown** (DET WR vs GNB) **15+ receiving yds**: 73% (fair -271), model median 63; last games: 67, 142, 19, 75, 69
-  - ➕ cleared 15+ in 5 of last 5
-  - ➖ yardage: one big play swings it; model 51% right on rec yds this season
-
-### #4: 8 legs, all hit 8.56% (fair +1,068)
-
 - **Kyler Murray** (MIN QB vs IND) **15+ completions**: 75% (fair -305), model median 18; last games: 3, 15, 27, 24
   - ➕ cleared 15+ in 3 of last 4; team projected 26 pts
   - ➖ model 50% right on completions this season
-- **Christian McCaffrey** (SFO RB vs ATL) **10+ rush attempts**: 74% (fair -287), model median 15; last games: 10, 15, 15, 11, 16
-  - ➕ cleared 10+ in 5 of last 5; team projected 25 pts; model 77% right on carries this season
-  - ➖ —
+- **Malik Nabers** (NYG WR vs HOU) **15+ receiving yds**: 73% (fair -266), model median 69; last games: 1, 26, 112, 121, 165
+  - ➕ targets rising; cleared 15+ in 4 of last 5
+  - ➖ yardage: one big play swings it; model 51% right on rec yds this season
 - **Ashton Jeanty** (LVR RB vs LAR) **10+ rush attempts**: 77% (fair -328), model median 16; last games: 21, 19, 15, 10, 10
   - ➕ cleared 10+ in 5 of last 5; model 77% right on carries this season
   - ➖ carries falling
-- **Patrick Mahomes** (KAN QB vs SEA) **175+ passing yds**: 74% (fair -288), model median 222; last games: 184, 382, 246, 225, 272
-  - ➕ cleared 175+ in 5 of last 5
-  - ➖ yardage: one big play swings it; model 50% right on pass yds this season
+- **Bijan Robinson** (ATL RB vs SFO) **12+ rush attempts**: 76% (fair -322), model median 18; last games: 16, 29, 19, 17, 9
+  - ➕ cleared 12+ in 4 of last 5; model 77% right on carries this season
+  - ➖ carries falling
 - **Zay Flowers** (BAL WR vs CIN) **15+ receiving yds**: 72% (fair -255), model median 69; last games: 150, 84, 118, 53, 66
   - ➕ targets rising; cleared 15+ in 5 of last 5
   - ➖ yardage: one big play swings it; model 51% right on rec yds this season
-- **Tony Pollard** (TEN RB vs CLE) **14+ rush attempts**: 71% (fair -245), model median 19; last games: 14, 17, 16, 14, 19
-  - ➕ carries rising; cleared 14+ in 5 of last 5; model 77% right on carries this season
-  - ➖ team projected only 16 pts
+
+### #4: 8 legs, all hit 8.11% (fair +1,133)
+
+- **Patrick Mahomes** (KAN QB vs SEA) **175+ passing yds**: 74% (fair -288), model median 222; last games: 184, 382, 246, 225, 272
+  - ➕ cleared 175+ in 5 of last 5
+  - ➖ yardage: one big play swings it; model 50% right on pass yds this season
+- **Drake London** (ATL WR vs SFO) **15+ receiving yds**: 72% (fair -256), model median 72; last games: 51, 194, 96, 118, 62
+  - ➕ targets rising; cleared 15+ in 5 of last 5
+  - ➖ yardage: one big play swings it; model 51% right on rec yds this season
+- **Joe Burrow** (CIN QB vs BAL) **22+ completions**: 74% (fair -281), model median 25; last games: 25, 20, 28, 39, 23
+  - ➕ cleared 22+ in 4 of last 5
+  - ➖ model 50% right on completions this season
 - **Tyler Shough** (NOR QB vs PIT) **20+ completions**: 74% (fair -281), model median 23; last games: 27, 29, 30, 16, 16
   - ➕ —
   - ➖ model 50% right on completions this season
+- **Amon-Ra St. Brown** (DET WR vs GNB) **15+ receiving yds**: 73% (fair -271), model median 63; last games: 67, 142, 19, 75, 69
+  - ➕ cleared 15+ in 5 of last 5
+  - ➖ yardage: one big play swings it; model 51% right on rec yds this season
+- **D'Andre Swift** (CHI RB vs NWE) **12+ rush attempts**: 74% (fair -286), model median 17; last games: 16, 20, 15, 9, 16
+  - ➕ cleared 12+ in 4 of last 5; model 77% right on carries this season
+  - ➖ carries falling
 - **CeeDee Lamb** (DAL WR vs PHI) **20+ receiving yds**: 72% (fair -253), model median 70; last games: 153, 112, 189, 9, 70
   - ➕ cleared 20+ in 4 of last 5
   - ➖ yardage: one big play swings it; model 51% right on rec yds this season
+- **Aaron Jones** (MIN RB vs IND) **15+ rush attempts**: 72% (fair -258), model median 20; last games: 12, 23, 17, 20, 25
+  - ➕ carries rising; cleared 15+ in 4 of last 5; team projected 26 pts; model 77% right on carries this season
+  - ➖ Questionable on the injury report
 
 ## Anytime-TD parlays
 
-### #1: 5 legs, all hit 4.84% (fair +1,966)
+### #1: 3 legs, all hit 7.72% (fair +1,195)
 
-- **Kyren Williams** (LAR RB vs LVR) **Anytime TD**: 61% (fair -159); last games: 1, 0, 2, 1, 0
-  - ➕ volume 7.7 targets + 13.0 carries projected; 3.7 red-zone touches/game, 1.5 inside the 10; scoring environment 6.2 TDs/game (team scored + opp allowed; median 4.8)
-  - ➖ usage falling
-- **Javonte Williams** (DAL RB vs PHI) **Anytime TD**: 60% (fair -152); last games: 0, 1, 3, 1, 1
-  - ➕ volume 3.5 targets + 17.1 carries projected; 4.5 red-zone touches/game, 2.5 inside the 10; scoring environment 5.7 TDs/game (team scored + opp allowed; median 4.8)
-  - ➖ usage falling
-- **Bijan Robinson** (ATL RB vs SFO) **Anytime TD**: 54% (fair -118); last games: 0, 2, 2, 0, 0
-  - ➕ volume 5.5 targets + 18.3 carries projected; 3.7 red-zone touches/game, 1.3 inside the 10
-  - ➖ scoring environment 4.2 TDs/game (team scored + opp allowed; median 4.8); usage falling
-- **D'Andre Swift** (CHI RB vs NWE) **Anytime TD**: 53% (fair -115); last games: 0, 0, 0, 1, 2
-  - ➕ volume 3.8 targets + 17.3 carries projected; 4.7 red-zone touches/game, 2.3 inside the 10; scoring environment 5.0 TDs/game (team scored + opp allowed; median 4.8)
-  - ➖ usage falling
 - **Christian Watson** (GNB WR vs DET) **Anytime TD**: 45% (fair +122); last games: 1, 1, 0, 2, 0
   - ➕ volume 7.7 targets + 0.0 carries projected; 1.2 red-zone touches/game, 0.7 inside the 10; 1.5 end-zone targets/game; scoring environment 6.3 TDs/game (team scored + opp allowed; median 4.8); usage rising
   - ➖ —
-
-### #2: 3 legs, all hit 8.31% (fair +1,104)
-
-- **Aaron Jones** (MIN RB vs IND) **Anytime TD**: 47% (fair +111); last games: 1, 0, 0, 0, 1
-  - ➕ volume 4.4 targets + 20.4 carries projected; 2.6 red-zone touches/game, 0.2 inside the 10; usage rising
-  - ➖ scoring environment 4.3 TDs/game (team scored + opp allowed; median 4.8); Questionable on the injury report
 - **Jaylen Warren** (PIT RB vs NOR) **Anytime TD**: 44% (fair +125); last games: 0, 0, 0, 2, 0
   - ➕ volume 5.5 targets + 12.7 carries projected; 1.3 red-zone touches/game, 0.3 inside the 10; scoring environment 5.7 TDs/game (team scored + opp allowed; median 4.8)
   - ➖ usage falling
-- **Matthew Golden** (GNB WR vs DET) **Anytime TD**: 40% (fair +153); last games: 0, 1, 1, 0, 1
-  - ➕ volume 9.2 targets + 0.1 carries projected; 1.8 red-zone touches/game, 0.5 inside the 10; 1.2 end-zone targets/game; scoring environment 6.3 TDs/game (team scored + opp allowed; median 4.8); usage rising
-  - ➖ under 40%: a real long shot on its own
-
-### #3: 3 legs, all hit 4.95% (fair +1,920)
-
 - **DeVonta Smith** (PHI WR vs DAL) **Anytime TD**: 39% (fair +159); last games: 0, 1, 0, 1
   - ➕ volume 9.4 targets + 0.0 carries projected; 1.0 end-zone targets/game; scoring environment 5.2 TDs/game (team scored + opp allowed; median 4.8); usage rising
   - ➖ 0.8 red-zone touches/game, 0.5 inside the 10; under 40%: a real long shot on its own
-- **MarShawn Lloyd** (GNB RB vs DET) **Anytime TD**: 36% (fair +175); last games: 1, 0, 0, 2, 0
-  - ➕ volume 2.7 targets + 9.1 carries projected; 2.5 red-zone touches/game, 0.8 inside the 10; scoring environment 6.3 TDs/game (team scored + opp allowed; median 4.8); usage rising
+
+### #2: 3 legs, all hit 5.40% (fair +1,753)
+
+- **Matthew Golden** (GNB WR vs DET) **Anytime TD**: 40% (fair +153); last games: 0, 1, 1, 0, 1
+  - ➕ volume 9.2 targets + 0.1 carries projected; 1.8 red-zone touches/game, 0.5 inside the 10; 1.2 end-zone targets/game; scoring environment 6.3 TDs/game (team scored + opp allowed; median 4.8); usage rising
   - ➖ under 40%: a real long shot on its own
 - **Tetairoa McMillan** (CAR WR vs TAM) **Anytime TD**: 35% (fair +183); last games: 0, 0, 0, 2, 0
   - ➕ volume 8.5 targets + 0.0 carries projected; 1.4 red-zone touches/game, 1.0 inside the 10; 1.0 end-zone targets/game; scoring environment 5.0 TDs/game (team scored + opp allowed; median 4.8); usage rising
   - ➖ under 40%: a real long shot on its own
-
-### #4: 3 legs, all hit 4.65% (fair +2,051)
-
 - **Brock Bowers** (LVR TE vs LAR) **Anytime TD**: 39% (fair +159); last games: 1, 1, 1, 0
   - ➕ volume 9.6 targets + 0.0 carries projected; 1.8 red-zone touches/game, 0.5 inside the 10; 1.0 end-zone targets/game; scoring environment 4.8 TDs/game (team scored + opp allowed; median 4.8)
   - ➖ usage falling; under 40%: a real long shot on its own
-- **Sam LaPorta** (DET TE vs GNB) **Anytime TD**: 33% (fair +199); last games: 0, 1, 0, 1, 1
-  - ➕ volume 7.3 targets + 0.0 carries projected; 1.8 red-zone touches/game, 1.4 inside the 10; 1.0 end-zone targets/game; scoring environment 6.7 TDs/game (team scored + opp allowed; median 4.8); usage rising
+
+### #3: 3 legs, all hit 4.13% (fair +2,322)
+
+- **MarShawn Lloyd** (GNB RB vs DET) **Anytime TD**: 36% (fair +175); last games: 1, 0, 0, 2, 0
+  - ➕ volume 2.7 targets + 9.1 carries projected; 2.5 red-zone touches/game, 0.8 inside the 10; scoring environment 6.3 TDs/game (team scored + opp allowed; median 4.8); usage rising
   - ➖ under 40%: a real long shot on its own
 - **Nico Collins** (HOU WR vs NYG) **Anytime TD**: 36% (fair +177); last games: 1, 2, 0, 0
   - ➕ volume 6.6 targets + 0.5 carries projected; 1.5 red-zone touches/game, 0.5 inside the 10; 1.0 end-zone targets/game; scoring environment 5.5 TDs/game (team scored + opp allowed; median 4.8)
   - ➖ usage falling; under 40%: a real long shot on its own
-
-### #5: 3 legs, all hit 3.25% (fair +2,979)
-
 - **Jalen Coker** (CAR WR vs TAM) **Anytime TD**: 32% (fair +217); last games: 2, 0, 0, 0
   - ➕ volume 8.6 targets + 0.0 carries projected; 1.2 red-zone touches/game, 1.0 inside the 10; scoring environment 5.0 TDs/game (team scored + opp allowed; median 4.8); usage rising
+  - ➖ under 40%: a real long shot on its own
+
+### #4: 3 legs, all hit 3.44% (fair +2,807)
+
+- **Sam LaPorta** (DET TE vs GNB) **Anytime TD**: 33% (fair +199); last games: 0, 1, 0, 1, 1
+  - ➕ volume 7.3 targets + 0.0 carries projected; 1.8 red-zone touches/game, 1.4 inside the 10; 1.0 end-zone targets/game; scoring environment 6.7 TDs/game (team scored + opp allowed; median 4.8); usage rising
   - ➖ under 40%: a real long shot on its own
 - **Garrett Wilson** (NYJ WR vs MIA) **Anytime TD**: 33% (fair +201); last games: 1, 1, 0, 1, 0
   - ➕ volume 7.7 targets + 0.0 carries projected; scoring environment 4.8 TDs/game (team scored + opp allowed; median 4.8)
@@ -222,6 +204,18 @@ Stat form this season (model lean right %): carries 77% (31), rec yds 51% (99), 
 - **RJ Harvey** (DEN RB vs ARI) **Anytime TD**: 31% (fair +222); last games: 0, 0, 0, 0, 1
   - ➕ volume 5.1 targets + 5.0 carries projected; 1.0 red-zone touches/game, 0.4 inside the 10; scoring environment 5.3 TDs/game (team scored + opp allowed; median 4.8); usage rising
   - ➖ under 40%: a real long shot on its own
+
+### #5: 3 legs, all hit 3.14% (fair +3,082)
+
+- **Justin Jefferson** (MIN WR vs IND) **Anytime TD**: 31% (fair +227); last games: 2, 0, 0, 1
+  - ➕ volume 7.3 targets + 0.0 carries projected; 1.0 red-zone touches/game, 0.2 inside the 10; 0.8 end-zone targets/game; usage rising
+  - ➖ scoring environment 4.3 TDs/game (team scored + opp allowed; median 4.8); under 40%: a real long shot on its own; simulation 39% vs stats model 24% disagree
+- **Emeka Egbuka** (TAM WR vs CAR) **Anytime TD**: 30% (fair +230); last games: 1, 0, 0, 1, 1
+  - ➕ volume 8.8 targets + 0.2 carries projected; 1.2 red-zone touches/game, 0.7 inside the 10; 0.7 end-zone targets/game; scoring environment 4.5 TDs/game (team scored + opp allowed; median 4.8); usage rising
+  - ➖ under 40%: a real long shot on its own
+- **Trey McBride** (ARI TE vs DEN) **Anytime TD**: 34% (fair +195); last games: 1, 0, 0, 1, 0
+  - ➕ volume 10.6 targets + 0.0 carries projected; 2.2 red-zone touches/game, 1.5 inside the 10; 0.7 end-zone targets/game
+  - ➖ scoring environment 4.2 TDs/game (team scored + opp allowed; median 4.8); usage falling; under 40%: a real long shot on its own; simulation 26% vs stats model 43% disagree
 
 ## Breakout parlays (vs the two most vulnerable defenses)
 
@@ -317,3 +311,41 @@ Role surges found: J.K. Dobbins (DEN: 12.5 → 20.0 touches/game, snaps 40% → 
 - **Derrick Henry** (BAL RB vs CIN) **2+ TDs**: 26% (fair +292; anytime 63%)
   - ➕ volume 1.7 targets + 21.3 carries projected; 5.5 red-zone touches/game, 2.5 inside the 10; scoring environment 5.0 TDs/game (team scored + opp allowed; median 4.8)
   - ➖ usage falling
+
+## First TD scorer parlay
+
+One leg per game: the player most likely to score his game's first touchdown (simulation share of the game's TDs x chance the game has one, rescaled by the blended TD model). Extreme long shot; this market is not backtested.
+
+### 4 legs, all hit 0.09% (fair +108,747)
+
+- **Jonathan Taylor** (IND RB vs MIN) **First TD scorer**: 19% (fair +431; anytime TD 56%)
+  - ➕ volume 4.4 targets + 18.7 carries projected; 4.5 red-zone touches/game, 2.3 inside the 10
+  - ➖ scoring environment 3.2 TDs/game (team scored + opp allowed; median 4.8); usage falling
+- **Christian McCaffrey** (SFO RB vs ATL) **First TD scorer**: 19% (fair +432; anytime TD 62%)
+  - ➕ volume 10.0 targets + 15.0 carries projected; 4.0 red-zone touches/game, 1.8 inside the 10; scoring environment 6.2 TDs/game (team scored + opp allowed; median 4.8)
+  - ➖ —
+- **Kyren Williams** (LAR RB vs LVR) **First TD scorer**: 16% (fair +512; anytime TD 61%)
+  - ➕ volume 7.7 targets + 13.0 carries projected; 3.7 red-zone touches/game, 1.5 inside the 10; scoring environment 6.2 TDs/game (team scored + opp allowed; median 4.8)
+  - ➖ usage falling
+- **Javonte Williams** (DAL RB vs PHI) **First TD scorer**: 16% (fair +529; anytime TD 60%)
+  - ➕ volume 3.5 targets + 17.1 carries projected; 4.5 red-zone touches/game, 2.5 inside the 10; scoring environment 5.7 TDs/game (team scored + opp allowed; median 4.8)
+  - ➖ usage falling
+
+## QB touchdown parlay
+
+Quarterback rushing TDs (how books grade "QB anytime TD"), one per game, from the blended TD model (QB carries, red-zone and goal-line runs, scoring environment).
+
+### 4 legs, all hit 0.11% (fair +91,074)
+
+- **Brock Purdy** (SFO QB vs ATL) **Anytime TD (rushing)**: 19% (fair +417; anytime TD 19%)
+  - ➕ scoring environment 6.2 TDs/game (team scored + opp allowed; median 4.8); usage rising
+  - ➖ volume 0.0 targets + 5.8 carries projected; 0.8 red-zone touches/game, 0.3 inside the 10; under 40%: a real long shot on its own
+- **Deshaun Watson** (CLE QB vs TEN) **Anytime TD (rushing)**: 19% (fair +431; anytime TD 19%)
+  - ➕ volume 0.0 targets + 11.4 carries projected; 1.0 red-zone touches/game, 0.2 inside the 10; usage rising
+  - ➖ scoring environment 3.7 TDs/game (team scored + opp allowed; median 4.8); under 40%: a real long shot on its own
+- **Malik Willis** (MIA QB vs NYJ) **Anytime TD (rushing)**: 18% (fair +466; anytime TD 18%)
+  - ➕ volume 0.0 targets + 7.4 carries projected; usage rising
+  - ➖ 0.8 red-zone touches/game, 0.4 inside the 10; scoring environment 3.6 TDs/game (team scored + opp allowed; median 4.8); under 40%: a real long shot on its own
+- **Caleb Williams** (CHI QB vs NWE) **Anytime TD (rushing)**: 17% (fair +487; anytime TD 17%)
+  - ➕ 1.7 red-zone touches/game, 0.3 inside the 10; scoring environment 5.0 TDs/game (team scored + opp allowed; median 4.8); usage rising
+  - ➖ volume 0.0 targets + 4.3 carries projected; under 40%: a real long shot on its own

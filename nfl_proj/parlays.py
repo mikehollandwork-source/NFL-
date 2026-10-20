@@ -127,7 +127,8 @@ def candidates(r: dict, cfg: dict, week: int, form: dict, target: float = 0.70) 
     return c.sort_values("score", ascending=False).drop_duplicates("player_id")
 
 
-def td_candidates(r: dict, cfg: dict, week: int, floor: float = 0.30) -> pd.DataFrame:
+def td_candidates(r: dict, cfg: dict, week: int, floor: float = 0.30,
+                  positions: tuple = ("WR", "TE", "RB")) -> pd.DataFrame:
     from .td_model import blend, current_features, predict
     w = r["wide"].copy()
     feat = current_features(int(cfg["season"]), week, r["tables"]["games"])
@@ -141,7 +142,7 @@ def td_candidates(r: dict, cfg: dict, week: int, floor: float = 0.30) -> pd.Data
     pg = pg[pg["week"] < week]
     totals = r["totals"].set_index("team")["proj_points"] if "proj_points" in r["totals"] else pd.Series(dtype=float)
     rows = []
-    for x in w[w["pos"].isin(["WR", "TE", "RB"]) & (w["p_td"] >= floor)].itertuples():
+    for x in w[w["pos"].isin(list(positions)) & (w["p_td"] >= floor)].itertuples():
         if status.get(x.player_id) in ("Out", "Doubtful", "IR"):
             continue
         h = pg[(pg["player_id"] == x.player_id) & (pg["team"] == x.team)].sort_values("week")
@@ -526,6 +527,58 @@ def _two_td_md(par: list, c: pd.DataFrame) -> list[str]:
     return L + [""]
 
 
+def first_td(r: dict, td: pd.DataFrame, used: set, legs: int = 4):
+    """First-TD-scorer legs. Each player's expected TDs = -ln(1 - calibrated
+    anytime chance) (blended TD model where available, calibrated simulation
+    otherwise); first-TD chance = his share of the game's expected TDs
+    (offense plus ~6% defense / special teams) x chance the game has a TD.
+    One leg per game. Not backtested."""
+    w = r["wide"][r["wide"]["anytime_td"] > 0][["player_id", "team", "opp", "anytime_td"]].copy()
+    blended = dict(zip(td["player_id"], td["p"]))
+    w["p"] = w["player_id"].map(blended).fillna(w["anytime_td"])
+    w["lam"] = -np.log(1 - w["p"].clip(upper=0.995))
+    w["game"] = [" @ ".join(sorted([a, b])) for a, b in zip(w["team"], w["opp"])]
+    lam_game = w.groupby("game")["lam"].sum() / 0.94
+    c = td[~td["player_id"].isin(used)].copy()
+    if c.empty:
+        return [], c
+    lam_i = -np.log(1 - c["p"].clip(upper=0.995))
+    L = c["game"].map(lam_game)
+    c["p_first"] = lam_i / L * (1 - np.exp(-L))
+    P = c.sort_values("p_first", ascending=False).drop_duplicates("game").head(legs)
+    if len(P) < legs:
+        return [], c
+    used |= set(P["player_id"])
+    return [P], c
+
+
+def qb_td(r: dict, cfg: dict, week: int, used: set, legs: int = 4):
+    """QB rushing-TD legs (how books grade "QB anytime TD"): blended TD model,
+    which counts a QB's carries, red-zone and goal-line runs."""
+    q = td_candidates(r, cfg, week, floor=0.05, positions=("QB",))
+    if q.empty:
+        return [], q
+    q = q[~q["player_id"].isin(used)].sort_values("p", ascending=False).drop_duplicates("game").head(legs)
+    if len(q) < legs:
+        return [], q
+    used |= set(q["player_id"])
+    return [q], q
+
+
+def _simple_md(title: str, note: str, par: list, col: str, what: str) -> list[str]:
+    L = [f"## {title}", "", note, ""]
+    if not par:
+        return L + ["Not enough qualifying legs.", ""]
+    P = par[0]
+    j = float(np.prod(P[col]))
+    L += [f"### {len(P)} legs, all hit {j:.2%} (fair +{100 * (1 - j) / j:,.0f})", ""]
+    for x in P.itertuples():
+        L.append(f"- **{x.player}** ({x.team} {x.pos} vs {x.opp}) **{what}**: {getattr(x, col):.0%} "
+                 f"(fair {american(getattr(x, col))}; anytime TD {x.p:.0%})\n"
+                 f"  - ➕ {'; '.join(x.pros) or '—'}\n  - ➖ {'; '.join(x.cons) or '—'}")
+    return L + [""]
+
+
 def _leg(x) -> str:
     what = f"Anytime TD" if x.stat == "anytime TD" else f"{x.k}+ {LABEL[x.stat]}"
     med = "" if pd.isna(x.median) else f", model median {x.median:.0f}"
@@ -587,9 +640,18 @@ def run(cfg: dict, paths: dict, week: int | None = None, log=print) -> Path | No
     brk = breakout(r, cfg, week, used)
     surge_p, surge = role_surge(r, cfg, week, c, td, used)
     two_p, two_c = two_td(td, used) if len(td) else ([], pd.DataFrame())
+    qb_p, _ = qb_td(r, cfg, week, used)
+    first_p, _ = first_td(r, td, used) if len(td) else ([], pd.DataFrame())
     parl = build(c, 5, 10, used=used) if len(c) else []
     tdp = build(td, 5, 7, per_stat=7, used=used) if len(td) else []
-    md = report(week, parl, tdp, form, td, brk, [_surge_md(surge_p, surge), _two_td_md(two_p, two_c)])
+    md = report(week, parl, tdp, form, td, brk, [
+        _surge_md(surge_p, surge), _two_td_md(two_p, two_c),
+        _simple_md("First TD scorer parlay", "One leg per game: the player most likely to score his game's first "
+                   "touchdown (simulation share of the game's TDs x chance the game has one, rescaled by the blended TD "
+                   "model). Extreme long shot; this market is not backtested.", first_p, "p_first", "First TD scorer"),
+        _simple_md("QB touchdown parlay", "Quarterback rushing TDs (how books grade \"QB anytime TD\"), one per game, "
+                   "from the blended TD model (QB carries, red-zone and goal-line runs, scoring environment).",
+                   qb_p, "p", "Anytime TD (rushing)")])
     out = paths["out"] / "parlays" / f"week_{week:02d}.md"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(md)
