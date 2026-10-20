@@ -1,0 +1,119 @@
+# NFL props automation: locks each game ~2 hours before kickoff, grades the
+# week on Tuesday, builds the week's parlays, refreshes the prop board after
+# injury reports, and sends everything to Telegram.
+#
+# Repository secrets (Settings -> Secrets and variables -> Actions):
+#   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID   (required for Telegram)
+#   ODDS_API_KEY                           (optional: real prices for grading)
+#
+# Scheduled runs only fire from the repository's default branch.
+name: NFL props
+
+on:
+  schedule:
+    # Lock checks every 30 min around kickoffs (UTC; covers EDT and EST).
+    # Each check only downloads the schedule; the full run happens when a game is due.
+    - cron: "*/30 21-23 * * 4"     # Thu evening
+    - cron: "*/30 0-1 * * 5"       # Thu night games (UTC rolls to Fri)
+    - cron: "*/30 15-23 * * 5"     # Fri (Black Friday / Christmas)
+    - cron: "*/30 15-23 * * 6"     # Sat (December / January)
+    - cron: "*/30 0-1 * * 0"       # Sat night games
+    - cron: "*/30 11-23 * * 0"     # Sun (international morning games through SNF)
+    - cron: "*/30 0-1 * * 1"       # SNF (UTC rolls to Mon)
+    - cron: "*/30 21-23 * * 1"     # Mon evening
+    - cron: "*/30 0-1 * * 2"       # MNF (UTC rolls to Tue)
+    # Grade + parlays Tuesday ~11:30 AM ET; Wednesday retries if Monday's stats were late.
+    - cron: "30 15 * * 2"
+    - cron: "30 15 * * 3"
+    # Prop board after the Wed / Fri / Sat injury reports (~6:30 PM ET).
+    - cron: "30 22 * * 3,5,6"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "What to run"
+        type: choice
+        options: [lock, grade, parlays, board]
+        default: board
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nfl-props
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Pick mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ inputs.mode }}" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          case "${{ github.event.schedule }}" in
+            "30 15 * * 2"|"30 15 * * 3") echo "mode=grade" >> "$GITHUB_OUTPUT" ;;
+            "30 22 * * 3,5,6")           echo "mode=board" >> "$GITHUB_OUTPUT" ;;
+            *)                           echo "mode=lock"  >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Lock games due soon
+        if: steps.mode.outputs.mode == 'lock'
+        run: |
+          if python -m nfl_proj due || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python -m nfl_proj auto --mode lock          # sends the picks to Telegram
+            python -m nfl_proj board --send              # updated board: qualifying + locked bets
+          fi
+
+      - name: Grade the week and build parlays
+        if: steps.mode.outputs.mode == 'grade'
+        run: |
+          python -m nfl_proj auto --mode grade           # sends results + loss review to Telegram
+          python -m nfl_proj parlays --once --send       # once per week
+
+      - name: Parlays (manual)
+        if: steps.mode.outputs.mode == 'parlays'
+        run: python -m nfl_proj parlays --refresh --send
+
+      - name: Prop board after injury reports
+        if: steps.mode.outputs.mode == 'board'
+        run: python -m nfl_proj board --refresh --send
+
+      - name: Save outputs to the repo
+        if: always()
+        run: |
+          git config user.name "nfl-props-bot"
+          git config user.email "nfl-props-bot@users.noreply.github.com"
+          git add -f output/*/paper output/*/parlays output/*/board 2>/dev/null || true
+          if git diff --cached --quiet; then echo "nothing to save"; exit 0; fi
+          git commit -m "Automated ${{ steps.mode.outputs.mode }} run"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
+
+      - name: Keep the run's files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nfl-props-${{ steps.mode.outputs.mode }}-${{ github.run_id }}
+          path: |
+            output/*/paper
+            output/*/parlays
+            output/*/board
+          if-no-files-found: ignore
+          retention-days: 30
