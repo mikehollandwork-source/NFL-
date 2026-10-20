@@ -152,7 +152,12 @@ max_factor = 1.2
 # Game script from the model's own projected margin (used when [market] is off):
 # the team projected to lead passes less, the trailing team passes more.
 enabled = true
-pass_rate_per_point = 0.004
+pass_rate_per_point = 0.0
+# Was 0.004. Backtest: the model's pass rate fell 0.0056 per point of projected
+# margin vs 0.0012 in reality (base team tendencies already carry script), so big
+# favorites' RB carries ran 17% high and big underdogs' targets 19% high.
+# 0.0 vs 0.004: prop log-loss 2025 wk 4-18 0.6543 -> 0.6522, 2026 wk 3-6
+# 0.6559 -> 0.6521; team points MAE 7.68 -> 7.70 (2025), 7.32 -> 7.27 (2026).
 
 [defense]
 # Position-group weakness (WR / TE / RB) and struggle-week diagnosis.

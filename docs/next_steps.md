@@ -42,4 +42,4 @@
   carry nearly all the signal; red-zone/inside-10/end-zone usage add little; last-week end-zone near misses, deep
   share and air yards add nothing.
 - Game script: model applies ~4-5x too much (pass-rate slope per point of projected margin -0.0056 vs actual -0.0012;
-  big favorites' RB carries -17%, big underdogs' targets -19%, pass yds -18%). Testing pass_rate_per_point = 0.
+  big favorites' RB carries -17%, big underdogs' targets -19%, pass yds -18%). Adopted pass_rate_per_point = 0: prop log-loss better in 2025 (0.6543 -> 0.6522) and 2026 (0.6559 -> 0.6521), team MAE flat.
