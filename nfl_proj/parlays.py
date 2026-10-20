@@ -580,25 +580,25 @@ def _simple_md(title: str, note: str, par: list, col: str, what: str) -> list[st
 
 
 def jackpot(r: dict, cfg: dict, week: int, form: dict, used: set, target_payout: float = 25000.0,
-            max_legs: int = 25, per_game: int = 2):
+            max_legs: int = 60, per_game: int = 4):
     """$1 -> ~$25k at fair odds: up to 25 realistic legs (calibrated ~62%+,
     same realism filters as the regular milestone legs), from players in no
     other parlay, at most two legs per game."""
-    c = candidates(r, cfg, week, form, target=0.62)
-    c = c[~c["player_id"].isin(used)].sort_values("score", ascending=False)
-    picked, per = [], {}
+    # The one exception to the no-overlap rule: the jackpot may reuse players from other parlays.
+    c = candidates(r, cfg, week, form, target=0.62).sort_values("score", ascending=False)
+    # Lean on the stat types the model has been right on: carries uncapped, unproven ones capped
+    cap = {"completions": 6, "pass_yds": 5, "rec_yds": 6, "receptions": 4}
+    picked, per, nstat = [], {}, {}
     for x in c.itertuples():
         if len(picked) >= max_legs or (picked and np.prod(c.loc[picked, "p"]) <= 1 / (1 + target_payout)):
             break
-        if per.get(x.game, 0) >= per_game:
+        if per.get(x.game, 0) >= per_game or nstat.get(x.stat, 0) >= cap.get(x.stat, 99):
             continue
         picked.append(x.Index)
         per[x.game] = per.get(x.game, 0) + 1
+        nstat[x.stat] = nstat.get(x.stat, 0) + 1
     P = c.loc[picked]
-    if not len(P):
-        return [], P
-    used |= set(P["player_id"])
-    return [P], P
+    return ([P] if len(P) else []), P
 
 
 def _career(season: int) -> pd.DataFrame:
@@ -726,9 +726,10 @@ def _backup_md(par: list) -> list[str]:
 def _jackpot_md(par: list) -> list[str]:
     L = ["## Jackpot parlay ($1 → ~$25k at fair odds)", "",
          "Career-floor legs can't get there: they hit ~95-98% each, so 25,000-to-1 would take ~200 legs. This uses "
-         "up to 25 realistic ~62-70% legs instead (same filters as the milestone parlays), from players in no other "
-         "parlay, at most two per game. Books cap leg counts (DraftKings ~25) and their margin compounds per leg, so "
-         "the real payout will be well below fair.", ""]
+         "realistic ~62%+ legs (same filters as the milestone parlays: cleared in 3+ of the last 5, normal role, "
+         "projection not above what he has done), as many as it takes, up to four per game. The only parlay allowed "
+         "to reuse players from the others. Books cap leg counts and their margin compounds per leg, so the real "
+         "payout will be well below fair.", ""]
     if not par:
         return L + ["Not enough unused legs.", ""]
     P = par[0]
