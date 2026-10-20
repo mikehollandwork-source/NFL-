@@ -19,11 +19,11 @@ from .picks import STATS
 from .sim import calibrate_td
 
 MILESTONES = {
-    "receptions": [2, 3, 4, 5, 6, 7, 8],
+    "receptions": [2, 3, 4, 5, 6, 7, 8, 9, 10, 12],
     "carries": [6, 8, 10, 12, 14, 15, 17, 20],
-    "rec_yds": [15, 20, 25, 30, 40, 50, 60, 70, 80, 100],
-    "rush_yds": [20, 25, 40, 50, 60, 70, 80, 100],
-    "pass_yds": [150, 175, 200, 225, 250, 275, 300],
+    "rec_yds": [15, 20, 25, 30, 40, 50, 60, 70, 80, 100, 125, 150],
+    "rush_yds": [20, 25, 40, 50, 60, 70, 80, 100, 125, 150],
+    "pass_yds": [150, 175, 200, 225, 250, 275, 300, 325, 350, 400],
     "completions": [12, 15, 18, 20, 22, 25],
 }
 LABEL = {"receptions": "receptions", "carries": "rush attempts", "rec_yds": "receiving yds",
@@ -185,12 +185,16 @@ def td_candidates(r: dict, cfg: dict, week: int, floor: float = 0.30) -> pd.Data
     return c.sort_values("score", ascending=False) if len(c) else c
 
 
-def build(c: pd.DataFrame, n_parlays: int, legs: int, max_uses: int = 2, per_stat: int = 3,
-          max_shared: int | None = None, min_payout: float = 10.0, max_legs: int = 16) -> list[pd.DataFrame]:
+def build(c: pd.DataFrame, n_parlays: int, legs: int, max_uses: int = 1, per_stat: int = 3,
+          max_shared: int | None = None, min_payout: float = 10.0, max_legs: int = 16,
+          used: set | None = None) -> list[pd.DataFrame]:
     """Greedy, diversified: one leg per game per parlay, at most ``per_stat``
-    legs of one stat type, each player in at most ``max_uses`` parlays, best
-    remaining legs first."""
-    uses: dict = {}
+    legs of one stat type, each player in at most one parlay (no shared legs,
+    across calls via ``used``), best remaining legs first. A parlay stops as
+    soon as it reaches +``min_payout`` x fair; if the strong legs run out
+    first it is dropped rather than padded with weaker legs."""
+    used = set() if used is None else used     # players already in any parlay (shared across calls)
+    uses: dict = {p: max_uses for p in used}
     out, prev = [], []
     max_shared = legs // 2 if max_shared is None else max_shared
     for i in range(n_parlays):
@@ -201,10 +205,10 @@ def build(c: pd.DataFrame, n_parlays: int, legs: int, max_uses: int = 2, per_sta
         cap = per_stat
         for x in pool.itertuples():
             # stop at the leg count once the parlay pays at least +1000 fair (all-hit <= 1/11)
-            if len(picked) >= legs and (joint() <= 1 / (1 + min_payout) or len(picked) >= max_legs):
+            if joint() <= 1 / (1 + min_payout) or len(picked) >= max_legs:
                 break
             if len(picked) >= legs:
-                cap = per_stat + 2   # extra legs may repeat a stat type a bit more
+                cap = per_stat + 2   # beyond the usual length a stat type may repeat a bit more
             if x.game in games or uses.get(x.player_id, 0) >= max_uses or stats.get(x.stat, 0) >= cap:
                 continue
             mine = {c.at[i, "player_id"] for i in picked} | {x.player_id}
@@ -214,10 +218,149 @@ def build(c: pd.DataFrame, n_parlays: int, legs: int, max_uses: int = 2, per_sta
             picked.append(x.Index)
             games.add(x.game)
             uses[x.player_id] = uses.get(x.player_id, 0) + 1
-        if len(picked) >= legs and joint() <= 1 / (1 + min_payout):
+        if picked and joint() <= 1 / (1 + min_payout):
             out.append(c.loc[picked])
+            used |= set(c.loc[picked, "player_id"])
             prev.append(set(c.loc[picked, "player_id"]))
+        else:   # not enough strong legs left: give the players back, don't force weaker ones in
+            for j in picked:
+                uses[c.at[j, "player_id"]] -= 1
     return out
+
+
+BREAKOUT_STATS = {"QB": ["pass_yds"], "WR": ["rec_yds", "receptions"], "TE": ["rec_yds", "receptions"],
+                  "RB": ["rush_yds", "rec_yds"]}
+
+
+def worst_defenses(r: dict, cfg: dict, n: int = 2) -> pd.DataFrame:
+    """Schedule-adjusted defense ratings (points allowed per game, pass and run
+    yards per play allowed, each corrected for the offenses faced), combined
+    as the average z-score; highest = most vulnerable."""
+    from .ratings import Schedule
+    t = Schedule(r["plays"], r["tables"]["games"], cfg).table().set_index("team")
+    cols = [c for c in ("def_points_adj", "def_pass_adj", "def_run_adj") if c in t]
+    z = (t[cols] - t[cols].mean()) / t[cols].std()
+    t["vuln"] = z.mean(axis=1)
+    for c in cols:
+        t[c.replace("_adj", "_rank")] = t[c].rank(ascending=False).astype(int)   # 1 = worst
+    return t.sort_values("vuln", ascending=False)
+
+
+def breakout(r: dict, cfg: dict, week: int, used: set, n_def: int = 2, min_payout: float = 10.0,
+             max_legs: int = 5) -> tuple[list[dict], pd.DataFrame]:
+    """One same-game long shot per vulnerable defense: the offense facing it,
+    players at "big game" milestones (above their 75th-percentile outcome) they
+    have actually reached this season. All-hit chance is read from the joint
+    simulations (same-game legs rise and fall together), scaled by each leg's
+    over-calibration."""
+    d = worst_defenses(r, cfg)
+    sched = r["tables"]["games"]
+    sched = sched[sched["week"] == week]
+    opp_of = {**dict(zip(sched["home"], sched["away"])), **dict(zip(sched["away"], sched["home"]))}
+    props = r["props"][r["props"]["_samples"].notna()].rename(columns={"_samples": "samples"})
+    pg = r["tables"]["player_games"]
+    pg = pg[pg["week"] < week]
+    status = _status(r.get("injuries"), week)
+    out, skipped = [], []
+    unreliable = set(r.get("no_qb_history", set()))
+    for dfn in [t for t in d.index if t in opp_of]:
+        if len(out) >= n_def:
+            break
+        off = opp_of[dfn]
+        dr = d.loc[dfn]
+        if off in unreliable:
+            skipped.append(f"{dfn} (opponent {off}'s starting QB has no passes this season, so its passing game can't be projected)")
+            continue
+        weeks = sorted(pg[pg["team"] == off]["week"].unique())[-4:]
+        legs = []
+        for x in props[(props["team"] == off)].itertuples():
+            if x.stat not in BREAKOUT_STATS.get(x.pos, []) or x.player_id in used:
+                continue
+            if status.get(x.player_id) in ("Out", "Doubtful", "IR", "Questionable"):
+                continue
+            col, ucol, fam = STATS[x.stat]
+            h = pg[(pg["player_id"] == x.player_id) & (pg["team"] == off)].sort_values("week")
+            if len(h[h["week"].isin(weeks)]) < 3:
+                continue
+            smp = np.asarray(x.samples, dtype=float)
+            p75 = float(np.percentile(smp, 75))
+            ks = [k for k in MILESTONES[x.stat] if k >= p75]
+            if not ks:
+                continue
+            k = ks[0]
+            vals = h[col].tolist()
+            if max(vals) < k:          # never done it: not a realistic ceiling
+                continue
+            tr = usage_trend(h.set_index("week")[ucol])["dir"] if fam != "qb" else "QB"
+            if tr == "down":
+                continue
+            p_raw = float((smp >= k).mean())
+            p_cal = calibrate(p_raw, cfg, x.stat, "over")
+            legs.append({"player": x.player, "player_id": x.player_id, "team": off, "opp": dfn, "pos": x.pos,
+                         "stat": x.stat, "k": k, "p": p_cal, "p_raw": p_raw, "median": float(np.median(smp)),
+                         "samples": smp >= k, "last": vals[-5:], "trend": tr,
+                         "hits": sum(v >= k for v in vals), "n": len(vals)})
+        if not legs:
+            skipped.append(f"{dfn} (no realistic ceiling legs on {off})")
+            continue
+        # A breakout is yards: QB passing yards first, then yardage legs, catches only as a fallback
+        pri = {"pass_yds": 0, "rec_yds": 1, "rush_yds": 1, "receptions": 2}
+        L = pd.DataFrame(legs)
+        L["pri"] = L["stat"].map(pri)
+        L = L.sort_values(["pri", "p"], ascending=[True, False]).drop_duplicates("player_id")
+        L = L.sort_values(["pri", "p"], ascending=[True, False])
+        picked, mask, scale = [], None, 1.0
+        for x in L.itertuples():
+            m = x.samples if mask is None else (mask & x.samples)
+            picked.append(x.Index)
+            mask, scale = m, scale * (x.p / max(x.p_raw, 1e-6))
+            if float(mask.mean()) * scale <= 1 / (1 + min_payout) or len(picked) >= max_legs:
+                break
+        joint = float(mask.mean()) * scale
+        if joint > 1 / (1 + min_payout):
+            skipped.append(f"{dfn} (not enough realistic ceiling legs on {off} to reach +1000)")
+            continue
+        P = L.loc[picked]
+        used |= set(P["player_id"])
+        out.append({"defense": dfn, "offense": off, "rating": dr, "legs": P, "joint": joint,
+                    "indep": float(np.prod(P["p"]))})
+    d.attrs["skipped"] = skipped
+    return out, d
+
+
+def _breakout_md(b: list, d: pd.DataFrame) -> list[str]:
+    L = ["## Breakout parlays (vs the two most vulnerable defenses)", "",
+         "Defense vulnerability = schedule-adjusted points allowed, pass yds/play and run yds/play allowed "
+         "(rank 1 = worst of 32). Legs are \"big game\" milestones above each player's 75th-percentile "
+         "projection that he has reached at least once this season, usage not falling. All legs come from "
+         "the same game, so they hit together when the defense collapses; the chance below is read from the "
+         "joint simulations, not multiplied.", ""]
+    top = d.head(5)
+    L.append("Most vulnerable defenses: " + ", ".join(
+        f"{t} (pts #{int(r.get('def_points_rank', 0))}, pass #{int(r.get('def_pass_rank', 0))}, run #{int(r.get('def_run_rank', 0))})"
+        for t, r in top.iterrows()))
+    L.append("")
+    for sk in d.attrs.get("skipped", []):
+        L.append(f"- Skipped {sk}")
+    if d.attrs.get("skipped"):
+        L.append("")
+    if not b:
+        L += ["No breakout parlay qualified (not enough realistic ceiling legs).", ""]
+    for i, x in enumerate(b, 1):
+        dr = x["rating"]
+        j = x["joint"]
+        L += [f"### Breakout #{i}: {x['offense']} vs {x['defense']}: {len(x['legs'])} legs, all hit {j:.1%} "
+              f"(fair +{100 * (1 - j) / j:,.0f}; would be {x['indep']:.1%} if the legs were independent)", "",
+              f"{x['defense']} defense: points allowed #{int(dr.get('def_points_rank', 0))} worst, pass yds/play "
+              f"#{int(dr.get('def_pass_rank', 0))}, run yds/play #{int(dr.get('def_run_rank', 0))} (schedule-adjusted).", ""]
+        for y in x["legs"].itertuples():
+            last = ", ".join(f"{v:g}" for v in y.last)
+            L.append(f"- **{y.player}** ({y.team} {y.pos}) **{y.k}+ {LABEL[y.stat]}**: {y.p:.0%} alone (model median "
+                     f"{y.median:.0f}); reached it {y.hits} of {y.n} games this season; last games: {last}\n"
+                     f"  - ➕ ceiling game vs a bottom defense; {'usage rising' if y.trend == 'up' else 'steady role'}\n"
+                     f"  - ➖ needs a big game: well above his projection")
+        L.append("")
+    return L
 
 
 def _leg(x) -> str:
@@ -228,9 +371,10 @@ def _leg(x) -> str:
             f"  - ➕ {'; '.join(x.pros) or '—'}\n  - ➖ {'; '.join(x.cons) or '—'}")
 
 
-def report(week: int, parlays: list, tds: list, form: dict, td_top: pd.DataFrame | None = None) -> str:
+def report(week: int, parlays: list, tds: list, form: dict, td_top: pd.DataFrame | None = None,
+           brk: tuple | None = None) -> str:
     L = [f"# Week {week} long-shot parlays", "",
-         "Every parlay is at least +1000 at fair odds (legs are added until it is). Legs are alternate milestones (\"X+\") the model gives about 70%+ after calibration, cleared in at least 3 of the player's last 5 games, with a projection not far above what he has actually done; TD legs blend the simulation with the stats-driven TD model (volume, red-zone and end-zone usage, scoring environment), on stat types the model has graded "
+         "Every parlay is at least +1000 at fair odds and no player appears in more than one parlay; a parlay stops once it reaches +1000, and if the strong legs run out it is left out rather than padded. Legs are alternate milestones (\"X+\") the model gives about 70%+ after calibration, cleared in at least 3 of the player's last 5 games, with a projection not far above what he has actually done; TD legs blend the simulation with the stats-driven TD model (volume, red-zone and end-zone usage, scoring environment), on stat types the model has graded "
          "well this season, one leg per game so they're close to independent. Probabilities assume independence; "
          "books add extra margin to parlays, so compare the payout with the fair odds before betting.", ""]
     if form:
@@ -244,7 +388,7 @@ def report(week: int, parlays: list, tds: list, form: dict, td_top: pd.DataFrame
             L.append(f"| {i} | {x.player} | {x.team} {x.pos} | {x.opp} | {x.p:.0%} | {american(x.p)} | "
                      f"{(x.pros or ['—'])[0]} | {(x.cons or ['—'])[0]} |")
         L.append("")
-    for name, group in (("Long-shot parlays (milestones)", parlays), ("7-leg anytime-TD parlays", tds)):
+    for name, group in (("Long-shot parlays (milestones)", parlays), ("Anytime-TD parlays", tds)):
         L += [f"## {name}", ""]
         if not group:
             L += ["Not enough qualifying legs yet (projections or injury news missing).", ""]
@@ -252,6 +396,8 @@ def report(week: int, parlays: list, tds: list, form: dict, td_top: pd.DataFrame
             joint = float(np.prod(p["p"]))
             L += [f"### #{i}: {len(p)} legs, all hit {joint:.2%} (fair +{100 * (1 - joint) / joint:,.0f})", ""]
             L += [_leg(x) for x in p.itertuples()] + [""]
+    if brk is not None:
+        L += _breakout_md(*brk)
     return "\n".join(L)
 
 
@@ -270,7 +416,11 @@ def run(cfg: dict, paths: dict, week: int | None = None, log=print) -> Path | No
     form = stat_form(paths["out"] / "paper")
     c = candidates(r, cfg, week, form)
     td = td_candidates(r, cfg, week)
-    md = report(week, build(c, 5, 10) if len(c) else [], build(td, 5, 7, per_stat=7) if len(td) else [], form, td)
+    used: set = set()
+    brk = breakout(r, cfg, week, used)                       # most specific first
+    parl = build(c, 5, 10, used=used) if len(c) else []
+    tdp = build(td, 5, 7, per_stat=7, used=used) if len(td) else []
+    md = report(week, parl, tdp, form, td, brk)
     out = paths["out"] / "parlays" / f"week_{week:02d}.md"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(md)
