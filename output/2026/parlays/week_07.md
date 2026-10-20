@@ -389,3 +389,52 @@ Career-floor legs can't get there: they hit ~95-98% each, so 25,000-to-1 would t
 - **Emeka Egbuka** (TAM WR vs CAR) **15+ receiving yds**: 64%
 - **Jacoby Brissett** (ARI QB vs DEN) **175+ passing yds**: 66%
 - **Sam LaPorta** (DET TE vs GNB) **15+ receiving yds**: 64%
+
+## Combo parlays (one leg from each parlay)
+
+One leg from each milestone, anytime-TD, breakout, role-surge and first-TD parlay (backup/injury, two-TD, QB-TD and the jackpot left out). Each leg is used in only one combo, so the count is capped by the smallest source parlay. Chances multiply the legs as if independent; legs from the same game (e.g. a breakout leg and a TD on that team) tend to move together, so the true chance is a bit higher.
+
+### Combo #1: 12 legs, all hit 0.00561% (fair $17,829 on $1)
+
+- **Deshaun Watson** (CLE QB vs TEN) **15+ completions**: 84%  _(from milestone #1)_
+- **Drake Maye** (NWE QB vs CHI) **15+ completions**: 80%  _(from milestone #2)_
+- **Chase Brown** (CIN HB vs BAL) **8+ rush attempts**: 79%  _(from milestone #3)_
+- **Christian Watson** (GNB WR vs DET) **Anytime TD**: 44%  _(from anytime-TD #1)_
+- **Amon-Ra St. Brown** (DET WR vs GNB) **Anytime TD**: 45%  _(from anytime-TD #2)_
+- **Tetairoa McMillan** (CAR WR vs TAM) **Anytime TD**: 35%  _(from anytime-TD #3)_
+- **Brock Bowers** (LVR TE vs LAR) **Anytime TD**: 38%  _(from anytime-TD #4)_
+- **Jalen Coker** (CAR WR vs TAM) **Anytime TD**: 31%  _(from anytime-TD #5)_
+- **Darnell Washington** (PIT TE vs NOR) **40+ receiving yds**: 33%  _(from breakout PIT vs NOR)_
+- **Matthew Stafford** (LAR QB vs LVR) **325+ passing yds**: 29%  _(from breakout LAR vs LVR)_
+- **Ollie Gordon II** (MIA RB vs NYJ) **8+ rush attempts**: 84%  _(from role surge)_
+- **Javonte Williams** (DAL RB vs PHI) **First TD scorer**: 16%  _(from first TD)_
+
+### Combo #2: 12 legs, all hit 0.00687% (fair $14,561 on $1)
+
+- **Rhamondre Stevenson** (NWE RB vs CHI) **6+ rush attempts**: 82%  _(from milestone #1)_
+- **Cam Skattebo** (NYG RB vs HOU) **6+ rush attempts**: 81%  _(from milestone #2)_
+- **Quinshon Judkins** (CLE RB vs TEN) **10+ rush attempts**: 79%  _(from milestone #3)_
+- **Aaron Jones** (MIN RB vs IND) **Anytime TD**: 47%  _(from anytime-TD #1)_
+- **Jaylen Warren** (PIT RB vs NOR) **Anytime TD**: 45%  _(from anytime-TD #2)_
+- **DeVonta Smith** (PHI WR vs DAL) **Anytime TD**: 38%  _(from anytime-TD #3)_
+- **MarShawn Lloyd** (GNB RB vs DET) **Anytime TD**: 36%  _(from anytime-TD #4)_
+- **Tony Pollard** (TEN RB vs CLE) **Anytime TD**: 32%  _(from anytime-TD #5)_
+- **Germie Bernard** (PIT WR vs NOR) **70+ receiving yds**: 32%  _(from breakout PIT vs NOR)_
+- **Blake Corum** (LAR RB vs LVR) **30+ receiving yds**: 33%  _(from breakout LAR vs LVR)_
+- **Kendre Miller** (NOR RB vs PIT) **8+ rush attempts**: 75%  _(from role surge)_
+- **Jonathan Taylor** (IND RB vs MIN) **First TD scorer**: 18%  _(from first TD)_
+
+### Combo #3: 12 legs, all hit 0.00529% (fair $18,891 on $1)
+
+- **Daniel Jones** (IND QB vs MIN) **15+ completions**: 80%  _(from milestone #1)_
+- **Michael Penix Jr.** (ATL QB vs SFO) **15+ completions**: 81%  _(from milestone #2)_
+- **Ashton Jeanty** (LVR RB vs LAR) **10+ rush attempts**: 77%  _(from milestone #3)_
+- **D'Andre Swift** (CHI RB vs NWE) **Anytime TD**: 54%  _(from anytime-TD #1)_
+- **CeeDee Lamb** (DAL WR vs PHI) **Anytime TD**: 43%  _(from anytime-TD #2)_
+- **Matthew Golden** (GNB WR vs DET) **Anytime TD**: 40%  _(from anytime-TD #3)_
+- **Nico Collins** (HOU WR vs NYG) **Anytime TD**: 36%  _(from anytime-TD #4)_
+- **Sam LaPorta** (DET TE vs GNB) **Anytime TD**: 33%  _(from anytime-TD #5)_
+- **Aaron Rodgers** (PIT QB vs NOR) **275+ passing yds**: 31%  _(from breakout PIT vs NOR)_
+- **Kyren Williams** (LAR RB vs LVR) **70+ receiving yds**: 34%  _(from breakout LAR vs LVR)_
+- **Chuba Hubbard** (CAR RB vs TAM) **Anytime TD**: 46%  _(from role surge)_
+- **Derrick Henry** (BAL RB vs CIN) **First TD scorer**: 20%  _(from first TD)_

@@ -746,6 +746,44 @@ def _jackpot_md(par: list) -> list[str]:
     return L + [""]
 
 
+def combos(sources: list[tuple[str, pd.DataFrame, str]]) -> list[pd.DataFrame]:
+    """One leg from each source parlay per combo. Each leg is used once, so the
+    number of combos = the smallest source's leg count. Legs are dealt snake
+    style (best legs spread evenly) so the combos have similar chances."""
+    srcs = [(name, df.sort_values(col, ascending=False).reset_index(drop=True), col)
+            for name, df, col in sources if df is not None and len(df)]
+    if not srcs:
+        return []
+    n = min(len(df) for _, df, _ in srcs)
+    out = [[] for _ in range(n)]
+    for j, (name, df, col) in enumerate(srcs):
+        order = range(n) if j % 2 == 0 else range(n - 1, -1, -1)
+        for combo, i in zip(order, range(n)):
+            x = df.iloc[i]
+            what = ("First TD scorer" if col == "p_first" else "Anytime TD" if x["stat"] == "anytime TD"
+                    else f"{x['k']}+ {LABEL[x['stat']]}")
+            out[combo].append({"source": name, "player": x["player"], "team": x["team"], "opp": x["opp"],
+                               "pos": x["pos"], "what": what, "p": float(x[col])})
+    return [pd.DataFrame(c) for c in out]
+
+
+def _combos_md(cs: list) -> list[str]:
+    L = ["## Combo parlays (one leg from each parlay)", "",
+         "One leg from each milestone, anytime-TD, breakout, role-surge and first-TD parlay (backup/injury, two-TD, QB-TD "
+         "and the jackpot left out). Each leg is used in only one combo, so the count is capped by the smallest source "
+         "parlay. Chances multiply the legs as if independent; legs from the same game (e.g. a breakout leg and a TD on "
+         "that team) tend to move together, so the true chance is a bit higher.", ""]
+    if not cs:
+        return L + ["No combos built.", ""]
+    for i, c in enumerate(cs, 1):
+        j = float(np.prod(c["p"]))
+        L += [f"### Combo #{i}: {len(c)} legs, all hit {j:.5%} (fair ${(1 - j) / j:,.0f} on $1)", ""]
+        L += [f"- **{x.player}** ({x.team} {x.pos} vs {x.opp}) **{x.what}**: {x.p:.0%}  _(from {x.source})_"
+              for x in c.itertuples()]
+        L.append("")
+    return L
+
+
 def _leg(x) -> str:
     what = f"Anytime TD" if x.stat == "anytime TD" else f"{x.k}+ {LABEL[x.stat]}"
     med = "" if pd.isna(x.median) else f", model median {x.median:.0f}"
@@ -825,7 +863,13 @@ def run(cfg: dict, paths: dict, week: int | None = None, log=print, once: bool =
         _simple_md("QB touchdown parlay", "Quarterback rushing TDs (how books grade \"QB anytime TD\"), one per game, "
                    "from the blended TD model (QB carries, red-zone and goal-line runs, scoring environment).",
                    qb_p, "p", "Anytime TD (rushing)"),
-        _backup_md(bk_p), _jackpot_md(jp_p)])
+        _backup_md(bk_p), _jackpot_md(jp_p),
+        _combos_md(combos(
+            [(f"milestone #{i}", P, "p") for i, P in enumerate(parl, 1)]
+            + [(f"anytime-TD #{i}", P, "p") for i, P in enumerate(tdp, 1)]
+            + [(f"breakout {b['offense']} vs {b['defense']}", b["legs"], "p") for b in brk[0]]
+            + [("role surge", P.drop_duplicates("player_id"), "p") for P in surge_p]
+            + [("first TD", P, "p_first") for P in first_p]))])
     out = paths["out"] / "parlays" / f"week_{week:02d}.md"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(md)
