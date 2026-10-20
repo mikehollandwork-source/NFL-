@@ -85,6 +85,14 @@ def candidates(r: dict, cfg: dict, week: int, form: dict, target: float = 0.70) 
         vals = h[col].tolist()
         last = vals[-5:]
         hit = sum(v >= k for v in last)
+        # Realism: he must have cleared it in most recent games, be playing a normal
+        # role lately, and the projection can't run far above what he's actually done.
+        recent_weeks = sorted(pg[pg["team"] == x.team]["week"].unique())[-4:]
+        played = h[h["week"].isin(recent_weeks)]
+        if hit < max(3, int(np.ceil(0.6 * len(last)))) or len(played) < 3:
+            continue
+        if float(np.median(smp)) > 1.3 * float(np.median(last)) + (2 if x.stat in ("receptions", "carries", "completions") else 10):
+            continue
         tr = usage_trend(h.set_index("week")[ucol])["dir"] if fam != "qb" else "QB"
         pros, cons = [], []
         if tr == "up":
@@ -120,13 +128,20 @@ def candidates(r: dict, cfg: dict, week: int, form: dict, target: float = 0.70) 
 
 
 def td_candidates(r: dict, cfg: dict, week: int, floor: float = 0.30) -> pd.DataFrame:
-    w = r["wide"]
+    from .td_model import blend, current_features, predict
+    w = r["wide"].copy()
+    feat = current_features(int(cfg["season"]), week, r["tables"]["games"])
+    ps = predict(feat)
+    fe = feat.set_index("pid") if len(feat) else pd.DataFrame()
+    lg_env = float(feat["env"].median()) if len(feat) else np.nan
+    w["p_stats"] = w["player_id"].map(ps)
+    w["p_td"] = np.where(w["p_stats"].notna(), blend(w["anytime_td"], w["p_stats"].fillna(0.5)), w["anytime_td"])
     status = _status(r.get("injuries"), week)
     pg = r["tables"]["player_games"]
     pg = pg[pg["week"] < week]
     totals = r["totals"].set_index("team")["proj_points"] if "proj_points" in r["totals"] else pd.Series(dtype=float)
     rows = []
-    for x in w[w["pos"].isin(["WR", "TE", "RB"]) & (w["anytime_td"] >= floor)].itertuples():
+    for x in w[w["pos"].isin(["WR", "TE", "RB"]) & (w["p_td"] >= floor)].itertuples():
         if status.get(x.player_id) in ("Out", "Doubtful", "IR"):
             continue
         h = pg[(pg["player_id"] == x.player_id) & (pg["team"] == x.team)].sort_values("week")
@@ -137,32 +152,41 @@ def td_candidates(r: dict, cfg: dict, week: int, floor: float = 0.30) -> pd.Data
         tr = usage_trend(h.set_index("week")[ucol])["dir"]
         tp = float(totals.get(x.team, np.nan))
         pros, cons = [], []
-        vol = f"{x.targets:.1f} targets" + (f", {x.carries:.1f} carries" if x.carries >= 3 else "")
-        pros.append(f"projected {vol}")
-        if tp >= 25:
-            pros.append(f"team projected {tp:.0f} pts")
-        elif tp <= 19:
-            cons.append(f"team projected only {tp:.0f} pts")
+        f = fe.loc[x.player_id] if len(fe) and x.player_id in fe.index else None
+        if isinstance(f, pd.DataFrame):
+            f = f.iloc[0]
+        touches = x.targets + x.carries
+        (pros if touches >= 12 else cons if touches < 7 else pros).append(
+            f"volume {x.targets:.1f} targets + {x.carries:.1f} carries projected")
+        if f is not None:
+            rz = f["m_rz_tgt"] + f["m_rz_car"]
+            gl = f["m_i10_tgt"] + f["m_i5_car"]
+            (pros if rz >= 2 else cons if rz < 1 else pros).append(f"{rz:.1f} red-zone touches/game, {gl:.1f} inside the 10")
+            if f["m_ez_tgt"] >= 0.6:
+                pros.append(f"{f['m_ez_tgt']:.1f} end-zone targets/game")
+            if pd.notna(f["env"]) and pd.notna(lg_env):
+                (pros if f["env"] >= lg_env * 1.1 else cons if f["env"] <= lg_env * 0.9 else pros).append(
+                    f"scoring environment {f['env']:.1f} TDs/game (team scored + opp allowed; median {lg_env:.1f})")
         if tr == "up":
             pros.append("usage rising")
         elif tr == "down":
             cons.append("usage falling")
-        scored = sum(v > 0 for v in tds)
-        (pros if scored >= len(tds) / 2 else cons).append(f"scored in {scored} of {len(tds)} games")
         if status.get(x.player_id) == "Questionable":
             cons.append("Questionable on the injury report")
-        if x.anytime_td < 0.40:
+        if x.p_td < 0.40:
             cons.append("under 40%: a real long shot on its own")
-        score = x.anytime_td + 0.02 * (tr == "up") - 0.02 * (tr == "down") - 0.04 * (status.get(x.player_id) == "Questionable")
+        if pd.notna(x.p_stats) and abs(x.p_stats - x.anytime_td) >= 0.12:
+            cons.append(f"simulation {x.anytime_td:.0%} vs stats model {x.p_stats:.0%} disagree")
+        score = x.p_td + 0.02 * (tr == "up") - 0.02 * (tr == "down") - 0.04 * (status.get(x.player_id) == "Questionable")
         rows.append({"player": x.player, "player_id": x.player_id, "team": x.team, "opp": x.opp, "pos": x.pos,
-                     "game": " @ ".join(sorted([x.team, x.opp])), "stat": "anytime TD", "k": 1, "p": float(x.anytime_td),
+                     "game": " @ ".join(sorted([x.team, x.opp])), "stat": "anytime TD", "k": 1, "p": float(x.p_td),
                      "median": np.nan, "last": tds[-5:], "trend": tr, "score": score, "pros": pros, "cons": cons})
     c = pd.DataFrame(rows)
     return c.sort_values("score", ascending=False) if len(c) else c
 
 
 def build(c: pd.DataFrame, n_parlays: int, legs: int, max_uses: int = 2, per_stat: int = 3,
-          max_shared: int | None = None) -> list[pd.DataFrame]:
+          max_shared: int | None = None, min_payout: float = 10.0, max_legs: int = 16) -> list[pd.DataFrame]:
     """Greedy, diversified: one leg per game per parlay, at most ``per_stat``
     legs of one stat type, each player in at most ``max_uses`` parlays, best
     remaining legs first."""
@@ -172,10 +196,16 @@ def build(c: pd.DataFrame, n_parlays: int, legs: int, max_uses: int = 2, per_sta
     for i in range(n_parlays):
         picked, games, stats = [], set(), {}
         pool = c.assign(adj=c["score"] - 0.06 * c["player_id"].map(uses).fillna(0)).sort_values("adj", ascending=False)
+        def joint():
+            return float(np.prod(c.loc[picked, "p"])) if picked else 1.0
+        cap = per_stat
         for x in pool.itertuples():
-            if len(picked) == legs:
+            # stop at the leg count once the parlay pays at least +1000 fair (all-hit <= 1/11)
+            if len(picked) >= legs and (joint() <= 1 / (1 + min_payout) or len(picked) >= max_legs):
                 break
-            if x.game in games or uses.get(x.player_id, 0) >= max_uses or stats.get(x.stat, 0) >= per_stat:
+            if len(picked) >= legs:
+                cap = per_stat + 2   # extra legs may repeat a stat type a bit more
+            if x.game in games or uses.get(x.player_id, 0) >= max_uses or stats.get(x.stat, 0) >= cap:
                 continue
             mine = {c.at[i, "player_id"] for i in picked} | {x.player_id}
             if any(len(mine & p) > max_shared for p in prev):
@@ -184,7 +214,7 @@ def build(c: pd.DataFrame, n_parlays: int, legs: int, max_uses: int = 2, per_sta
             picked.append(x.Index)
             games.add(x.game)
             uses[x.player_id] = uses.get(x.player_id, 0) + 1
-        if len(picked) == legs:
+        if len(picked) >= legs and joint() <= 1 / (1 + min_payout):
             out.append(c.loc[picked])
             prev.append(set(c.loc[picked, "player_id"]))
     return out
@@ -198,22 +228,29 @@ def _leg(x) -> str:
             f"  - ➕ {'; '.join(x.pros) or '—'}\n  - ➖ {'; '.join(x.cons) or '—'}")
 
 
-def report(week: int, parlays: list, tds: list, form: dict) -> str:
+def report(week: int, parlays: list, tds: list, form: dict, td_top: pd.DataFrame | None = None) -> str:
     L = [f"# Week {week} long-shot parlays", "",
-         "Legs are alternate milestones (\"X+\") the model gives about 70%+ after calibration, on stat types the model has graded "
+         "Every parlay is at least +1000 at fair odds (legs are added until it is). Legs are alternate milestones (\"X+\") the model gives about 70%+ after calibration, cleared in at least 3 of the player's last 5 games, with a projection not far above what he has actually done; TD legs blend the simulation with the stats-driven TD model (volume, red-zone and end-zone usage, scoring environment), on stat types the model has graded "
          "well this season, one leg per game so they're close to independent. Probabilities assume independence; "
          "books add extra margin to parlays, so compare the payout with the fair odds before betting.", ""]
     if form:
         L.append("Stat form this season (model lean right %): " + ", ".join(
             f"{s.replace('_', ' ')} {a:.0%} ({n})" for s, (a, n) in sorted(form.items(), key=lambda z: -z[1][0])))
         L.append("")
-    for name, group in (("10-leg parlays", parlays), ("7-leg anytime-TD parlays", tds)):
+    if td_top is not None and len(td_top):
+        L += ["## Top anytime-TD picks", "", "| # | Player | Team | vs | TD chance | Fair | Main pro | Main con |",
+              "|---|---|---|---|---|---|---|---|"]
+        for i, x in enumerate(td_top.sort_values("p", ascending=False).head(15).itertuples(), 1):
+            L.append(f"| {i} | {x.player} | {x.team} {x.pos} | {x.opp} | {x.p:.0%} | {american(x.p)} | "
+                     f"{(x.pros or ['—'])[0]} | {(x.cons or ['—'])[0]} |")
+        L.append("")
+    for name, group in (("Long-shot parlays (milestones)", parlays), ("7-leg anytime-TD parlays", tds)):
         L += [f"## {name}", ""]
         if not group:
             L += ["Not enough qualifying legs yet (projections or injury news missing).", ""]
         for i, p in enumerate(group, 1):
             joint = float(np.prod(p["p"]))
-            L += [f"### #{i}: all hit {joint:.2%} (fair +{100 * (1 - joint) / joint:,.0f})", ""]
+            L += [f"### #{i}: {len(p)} legs, all hit {joint:.2%} (fair +{100 * (1 - joint) / joint:,.0f})", ""]
             L += [_leg(x) for x in p.itertuples()] + [""]
     return "\n".join(L)
 
@@ -233,7 +270,7 @@ def run(cfg: dict, paths: dict, week: int | None = None, log=print) -> Path | No
     form = stat_form(paths["out"] / "paper")
     c = candidates(r, cfg, week, form)
     td = td_candidates(r, cfg, week)
-    md = report(week, build(c, 5, 10) if len(c) else [], build(td, 5, 7, per_stat=7) if len(td) else [], form)
+    md = report(week, build(c, 5, 10) if len(c) else [], build(td, 5, 7, per_stat=7) if len(td) else [], form, td)
     out = paths["out"] / "parlays" / f"week_{week:02d}.md"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(md)
