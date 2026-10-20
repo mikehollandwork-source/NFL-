@@ -316,5 +316,14 @@ max_stake = 1.5              # units
 min_stake = 0.5
 max_per_game = 2             # correlated outcomes: cap exposure per game
 max_per_team_side = 1        # no stacking two same-team props in the same direction
+
+# Calibration by stat family and side (replaces calib_a/b where present).
+# Fitted on the 2025 backtest (11.7k graded sides); the intercept is scaled
+# to 75% because the backtest's stand-in lines (season averages) overstate the
+# over/under gap. Out of sample it lowers log-loss on 2026 weeks 4-5
+# (0.675 -> 0.662) and on week 6 real DraftKings lines (0.706 -> 0.698,
+# better in 93% of game resamples). The model is overconfident on overs.
+# rec = receptions / receiving yds / targets, rush = carries / rushing yds, qb = passing yds / completions
+calib_family = { rec = { a_over = -0.253, b = 0.361 }, rush = { a_over = -0.194, b = 0.459 }, qb = { a_over = 0.09, b = 0.761 } }
 max_bets = 32                # games are locked slate by slate, so the per-game cap (2) is the real limit
 require_usage_trend = true   # your rule: overs need rising usage, unders falling (stars / QBs exempt)

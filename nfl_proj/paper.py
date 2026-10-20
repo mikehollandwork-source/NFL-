@@ -43,9 +43,19 @@ def _sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
 
-def calibrate(p: float, cfg: dict) -> float:
+_CAL_FAMILY = {"run": "rush", "pass": "rec", "qb": "qb"}
+
+
+def calibrate(p: float, cfg: dict, stat: str | None = None, side: str | None = None) -> float:
+    """sigmoid(a + b * logit(p)). With [paper.calib_family] the slope is per
+    stat family and the intercept is signed by side (a for overs, -a for
+    unders): the model is overconfident on overs, not on unders."""
     c = cfg.get("paper", {})
     p = float(np.clip(p, 1e-4, 1 - 1e-4))
+    fam = c.get("calib_family", {}).get(_CAL_FAMILY.get(STATS[stat][2], "")) if stat in STATS else None
+    if fam and side in ("over", "under"):
+        a = fam["a_over"] if side == "over" else -fam["a_over"]
+        return float(_sigmoid(a + fam["b"] * np.log(p / (1 - p))))
     return float(_sigmoid(c.get("calib_a", 0.0) + c.get("calib_b", 1.0) * np.log(p / (1 - p))))
 
 
@@ -81,7 +91,7 @@ def evaluate(props: pd.DataFrame, lines: pd.DataFrame, player_games: pd.DataFram
         for side, p, odds in (("over", p_over, ln.over_odds), ("under", p_under, ln.under_odds)):
             if pd.isna(odds):
                 continue
-            pc = calibrate(p, cfg)
+            pc = calibrate(p, cfg, ln.stat, side)
             dec = american_to_decimal(float(odds))
             ev = pc * dec - 1
             b = dec - 1

@@ -30,3 +30,10 @@
 - Change gate: pattern over 3+ weeks / ~100 bets AND passes 2021-25 backtest. Rule tweaks (e.g. min_prob 0.54 -> 0.60;
   week 6: leans >=60% went 68-50 +7.7%, below 60% lost) can move faster than model changes. Log each change with evidence.
 - Week 6 official: locked 13-7, +6.46u, +21.5% ROI at assumed -115.
+
+## Done (Oct 20)
+- Calibration by stat family + side (`[paper] calib_family`, tools/calibration_fit.py). Model is overconfident on
+  overs: 2025 backtest over-leans on receptions hit 46%, targets 47%; week 6 real: receptions overs 43%, rec_yds overs 46%.
+  Log-loss: 2026 wks 4-5 0.675 -> 0.662, week 6 real 0.706 -> 0.698 (P>0 = 93%). Carries also improve.
+  Week 6 lock replay: 12-7 (+18%) vs actual 13-7 (+21.5%) -> selection noise; overs fall from 12/20 to 5/19.
+- min_prob kept at 0.54: with the new calibration, higher floors don't clearly help on real lines.
