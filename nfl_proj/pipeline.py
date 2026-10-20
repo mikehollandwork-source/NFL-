@@ -127,7 +127,7 @@ def run_week(tables: dict, cfg: dict, paths: dict, week: int, asof: bool = False
     sim = Simulator(proj, t["player_games"], t.get("defenders"), t.get("kickers"),
                     n_sims=n, seed=cfg["sim"]["seed"])
     props = sim.run_week(week)
-    wide = wide_means(props)
+    wide = wide_means(props, cfg.get("sim", {}).get("td_calib"))
     totals = pd.DataFrame([{"week": week, "team": tm, "opp": op, "model_points": proj.pts_override.get((tm, op)),
                             "final_points": v, **{f"proj_{k}": x for k, x in sim.team_components[(tm, op)].items()}}
                            for (tm, op), v in sim.team_points.items()])

@@ -331,3 +331,16 @@ model's lean for every posted line), `paper/summary.md`.
 `python -m nfl_proj board [--refresh]` writes `output/<season>/board/prop-board.html`: every posted line for games
 not yet kicked off, the model's lean, win chance and season hit log. It opens on qualifying bets; already-locked bets
 are tagged. It is rebuilt after every scheduled lock run and on Wed/Fri/Sat evenings after injury reports.
+
+### Weekly review (runs inside `auto --mode grade`)
+
+Each graded week also writes `paper/week_NN_review.md`:
+- every loss tagged by cause: **coin flip** (lost by ≤1 or ≤10% of the line), **role** (snap share 20+ pts under his norm),
+  **volume** (targets/carries/attempts 30%+ off projection the wrong way), **market** (closing line moved against us),
+  **efficiency** (usage fine, per-touch production decided it: variance);
+- closing-line comparison (ESPN's final DraftKings line is captured at grade time as `data/odds/week_NN_close.csv`);
+- season-to-date hit rate by stat/side and confidence bucket, for bets and for every posted line's lean.
+
+Change rule: act only on a pattern that holds 3+ weeks (~100 bets) and passes the 2021-25 backtest.
+Tools: `tools/calibration_fit.py` (prop calibration by stat family and side), `tools/td_study.py`
+(what predicts TDs), `tools/td_calibration.py` (anytime-TD calibration from `backtest_*_td.csv`).

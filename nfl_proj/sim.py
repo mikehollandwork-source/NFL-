@@ -354,7 +354,16 @@ def apply_lines(props: pd.DataFrame, lines: pd.DataFrame) -> pd.DataFrame:
     return props
 
 
-def wide_means(props: pd.DataFrame) -> pd.DataFrame:
+def calibrate_td(p, cal: dict | None):
+    """Anytime-TD probabilities are too spread out (top calls score less often
+    than predicted, long shots more): p' = sigmoid(a + b * logit(p))."""
+    if not cal:
+        return p
+    p = np.clip(np.asarray(p, dtype=float), 1e-4, 1 - 1e-4)
+    return 1 / (1 + np.exp(-(cal.get("a", 0.0) + cal.get("b", 1.0) * np.log(p / (1 - p)))))
+
+
+def wide_means(props: pd.DataFrame, td_cal: dict | None = None) -> pd.DataFrame:
     cols = OFFENSE_STATS + DERIVED + KICKER_STATS + DEFENSE_STATS
     w = props.pivot_table(index=["week", "team", "opp", "player", "pos", "player_id"],
                           columns="stat", values="mean", fill_value=0.0).reset_index()
@@ -364,9 +373,11 @@ def wide_means(props: pd.DataFrame) -> pd.DataFrame:
     td = props[props["stat"] == "rush_rec_td"][["player_id", "team", "p_ge_1"]].rename(
         columns={"p_ge_1": "anytime_td"})
     w = w.merge(td, on=["player_id", "team"], how="left").fillna({"anytime_td": 0.0})
+    w["anytime_td_raw"] = w["anytime_td"]
+    w["anytime_td"] = np.where(w["anytime_td"] > 0, calibrate_td(w["anytime_td"], td_cal), 0.0)
     ft = first_td_probs(props)
     if not ft.empty:
         w = w.merge(ft, on=["player_id", "team"], how="left").fillna({"p_first_td": 0.0})
-    keep = ["week", "team", "opp", "player", "pos", "player_id"] + cols + ["anytime_td", "p_first_td"]
+    keep = ["week", "team", "opp", "player", "pos", "player_id"] + cols + ["anytime_td", "anytime_td_raw", "p_first_td"]
     w = w[[c for c in keep if c in w]]
     return w.round(3).sort_values(["team", "pass_yds", "fantasy_ppr"], ascending=[True, False, False])

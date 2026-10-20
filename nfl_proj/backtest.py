@@ -102,7 +102,7 @@ def run(tables: dict, cfg: dict, paths: dict, weeks: list[int], n_sims: int = 20
         # Anytime-TD calibration: every projected skill player vs whether he scored
         if "anytime_td" in wide:
             cols = [c for c in ["player_id", "team", "opp", "player", "pos", "targets", "carries", "rec_td",
-                                "rush_td", "anytime_td"] if c in wide]
+                                "rush_td", "anytime_td", "anytime_td_raw"] if c in wide]
             td = wide[cols].copy()
             a = actual.groupby(["player_id", "team"])[["rec_td", "rush_td"]].sum().sum(axis=1).rename("actual_td")
             td = td.merge(a, left_on=["player_id", "team"], right_index=True, how="inner")
