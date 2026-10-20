@@ -153,7 +153,7 @@ def run_week(tables: dict, cfg: dict, paths: dict, week: int, asof: bool = False
         for r_ in m[m["week"] == week].itertuples():
             no_qb_history.add(r_.team)
             flags.append(f"{r_.team}: props skipped when locking ({r_.reason})")
-    return {"no_qb_history": no_qb_history, "tables": t, "plays": plays, "style": style, "dprof": dprof, "labels": labels, "splits": splits,
+    return {"injuries": injuries, "no_qb_history": no_qb_history, "tables": t, "plays": plays, "style": style, "dprof": dprof, "labels": labels, "splits": splits,
             "scheme": scheme, "coach": coach, "est": est, "strength": strength, "overrides": overrides,
             "auto_overrides": auto, "flags": flags, "corners": corners, "proj": proj, "ctx": ctx,
             "props": props, "wide": wide, "totals": totals, "picks": picks, "sim": sim}

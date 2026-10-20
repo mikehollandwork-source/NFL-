@@ -112,6 +112,8 @@ def main(argv=None):
     au.add_argument("--mode", choices=["lock", "grade"], default="lock")
     au.add_argument("--window", type=float, help="hours before kickoff a game becomes due ([auto] lock_window_hours)")
     au.add_argument("--no-refresh", action="store_true")
+    pl = sub.add_parser("parlays", help="long-shot parlays: 5 x 10-leg milestones + 5 x 7-leg anytime TD")
+    pl.add_argument("--week", type=int)
     bd = sub.add_parser("board", help="rebuild the prop board HTML (games not yet kicked off)")
     bd.add_argument("--refresh", action="store_true", help="download + rebuild data first")
     sub.add_parser("factor-tests", help="out-of-sample tests of candidate factors (2021-25)")
@@ -129,6 +131,12 @@ def main(argv=None):
             print(run_lock(cfg, paths, ROOT, window_h=args.window, refresh=not args.no_refresh))
         else:
             print(run_grade(cfg, paths, ROOT, refresh=not args.no_refresh))
+        return
+
+    if args.cmd == "parlays":
+        from .parlays import run as run_parlays
+        out = run_parlays(cfg, paths, args.week)
+        print(out.read_text() if out else "season over")
         return
 
     if args.cmd == "board":
