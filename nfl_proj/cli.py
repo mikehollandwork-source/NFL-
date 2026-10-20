@@ -115,8 +115,13 @@ def main(argv=None):
     pl = sub.add_parser("parlays", help="long-shot parlays: 5 x 10-leg milestones + 5 x 7-leg anytime TD")
     pl.add_argument("--week", type=int)
     pl.add_argument("--refresh", action="store_true", help="download + rebuild data first")
+    pl.add_argument("--send", action="store_true", help="also send the report to Telegram")
+    pl.add_argument("--once", action="store_true", help="skip if this week's report already exists")
+    du = sub.add_parser("due", help="exit 0 if a game kicks off within the lock window (cheap: schedule only)")
+    du.add_argument("--window", type=float, help="hours before kickoff ([auto] lock_window_hours)")
     bd = sub.add_parser("board", help="rebuild the prop board HTML (games not yet kicked off)")
     bd.add_argument("--refresh", action="store_true", help="download + rebuild data first")
+    bd.add_argument("--send", action="store_true", help="send the qualifying and locked bets to Telegram")
     sub.add_parser("factor-tests", help="out-of-sample tests of candidate factors (2021-25)")
     pj = sub.add_parser("project")
     pj.add_argument("--week", type=int, help="defaults to the next week with unplayed games")
@@ -139,13 +144,25 @@ def main(argv=None):
         if args.refresh:
             from .auto import _refresh
             _refresh(cfg, paths, print)
-        out = run_parlays(cfg, paths, args.week)
-        print(out.read_text() if out else "season over")
+        out = run_parlays(cfg, paths, args.week, once=args.once)
+        print(out.read_text() if out else "nothing built")
+        if out and args.send:
+            from .notify import send
+            send(out.read_text().replace("**", ""))
         return
 
+    if args.cmd == "due":
+        from .auto import due_now
+        msg, due = due_now(cfg, paths, args.window)
+        print(msg)
+        raise SystemExit(0 if due else 1)
+
     if args.cmd == "board":
-        from .board import build
-        build(cfg, paths, ROOT, refresh=args.refresh)
+        from .board import build, summary_text
+        out = build(cfg, paths, ROOT, refresh=args.refresh)
+        if out and args.send:
+            from .notify import send
+            send(summary_text(out))
         return
 
     if args.cmd == "factor-tests":

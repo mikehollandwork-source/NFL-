@@ -22,6 +22,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import numpy as np
 import pandas as pd
 
 ET = ZoneInfo("America/New_York")
@@ -34,6 +35,32 @@ def kickoffs(games: pd.DataFrame, week: int) -> pd.DataFrame:
     g["game"] = [" @ ".join(sorted([a, h])) for a, h in zip(g["away"], g["home"])]
     g["label"] = g["away"] + " @ " + g["home"]
     return g
+
+
+def due_now(cfg: dict, paths: dict, window_h: float | None = None, now: datetime | None = None):
+    """Cheap check from the schedule file alone (no stats download): is any game
+    within the lock window and not yet in this week's lock log?"""
+    from .nflverse import GAMES_URL, Downloader, parse_games
+    now = now or datetime.now(timezone.utc)
+    window_h = window_h if window_h is not None else cfg.get("auto", {}).get("lock_window_hours", 2.25)
+    f = Downloader(paths["nflverse"], log=lambda *a: None).get(GAMES_URL, refresh=True)
+    raw = pd.read_csv(f, low_memory=False)
+    raw = raw[(raw["season"] == int(cfg["season"])) & (raw["game_type"] == "REG")]
+    games = parse_games(raw, int(cfg["season"]), set())
+    games["boxscore_id"] = np.where(raw["home_score"].notna().values, "played", None)
+    pend = games[games["boxscore_id"].isna()]
+    if pend.empty:
+        return "season over", False
+    week = int(pend["week"].min())
+    g = kickoffs(games, week)
+    logf = paths["out"] / "paper" / f"week_{week:02d}_lock_log.csv"
+    done = set(pd.read_csv(logf)["game"]) if logf.exists() else set()
+    due = g[(g["kickoff"] - now <= pd.Timedelta(hours=window_h)) & ~g["game"].isin(done)]
+    if len(due):
+        return f"due: {', '.join(due['label'])}", True
+    nxt = g[~g["game"].isin(done) & (g["kickoff"] > now)].sort_values("kickoff").head(1)
+    return ("nothing due" + (f"; next {nxt.iloc[0]['label']} {nxt.iloc[0]['kickoff'].astimezone(ET):%a %I:%M %p ET}"
+                             if len(nxt) else "")), False
 
 
 def _refresh(cfg: dict, paths: dict, log) -> dict:

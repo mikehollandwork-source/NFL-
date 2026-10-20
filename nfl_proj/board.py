@@ -72,3 +72,25 @@ def build(cfg: dict, paths: dict, root: Path, refresh: bool = False, log=print) 
     log(f"board: {len(rows)} lines, {sum(r['bet'] for r in rows)} qualifying, "
         f"{sum(r['locked'] for r in rows)} locked, {len(future)} games -> {out}")
     return out
+
+
+def summary_text(path: Path) -> str:
+    """Plain-text list of the board's qualifying and locked bets (for Telegram)."""
+    import re
+    html = Path(path).read_text()
+    m = re.search(r'<script id="data" type="application/json">(.*?)</script>', html, re.S)
+    d = json.loads(m.group(1).replace("<\\/", "</"))
+    rows = [r for r in d["rows"] if r["bet"] or r["locked"]]
+    head = f"🏈 Prop board ({d['generated'][:16].replace('T', ' ')} UTC): {len(rows)} qualifying / locked"
+    lines = [head]
+    for g in sorted({r["game"] for r in rows}, key=lambda g: min(x["ko"] for x in rows if x["game"] == g)):
+        rs = [r for r in rows if r["game"] == g]
+        lines.append(f"\n{g} ({rs[0]['kick']} ET)")
+        for r in sorted(rs, key=lambda r: -r["p"]):
+            tag = "LOCKED" if r["locked"] else "qualifies"
+            lines.append(f"• {r['player']} {r['stat'].replace('_', ' ')} {r['side'].upper()} {r['line']:g} "
+                         f"(model {r['model']:g}, {r['p']:.0%}) [{tag}]")
+    flags = [f for f in d.get("flags", []) if "injury report isn't out" not in f]
+    if flags:
+        lines += ["\nAvailability:"] + [f"- {f}" for f in flags]
+    return "\n".join(lines)

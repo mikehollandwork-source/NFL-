@@ -602,7 +602,14 @@ def jackpot(r: dict, cfg: dict, week: int, form: dict, used: set, target_payout:
 
 
 def _career(season: int) -> pd.DataFrame:
+    from .nflverse import Downloader, season_files
     from .td_model import RAW
+    d = Downloader(RAW, log=lambda *a: None)
+    for y in range(season - 8, season + 1):      # a fresh checkout (e.g. GitHub Actions) lacks older seasons
+        try:
+            d.get(season_files(y)["player_week"])
+        except Exception:
+            pass
     fs = sorted(RAW.glob("stats_player_week_*.csv.gz"))
     cols = ["player_id", "season", "week", "season_type", "team", "position", "carries", "rushing_yards",
             "targets", "receptions", "receiving_yards", "attempts"]
@@ -779,7 +786,7 @@ def report(week: int, parlays: list, tds: list, form: dict, td_top: pd.DataFrame
     return "\n".join(L)
 
 
-def run(cfg: dict, paths: dict, week: int | None = None, log=print) -> Path | None:
+def run(cfg: dict, paths: dict, week: int | None = None, log=print, once: bool = False) -> Path | None:
     from .build import load_season
     from .pipeline import run_week
     t = load_season(paths["db"])
@@ -790,6 +797,10 @@ def run(cfg: dict, paths: dict, week: int | None = None, log=print) -> Path | No
         if pend.empty:
             return None
         week = int(pend["week"].min())
+    out = paths["out"] / "parlays" / f"week_{week:02d}.md"
+    if once and out.exists():
+        log(f"parlays for week {week} already built ({out}); skipping")
+        return None
     r = run_week(t, cfg, paths, week)
     form = stat_form(paths["out"] / "paper")
     c = candidates(r, cfg, week, form)
