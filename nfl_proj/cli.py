@@ -261,7 +261,7 @@ def main(argv=None):
         res = run_backtest(t, cfg, paths, weeks, n_sims=args.sims)
         sfx = f"_{args.tag}" if args.tag else ""
         (paths["out"] / f"backtest{sfx}.md").write_text(res["report"])
-        for k in ("picks", "calls", "totals", "proj_err", "actual_components", "paper_ev"):
+        for k in ("picks", "calls", "totals", "proj_err", "actual_components", "paper_ev", "td"):
             if not res[k].empty:
                 res[k].to_csv(paths["out"] / f"backtest{sfx}_{k}.csv", index=False)
         print(res["report"])

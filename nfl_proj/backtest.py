@@ -70,7 +70,7 @@ def run(tables: dict, cfg: dict, paths: dict, weeks: list[int], n_sims: int = 20
     from .market import implied_totals
     from .pipeline import run_week
     full_pg = tables["player_games"]
-    picks, calls, proj_err, totals, paper = [], [], [], [], []
+    picks, calls, proj_err, totals, paper, tds = [], [], [], [], [], []
     imp = implied_totals(tables["games"])
     for w in weeks:
         log(f"backtest: week {w} (data through week {w - 1})")
@@ -99,6 +99,15 @@ def run(tables: dict, cfg: dict, paths: dict, weeks: list[int], n_sims: int = 20
                 proj_err.append({"week": w, "stat": stat, "n": len(m),
                                  "model_mae": float((m["proj"] - m[col]).abs().mean()),
                                  "naive_mae": float((m["naive"] - m[col]).abs().mean())})
+        # Anytime-TD calibration: every projected skill player vs whether he scored
+        if "anytime_td" in wide:
+            cols = [c for c in ["player_id", "team", "opp", "player", "pos", "targets", "carries", "rec_td",
+                                "rush_td", "anytime_td"] if c in wide]
+            td = wide[cols].copy()
+            a = actual.groupby(["player_id", "team"])[["rec_td", "rush_td"]].sum().sum(axis=1).rename("actual_td")
+            td = td.merge(a, left_on=["player_id", "team"], right_index=True, how="inner")
+            td["week"] = w
+            tds.append(td)
         # Team totals
         g = tables["games"][tables["games"]["week"] == w]
         act = pd.concat([pd.DataFrame({"team": g["home"], "actual": g["home_score"]}),
@@ -114,7 +123,8 @@ def run(tables: dict, cfg: dict, paths: dict, weeks: list[int], n_sims: int = 20
            "calls": pd.concat(calls, ignore_index=True) if calls else pd.DataFrame(),
            "proj_err": pd.DataFrame(proj_err),
            "totals": pd.concat(totals, ignore_index=True) if totals else pd.DataFrame(),
-           "paper_ev": pd.concat(paper, ignore_index=True) if paper else pd.DataFrame()}
+           "paper_ev": pd.concat(paper, ignore_index=True) if paper else pd.DataFrame(),
+           "td": pd.concat(tds, ignore_index=True) if tds else pd.DataFrame()}
     from .components import actual_components
     out["actual_components"] = actual_components(tables["plays"], tables["games"])
     try:

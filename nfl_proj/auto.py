@@ -102,6 +102,13 @@ def run_lock(cfg: dict, paths: dict, root: Path, now: datetime | None = None, wi
     lines = pick_book(lines_now, cfg)
     r = run_week(t, cfg, paths, week)
     teams = set(due["home"]) | set(due["away"])
+    # Keep what the model projected at lock (the weekly review compares usage to it)
+    pf = paper_dir / f"week_{week:02d}_proj.csv"
+    wide = r["wide"][r["wide"]["team"].isin(teams)].assign(locked_at=stamp)
+    prev = pd.read_csv(pf) if pf.exists() else pd.DataFrame()
+    if len(prev):
+        prev = prev[~prev["team"].isin(teams)]
+    pd.concat([prev, wide], ignore_index=True).to_csv(pf, index=False)
     bets, path = lock(r["props"], lines, r["tables"]["player_games"], week, cfg, paper_dir, root,
                       teams=teams, price_fn=lambda b: fetch_prices(b, cfg, log=log),
                       skip_teams=r.get("no_qb_history", set()))
@@ -139,16 +146,30 @@ def run_grade(cfg: dict, paths: dict, root: Path, refresh: bool = True, log=prin
         wk = games[games["week"] == week]
         if wk["boxscore_id"].isna().any() or not (pg["week"] == week).any():
             continue  # games or stats not final yet
-        gr = grade(week, pg, paper_dir, pick_book(load_lines(root / "data" / "odds", week, "close"), cfg))
+        odds_dir = root / "data" / "odds"
+        if not (odds_dir / f"week_{week:02d}_close.csv").exists():
+            # ESPN keeps serving each prop's final line after the game: that's the close
+            try:
+                from .odds import fetch_espn, save
+                rp = paths["nflverse"] / f"roster_weekly_{int(cfg['season'])}.csv.gz"
+                ro = pd.read_csv(rp, low_memory=False) if rp.exists() else None
+                save(fetch_espn(games, week, cfg, ro, log=lambda *a: None), odds_dir, week, "close")
+            except Exception as e:  # grading must not fail on this
+                log(f"close lines unavailable: {e}")
+        gr = grade(week, pg, paper_dir, pick_book(load_lines(odds_dir, week, "close"), cfg))
+        from .review import run as review
+        review(week, gr, pg, paper_dir, paths["out"])
+        gr = pd.read_csv(paper_dir / f"week_{week:02d}_graded.csv")
         d = gr[gr["result"].isin(["win", "loss"])]
         lines = [f"📊 Week {week} graded: {int((d['result'] == 'win').sum())}-{int((d['result'] == 'loss').sum())}"
                  f", {gr['profit'].sum():+.2f}u"]
         for r in gr.itertuples():
             icon = {"win": "✅", "loss": "❌", "push": "➖", "void": "⛔"}[r.result]
+            why = f" [{r.cause}]" if r.result == "loss" and isinstance(r.cause, str) else ""
             lines.append(f"{icon} {r.player} {r.stat.replace('_', ' ')} {r.side} {r.line:g} → {r.actual:g}"
-                         f" ({r.profit:+.2f}u @ {int(r.price_used):+d} {r.price_used_source})"
+                         f" ({r.profit:+.2f}u @ {int(r.price_used):+d} {r.price_used_source}){why}"
                          if pd.notna(r.actual) else f"{icon} {r.player} {r.stat} — did not play")
-        msgs.append("\n".join(lines))
+        msgs.append("\n".join(lines) + f"\n(full review: paper/week_{week:02d}_review.md)")
     if not msgs:
         return "nothing to grade"
     summ = summary(paper_dir)
