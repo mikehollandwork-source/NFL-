@@ -134,7 +134,7 @@ def main(seasons=range(2021, 2026)):
     mu, sd = g[f].mean(), g[f].std()
     b = fit_logit(((g[f] - mu) / sd).values, g["y"].values)
     print("standardized coefficients:", dict(zip(f, np.round(b[1:], 3))))
-    g.to_pickle(Path(__file__).with_name("td_study_rows.pkl"))
+    pass
     return g, r
 
 
