@@ -21,3 +21,12 @@
 ## 3. Ops
 - Triggers fire into this session and were delivered ~20h late on Sun Oct 18 (4 games missed).
   Fix: env vars TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID / ODDS_API_KEY, then fresh-session triggers.
+
+## 4. Weekly loss autopsy (build into `auto --mode grade`)
+- Tag every loss: role/availability (snap share vs projected), volume (targets/carries vs projected share),
+  efficiency (per-touch yards), game script (team plays / pass rate vs projected), market disagreed (line moved
+  against us after lock = negative CLV), coin flip (lost by <= 1 rec / 1 carry / ~10% of yds line).
+- Track CLV (needs a closing-line snapshot at kickoff), calibration by p bucket, splits by stat/side/line size, cumulative.
+- Change gate: pattern over 3+ weeks / ~100 bets AND passes 2021-25 backtest. Rule tweaks (e.g. min_prob 0.54 -> 0.60;
+  week 6: leans >=60% went 68-50 +7.7%, below 60% lost) can move faster than model changes. Log each change with evidence.
+- Week 6 official: locked 13-7, +6.46u, +21.5% ROI at assumed -115.
