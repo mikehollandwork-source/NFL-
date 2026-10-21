@@ -112,8 +112,63 @@ def combine(espn: pd.DataFrame, sleeper: pd.DataFrame) -> pd.DataFrame:
     return allf.drop_duplicates("player_id", keep="last").reset_index(drop=True)
 
 
+SCOREBOARD = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
+CORE = "https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/{e}/competitions/{e}/competitors"
+
+
+def fetch_inactives(roster: pd.DataFrame | None, hours: float = 3.0, log=print, events: list | None = None) -> pd.DataFrame:
+    """Game-day inactives (posted about 90 minutes before kickoff) from ESPN's
+    game rosters, for games starting within ``hours`` that haven't started.
+    A team's list counts only once it is posted (at least one player marked
+    did-not-play); then every listed player is Out and every other player on
+    that game roster is Active, which clears a Questionable tag."""
+    from .nflverse import team as nv_team
+    from .odds import norm_name
+    ids, by_name = {}, {}
+    if roster is not None and {"espn_id", "gsis_id"} <= set(roster.columns):
+        r = roster.dropna(subset=["espn_id"]).drop_duplicates("espn_id", keep="last")
+        ids = {str(int(e)): g for e, g in zip(r["espn_id"], r["gsis_id"])}
+        rr = roster.dropna(subset=["gsis_id"]).drop_duplicates(["team", "full_name"], keep="last")
+        by_name = {(nv_team(t), norm_name(n)): g for t, n, g in zip(rr["team"], rr["full_name"], rr["gsis_id"])}
+    now = pd.Timestamp.now(tz="UTC")
+    if events is None:
+        events = []
+        for e in requests.get(SCOREBOARD, timeout=30).json().get("events", []):
+            ko = pd.Timestamp(e["date"])
+            if e.get("status", {}).get("type", {}).get("state") == "pre" and ko - now <= pd.Timedelta(hours=hours):
+                events.append(e["id"])
+    rows = []
+    for eid in events:
+        comps = requests.get(CORE.format(e=eid), timeout=30).json().get("items", [])
+        for c in comps:
+            ref = (c.get("roster") or {}).get("$ref")
+            if not ref:
+                continue
+            entries = requests.get(ref.replace("http://", "https://"), timeout=30).json().get("entries", [])
+            if not any(x.get("didNotPlay") for x in entries):
+                continue                         # list not posted yet
+            team_abbr = requests.get(c["team"]["$ref"].replace("http://", "https://"), timeout=30).json().get("abbreviation", "")
+            team = nv_team(team_abbr)
+            for x in entries:
+                pid = ids.get(str(x.get("playerId")), "")
+                if not pid and x.get("didNotPlay") and (x.get("athlete") or {}).get("$ref"):
+                    try:   # roster has no ESPN id for him: match the full name instead
+                        full = requests.get(x["athlete"]["$ref"].replace("http://", "https://"), timeout=30).json().get("fullName", "")
+                        pid = by_name.get((team, norm_name(full)), "")
+                    except Exception:
+                        pass
+                rows.append({"team": team, "player": x.get("displayName"), "espn_id": str(x.get("playerId")),
+                             "player_id": pid, "pos": "", "report_status": "Out" if x.get("didNotPlay") else None,
+                             "injury": "inactive" if x.get("didNotPlay") else "", "updated": now.isoformat()})
+    out = pd.DataFrame(rows)
+    if len(out):
+        log(f"ESPN inactives: {int((out['report_status'] == 'Out').sum())} inactive across {out['team'].nunique()} teams")
+    return out
+
+
 def live(roster: pd.DataFrame | None, log=print) -> pd.DataFrame:
-    """ESPN + Sleeper combined; either feed failing leaves the other."""
+    """ESPN + Sleeper combined; either feed failing leaves the other. Posted
+    game-day inactives override both."""
     parts = {}
     for name, fn in (("espn", fetch), ("sleeper", fetch_sleeper)):
         try:
@@ -121,7 +176,21 @@ def live(roster: pd.DataFrame | None, log=print) -> pd.DataFrame:
         except Exception as e:
             log(f"{name} injury feed unavailable: {e}")
             parts[name] = pd.DataFrame()
-    return combine(parts["espn"], parts["sleeper"])
+    out = combine(parts["espn"], parts["sleeper"])
+    try:
+        ina = fetch_inactives(roster, log=log)
+    except Exception as e:
+        log(f"ESPN inactives unavailable: {e}")
+        ina = pd.DataFrame()
+    if len(ina):
+        ina = ina[ina["player_id"] != ""]
+        keep = out[~out["player_id"].isin(set(ina["player_id"]))]
+        # inactive -> Out; on the game roster and active -> cleared (only players with a prior tag matter)
+        tagged = set(out["player_id"])
+        ina = ina[(ina["report_status"] == "Out") | ina["player_id"].isin(tagged)]
+        ina = ina.assign(source="inactives", updated=pd.to_datetime(ina["updated"], utc=True))
+        out = pd.concat([keep, ina[keep.columns.intersection(ina.columns)]], ignore_index=True)
+    return out
 
 
 def merge(injuries: pd.DataFrame | None, live: pd.DataFrame, week: int) -> pd.DataFrame:
