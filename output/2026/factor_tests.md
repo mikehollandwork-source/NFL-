@@ -167,5 +167,7 @@ Starter = 60%+ of defensive snaps over his previous 3 games; missing = under 20%
 2,238 defense-games from week 4, defense and opposing offense season-to-date as baseline, each season held out.
 Per missing starter: CB +0.040 EPA/dropback (t 3.6) and +0.016 EPA/rush (t 1.9); LB +0.035 EPA/dropback (t 2.7);
 S +0.024 EPA/rush (t 2.6); EDGE / interior line not significant (few cases). Out-of-sample error: pass EPA -0.5%,
-all plays -0.8%. Implemented as opponent yards-per-play multipliers in `nfl_proj/def_injuries.py` (off by default
-until the projection backtest confirms it).
+all plays -0.8%. Implemented as opponent yards-per-play multipliers in `nfl_proj/def_injuries.py`. Projection backtest (on vs off,
+same code): prop log-loss 2025 wk 4-18 0.6536 -> 0.6532, 2026 wk 3-6 0.6530 -> 0.6522; team points unchanged;
+yardage MAE mixed (pass yds 2026 -0.9, but rec / rush yds slightly worse both seasons). Too small and mixed to
+adopt: left OFF.
