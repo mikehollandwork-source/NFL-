@@ -205,3 +205,11 @@ No signal clears noise (one sd: corr 0.04-0.045, 20% bucket cover 4-5 pts):
 - Underdog's team runs rising (last 3 vs season), top 20%: 59.2% -> 54.6%; by season 55/61/61/53/60/33 (2026 n=9).
   Pooled 57% on 227, about 2 sd, but it is the best of 17 tries. Watchlist only, not a bet.
 - Underdog's rush EPA + favorite's run defense allowed: 50.0% -> 56.7%. Inconsistent.
+
+## 13. Parlay backtest regraded (first-TD grading bug)
+
+First-TD legs had been graded as wins if the player scored first in any game this season. Graded on
+that week's game: first-TD tickets 0 of 3 (1 of 12 legs won, 8%), not 1 of 3. All types, weeks 2-6:
+65 tickets, 2 hits (both 9-13 leg milestone tickets, +6.3 and +4.7), $11 back on $65 (-83%).
+First-TD model: each game's top pick scored first 11.9% vs 16.4% predicted (2025-26, 285 games);
+chances above 10% are now shrunk (keep 45% of the excess).
