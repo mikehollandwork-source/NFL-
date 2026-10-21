@@ -75,6 +75,12 @@ active_within_games = 2
 share_games_played = true
 games_played_cap = 2.0
 games_played_min = 2
+# Receivers' yards per target are pulled toward their OWN last-season rate (vs their team,
+# long plays capped, shrunk by its volume with eff_prior_k = 60) instead of the team average.
+# Stars were underprojected: top-40 WR/TE rec yds bias -5.8 -> -3.4 (2025 wk 4-18), -6.5 -> -3.5
+# (2026 wk 3-6); rec yds MAE 18.28 -> 18.20 / 19.49 -> 19.36; prop log-loss 0.6536 -> 0.6522 /
+# 0.6530 -> 0.6512. Doing the same for rushers hurt 2026 rushing props (0.671 -> 0.678): "rec" only.
+eff_prior = "rec"
 
 [sim]
 # Simulated games per matchup. Every prop (medians, ranges, longest plays,

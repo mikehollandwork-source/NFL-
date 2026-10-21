@@ -171,3 +171,22 @@ all plays -0.8%. Implemented as opponent yards-per-play multipliers in `nfl_proj
 same code): prop log-loss 2025 wk 4-18 0.6536 -> 0.6532, 2026 wk 3-6 0.6530 -> 0.6522; team points unchanged;
 yardage MAE mixed (pass yds 2026 -0.9, but rec / rush yds slightly worse both seasons). Too small and mixed to
 adopt: left OFF.
+
+## 11. Star receiver efficiency prior (ON, receivers only) and backup-RB carries as a win tell (no)
+
+**Star prior.** Receivers' yards per target were shrunk toward the team average (k=25), so proven
+efficient receivers with few targets this season were pulled down. Variant: shrink toward the player's
+own 2025 rate vs his team (capped, regressed by volume, k=60). Same code, on vs off:
+
+| | 2025 wk 4-18 off | on (rec) | 2026 wk 3-6 off | on (rec) |
+|---|---|---|---|---|
+| Prop log-loss, all | 0.6536 | 0.6522 | 0.6530 | 0.6512 |
+| Receiving props | 0.6559 | 0.6535 | 0.6457 | 0.6425 |
+| Rec yds MAE | 18.28 | 18.20 | 19.49 | 19.36 |
+| Top-40 WR/TE rec yds bias | -5.8 | -3.4 | -6.5 | -3.5 |
+
+Applying it to rushers too: rushing props 0.6713 -> 0.6779 in 2026. Enabled for receivers only.
+
+**Backup-RB tell.** Both top-2 RBs' projected carries minus their season averages (484 team-games,
+2025 wk 4-18 + 2026 wk 3-6): adds +0.7 pt win chance per carry beyond the market spread (t 1.0),
++0.5 pt cover (t 0.6). Both backs projected above their usual: 50% win, 50% cover (n 119). No tell.
