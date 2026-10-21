@@ -104,5 +104,50 @@ def main():
     return R
 
 
+def sgp(L: pd.DataFrame | None = None):
+    """Same-game parlays with a profit boost. Legs come from one game (both
+    teams); outcomes are real, so in-game correlation is whatever actually
+    happened. Book price = fair price from Kalshi closes x (1 - margin); a
+    profit boost multiplies the profit: payout = 1 + (P - 1) x (1 + boost)."""
+    if L is None:
+        L = legs(pd.read_csv(ROOT / "output" / "2026" / "kalshi_backtest.csv"))
+    games = pd.read_csv(ROOT / "output" / "2026" / "kalshi_backtest.csv")[["ticker"]]
+    L = L.copy()
+    # game id from the Kalshi event ticker (e.g. KXNFLREC-26OCT18NYJNE -> 26OCT18NYJNE)
+    L["gid"] = L["ticker"].str.split("-").str[1]
+    out = []
+    for rule in ("edge", "prob", "carries", "unders", "overs"):
+        for n in range(2, 7):
+            for min_edge in (0.0, 0.03, 0.05):
+                tickets = []
+                for (w, gid), x in L.groupby(["week", "gid"]):
+                    x = RULES[rule](x[x["edge"] >= min_edge])
+                    x = x.drop_duplicates("player")          # one leg per player
+                    while len(x) >= n:
+                        p = x.head(n)
+                        x = x.iloc[n:]
+                        fair = 1 / np.prod(p["price"])
+                        tickets.append({"week": w, "hit": float(p["win"].all()), "fair": fair})
+                if len(tickets) < 8:
+                    continue
+                T = pd.DataFrame(tickets)
+                for margin in (0.0, 0.15, 0.25, 0.35):
+                    for boost in (0.0, 0.25, 0.5, 1.0):
+                        P = 1 + (T["fair"] * (1 - margin) - 1).clip(lower=0)
+                        pay = 1 + (P - 1) * (1 + boost)
+                        roi = (pay * T["hit"]).mean() - 1
+                        out.append({"rule": rule, "legs": n, "min_edge": min_edge, "book_margin": margin,
+                                    "boost": boost, "parlays": len(T), "hit_rate": T["hit"].mean(), "roi": roi})
+    R = pd.DataFrame(out)
+    R.to_csv(ROOT / "output" / "2026" / "sgp_structure.csv", index=False)
+    pd.set_option("display.width", 220)
+    print("\nSame-game parlays: best structures at a 25% book margin, by boost")
+    for b in (0.0, 0.25, 0.5, 1.0):
+        x = R[(R["book_margin"] == 0.25) & (R["boost"] == b) & (R["parlays"] >= 15)].sort_values("roi", ascending=False)
+        print(f"\nboost {b:.0%}:");print(x.head(6).round(3).to_string(index=False))
+    return R
+
+
 if __name__ == "__main__":
     main()
+    sgp()
