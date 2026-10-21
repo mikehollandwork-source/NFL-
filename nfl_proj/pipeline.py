@@ -110,6 +110,7 @@ def run_week(tables: dict, cfg: dict, paths: dict, week: int, asof: bool = False
     t["_streaks"] = streak_persistence(paths, cfg)
     proj = Projector(plays, t["player_games"], games, cfg, labels, overrides, scheme, coach,
                      corners=corners, tables=t, priors=priors)
+    proj._live_injuries = injuries          # merged nflverse + ESPN + Sleeper report (defensive starters)
     _context_effects(proj, t, cfg, paths, week, teams, overrides, asof, log)
     n = n_sims or cfg["sim"]["n_sims"]
 
@@ -211,6 +212,17 @@ def _context_effects(proj, t, cfg, paths, week, teams, overrides, asof, log):
             m = oline.effect(est, len(miss))
             m["missing"] = list(miss["player"])
             proj.oline[team] = m
+    # Defense: starting CB / LB / S missing this week
+    if cfg.get("def_injuries", {}).get("enabled", False):
+        from . import def_injuries as dinj
+        snaps = dinj.load_snaps(paths["nflverse"], int(cfg["season"]))
+        if not snaps.empty:
+            snaps["team_pfr"] = snaps["team"].map(dinj.nv_team)
+            inj = t.get("injuries")
+            if not asof and getattr(proj, "_live_injuries", None) is not None:
+                inj = proj._live_injuries
+            for team in teams:
+                proj.def_inj[team] = dinj.effect(dinj.missing(snaps, inj, team, week, asof), cfg)
 
 
 

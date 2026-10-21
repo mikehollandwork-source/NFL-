@@ -152,6 +152,7 @@ class Projector:
         self.base_mode = False      # True: SOS only (first pass for model team totals)
         self.weather = {}           # team -> {"pass", "fg", "note"} (set by the pipeline)
         self.oline = {}             # team -> {"sack", "pass", "run", "missing"}
+        self.def_inj = {}           # defense -> {"pass", "run", "missing"}: missing starters (def_injuries.py)
         self.pts_override = {}      # (team, opp) -> simulated model points
         pts = games.dropna(subset=["boxscore_id"])
         lg_pts = (pts[["home_score", "away_score"]].stack().mean()
@@ -343,7 +344,8 @@ class Projector:
                      "def_pts": 1 + dw * (f("points", "def", opp) - 1)},
              "market": None, "td_factor": 1.0, "ypp_factor": 1.0, "dropback_shift": 0.0,
              "weather": self.weather.get(team, {"pass": 1.0, "fg": 1.0, "note": None}),
-             "oline": self.oline.get(team, {"sack": 1.0, "pass": 1.0, "run": 1.0, "missing": []})}
+             "oline": self.oline.get(team, {"sack": 1.0, "pass": 1.0, "run": 1.0, "missing": []}),
+             "def_inj": self.def_inj.get(opp, {"pass": 1.0, "run": 1.0, "missing": []})}
         self._adj_cache[key] = a  # provisional, so the base projections below see no adjustment
         if not self._market_on or self.base_mode:
             return a
@@ -543,7 +545,7 @@ class Projector:
             side = "pass" if family == "pass" else "run"
             team_ypp *= a["sos"][f"off_{side}"]
             m_ypp *= a["sos"][f"def_{side}"] * a["ypp_factor"]
-            m_ypp *= a["oline"][side] * (a["weather"]["pass"] if side == "pass" else 1.0)
+            m_ypp *= a["oline"][side] * (a["weather"]["pass"] if side == "pass" else 1.0) * a["def_inj"][side]
         return {"ypp": float(team_ypp), "cmp": float(team_cmp), "td": float(lgr["td"]),
                 "m_ypp": m_ypp, "m_cmp": m_cmp}
 
@@ -596,7 +598,7 @@ class Projector:
             a = self.adjustments(team, opp, week)
             team_ypp *= a["sos"][f"off_{fam}"]
             m_ypp *= a["sos"][f"def_{fam}"] * a["ypp_factor"]
-            m_ypp *= a["oline"][fam] * (a["weather"]["pass"] if fam == "pass" else 1.0)
+            m_ypp *= a["oline"][fam] * (a["weather"]["pass"] if fam == "pass" else 1.0) * a["def_inj"][fam]
         return {"ypp": float(team_ypp), "cmp": float(team_cmp), "td": float(lgr["td"]),
                 "m_ypp": m_ypp, "m_cmp": m_cmp}
 

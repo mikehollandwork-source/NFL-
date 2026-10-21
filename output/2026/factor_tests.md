@@ -160,3 +160,12 @@ Six zones (short/deep x left/middle/right), team-game level, weeks 5+, season-to
 completion % error -0.42%, EPA/attempt error -0.07% (both within noise). Split-half repeatability of a team's zone
 effect beyond its overall rate and the league's zone rate: defense r = 0.08, offense r = 0.01 (no zone above 0.16).
 Verdict: noise beyond what the model already uses (overall pass defense + deep share / deep efficiency). Not used.
+
+## 10. Missing defensive starters (2021-25)
+
+Starter = 60%+ of defensive snaps over his previous 3 games; missing = under 20% this game (`tools/def_injury_test.py`).
+2,238 defense-games from week 4, defense and opposing offense season-to-date as baseline, each season held out.
+Per missing starter: CB +0.040 EPA/dropback (t 3.6) and +0.016 EPA/rush (t 1.9); LB +0.035 EPA/dropback (t 2.7);
+S +0.024 EPA/rush (t 2.6); EDGE / interior line not significant (few cases). Out-of-sample error: pass EPA -0.5%,
+all plays -0.8%. Implemented as opponent yards-per-play multipliers in `nfl_proj/def_injuries.py` (off by default
+until the projection backtest confirms it).
