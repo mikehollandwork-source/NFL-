@@ -585,7 +585,10 @@ def jackpot(r: dict, cfg: dict, week: int, form: dict, used: set, target_payout:
     same realism filters as the regular milestone legs), from players in no
     other parlay, at most two legs per game."""
     # The one exception to the no-overlap rule: the jackpot may reuse players from other parlays.
-    c = candidates(r, cfg, week, form, target=0.62).sort_values("score", ascending=False)
+    c = candidates(r, cfg, week, form, target=0.62)
+    if c.empty:
+        return [], c
+    c = c.sort_values("score", ascending=False)
     # Lean on the stat types the model has been right on: carries uncapped, unproven ones capped
     cap = {"completions": 6, "pass_yds": 5, "rec_yds": 6, "receptions": 4}
     picked, per, nstat = [], {}, {}
@@ -601,7 +604,7 @@ def jackpot(r: dict, cfg: dict, week: int, form: dict, used: set, target_payout:
     return ([P] if len(P) else []), P
 
 
-def _career(season: int) -> pd.DataFrame:
+def _career(season: int, before_week: int | None = None) -> pd.DataFrame:
     from .nflverse import Downloader, season_files
     from .td_model import RAW
     d = Downloader(RAW, log=lambda *a: None)
@@ -619,7 +622,10 @@ def _career(season: int) -> pd.DataFrame:
             continue
         d = pd.read_csv(f, usecols=lambda c: c in cols, low_memory=False)
         out.append(d[d["season_type"] == "REG"])
-    return pd.concat(out, ignore_index=True)
+    car = pd.concat(out, ignore_index=True)
+    if before_week is not None:   # backtests: nothing from the week being predicted or later
+        car = car[(car["season"] < season) | (car["week"] < before_week)]
+    return car
 
 
 BIG_ROLE = {"RB": ("carries", 15), "WR": ("targets", 8), "TE": ("targets", 7)}
@@ -628,7 +634,7 @@ ROLE_STATS = {"RB": [("rush_yds", "rushing_yards"), ("carries", "carries")],
               "TE": [("rec_yds", "receiving_yards"), ("receptions", "receptions")]}
 
 
-def backups(r: dict, cfg: dict, week: int, used: set, n_parlays: int = 2, legs: int = 4):
+def backups(r: dict, cfg: dict, week: int, used: set, n_parlays: int = 2, legs: int = 4, asof: bool = False):
     """Backups who'd fill a big role if the starter ahead of them misses time.
     Starter / backup = 1st / 2nd in projected workload at the position (RB
     carries; WR, TE targets). Starter risk = share of his team's games he
@@ -639,7 +645,7 @@ def backups(r: dict, cfg: dict, week: int, used: set, n_parlays: int = 2, legs: 
     x his hit rate in big-role games."""
     w = r["wide"]
     status = _status(r.get("injuries"), week)
-    car = _career(int(cfg["season"]))
+    car = _career(int(cfg["season"]), before_week=week if asof else None)
     recent = car[car["season"] >= int(cfg["season"]) - 1]
     gp = recent.groupby("player_id").size()
     season_g = recent.groupby("season")["week"].nunique()          # games played so far each season
