@@ -197,6 +197,10 @@ def run_grade(cfg: dict, paths: dict, root: Path, refresh: bool = True, log=prin
                          f" ({r.profit:+.2f}u @ {int(r.price_used):+d} {r.price_used_source}){why}"
                          if pd.notna(r.actual) else f"{icon} {r.player} {r.stat} — did not play")
         msgs.append("\n".join(lines) + f"\n(full review: paper/week_{week:02d}_review.md)")
+        from .money import grade as money_grade
+        mg = money_grade(week, pg, paths)
+        if mg:
+            msgs.append(mg)
     if not msgs:
         return "nothing to grade"
     summ = summary(paper_dir)

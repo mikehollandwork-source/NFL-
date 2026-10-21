@@ -80,6 +80,7 @@ jobs:
           if python -m nfl_proj due || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             python -m nfl_proj auto --mode lock          # sends the picks to Telegram
             python -m nfl_proj board --send              # updated board: qualifying + locked bets
+            python -m nfl_proj money --send              # real-money list (carries vs Kalshi)
           fi
 
       - name: Grade the week and build parlays
@@ -94,14 +95,16 @@ jobs:
 
       - name: Prop board after injury reports
         if: steps.mode.outputs.mode == 'board'
-        run: python -m nfl_proj board --refresh --send
+        run: |
+          python -m nfl_proj board --refresh --send
+          python -m nfl_proj money --send
 
       - name: Save outputs to the repo
         if: always()
         run: |
           git config user.name "nfl-props-bot"
           git config user.email "nfl-props-bot@users.noreply.github.com"
-          git add -f output/*/paper output/*/parlays output/*/board 2>/dev/null || true
+          git add -f output/*/paper output/*/parlays output/*/board output/*/money 2>/dev/null || true
           if git diff --cached --quiet; then echo "nothing to save"; exit 0; fi
           git commit -m "Automated ${{ steps.mode.outputs.mode }} run"
           for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
@@ -115,5 +118,6 @@ jobs:
             output/*/paper
             output/*/parlays
             output/*/board
+            output/*/money
           if-no-files-found: ignore
           retention-days: 30

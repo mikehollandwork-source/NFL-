@@ -1,0 +1,137 @@
+"""Real-money list: the one edge that held up against the market.
+
+Backtest (tools/kalshi_backtest.py, 2026 weeks 2-6): single bets on Kalshi
+rush-attempt markets where the model's chance beats the price by 10+ points
+went +28% ROI over 157 bets (90% range +10% to +52%); every other stat lost
+to the Kalshi close. So this list is carries only, priced at what you would
+actually pay (YES at the ask, NO at 1 - bid). Each pick is logged the first
+time it qualifies, at that price, and graded after the games.
+"""
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+from .odds import norm_name
+from .paper import calibrate
+
+DEFAULT = {"min_edge": 0.10, "max_spread": 0.10, "bankroll": 50.0, "kelly_fraction": 0.25, "max_stake_pct": 0.05,
+           "stats": ["carries"]}
+
+
+def _cfg(cfg):
+    return {**DEFAULT, **cfg.get("money", {})}
+
+
+def build(cfg: dict, paths: dict, week: int | None = None, refresh: bool = False, log=print):
+    from .auto import _refresh, kickoffs
+    from .build import load_season
+    from .kalshi import fetch
+    from .odds import fetch as fetch_lines, pick_book
+    from .pipeline import run_week
+    c = _cfg(cfg)
+    t = _refresh(cfg, paths, log) if refresh else load_season(paths["db"])
+    games = t["games"]
+    now = datetime.now(timezone.utc)
+    if week is None:
+        today = pd.Timestamp.now(tz="America/New_York").strftime("%Y-%m-%d")
+        pend = games[games["boxscore_id"].isna() & (games["date"].astype(str) >= today)]
+        if pend.empty:
+            return None, None
+        week = int(pend["week"].min())
+    g = kickoffs(games, week)
+    ko = {}
+    for x in g.itertuples():
+        ko[x.home] = ko[x.away] = (x.kickoff, x.label)
+    r = run_week(t, cfg, paths, week, log=lambda *a: None)
+    P = r["props"][r["props"]["_samples"].notna()].copy()
+    P["key"] = P["player"].map(norm_name)
+    K = fetch(log=log)
+    K = K[K["stat"].isin(c["stats"])] if len(K) else K
+    try:
+        L = pick_book(fetch_lines(games, week, cfg, None, log=lambda *a: None), cfg)
+    except Exception:
+        L = pd.DataFrame()
+    rows = []
+    for x in K.itertuples():
+        p = P[(P["key"] == x.key) & (P["stat"] == x.stat)]
+        if p.empty:
+            continue
+        team = p["team"].iloc[0]
+        kick, label = ko.get(team, (None, None))
+        if kick is None or kick <= now or x.bid <= 0 or x.ask >= 1 or x.ask - x.bid > c["max_spread"]:
+            continue
+        smp = np.asarray(p["_samples"].iloc[0], float)
+        pm = calibrate(float((smp >= x.k).mean()), cfg, x.stat, "over")
+        for side, prob, price in (("YES", pm, x.ask), ("NO", 1 - pm, 1 - x.bid)):
+            edge = prob - price
+            if edge < c["min_edge"]:
+                continue
+            kelly = max(0.0, (prob - price) / (1 - price)) * c["kelly_fraction"]
+            stake = round(min(kelly, c["max_stake_pct"]) * c["bankroll"], 2)
+            dk = ""
+            if len(L):
+                m = L[(L["player"].map(norm_name) == x.key) & (L["stat"] == x.stat)]
+                if len(m):
+                    ln = float(m["line"].iloc[0])
+                    p_dk = calibrate(float((smp > ln).mean()) if side == "YES" else float((smp < ln).mean()), cfg,
+                                     x.stat, "over" if side == "YES" else "under")
+                    dk = f"DK {'over' if side == 'YES' else 'under'} {ln:g} (model {p_dk:.0%})"
+            rows.append({"week": week, "game": label, "kickoff": kick.isoformat(), "player": x.player, "team": team,
+                         "stat": x.stat, "k": int(x.k), "side": side, "model": round(prob, 3), "price": round(price, 3),
+                         "edge": round(edge, 3), "stake": stake, "volume": x.volume, "ticker": x.ticker, "dk": dk,
+                         "found_at": now.isoformat(timespec="seconds")})
+    # one bet per player and stat (the backtest priced one market per player): his biggest edge
+    picks = (pd.DataFrame(rows).sort_values("edge", ascending=False).drop_duplicates(["player", "stat"])
+             if rows else pd.DataFrame())
+    logf = paths["out"] / "money" / f"week_{week:02d}.csv"
+    logf.parent.mkdir(parents=True, exist_ok=True)
+    if len(picks):
+        old = pd.read_csv(logf) if logf.exists() else pd.DataFrame()
+        new = picks[~picks["ticker"].isin(set(old.get("ticker", [])))] if len(old) else picks
+        pd.concat([old, new], ignore_index=True).to_csv(logf, index=False)
+    return picks, week
+
+
+def text(picks: pd.DataFrame, week: int, cfg: dict) -> str:
+    c = _cfg(cfg)
+    if picks is None or picks.empty:
+        return f"💵 Week {week} money list: no carries bets beat the Kalshi price by {c['min_edge']:.0%}+ right now."
+    lines = [f"💵 Week {week} money list: rush attempts where the model beats the price by {c['min_edge']:.0%}+ "
+             f"(bankroll ${c['bankroll']:.0f}, quarter Kelly)"]
+    for x in picks.itertuples():
+        what = f"{x.k}+ rush attempts" if x.side == "YES" else f"UNDER {x.k} rush attempts (≤{x.k - 1})"
+        lines.append(f"• {x.player} ({x.team}) {what}: model {x.model:.0%} vs price {x.price:.0%} "
+                     f"→ edge +{x.edge * 100:.0f}, stake ${x.stake:.2f} [{x.game}]" + (f"\n   {x.dk}" if x.dk else ""))
+    lines.append("Kalshi: buy the contract at or below the price shown. Backtest: +28% ROI over 157 bets, weeks 2-6.")
+    return "\n".join(lines)
+
+
+def grade(week: int, player_games: pd.DataFrame, paths: dict) -> str | None:
+    from .picks import STATS
+    f = paths["out"] / "money" / f"week_{week:02d}.csv"
+    if not f.exists():
+        return None
+    m = pd.read_csv(f)
+    pw = player_games[player_games["week"] == week].copy()
+    pw["key"] = pw["player"].map(norm_name)
+    res = []
+    for x in m.itertuples():
+        a = pw[(pw["key"] == norm_name(x.player)) & (pw["team"] == x.team)]
+        if a.empty:
+            res.append((np.nan, "void", 0.0)); continue
+        v = float(a[STATS[x.stat][0]].sum())
+        won = (v >= x.k) if x.side == "YES" else (v < x.k)
+        res.append((v, "win" if won else "loss", x.stake * ((1 - x.price) / x.price if won else -1)))
+    m["actual"], m["result"], m["profit"] = zip(*res)
+    m.to_csv(f.with_name(f"week_{week:02d}_graded.csv"), index=False)
+    d = m[m["result"] != "void"]
+    staked = d["stake"].sum()
+    head = (f"💵 Money list week {week}: {int((d.result == 'win').sum())}-{int((d.result == 'loss').sum())}, "
+            f"{d.profit.sum():+.2f} on ${staked:.2f} staked" + (f" (ROI {d.profit.sum() / staked:+.0%})" if staked else ""))
+    return head + "\n" + "\n".join(f"{'✅' if x.result == 'win' else '❌' if x.result == 'loss' else '⛔'} {x.player} "
+                                   f"{x.side} {x.k}+ carries → {x.actual:g} ({x.profit:+.2f})" for x in m.itertuples()
+                                   if x.result != "void" or True)

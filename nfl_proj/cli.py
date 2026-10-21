@@ -117,6 +117,10 @@ def main(argv=None):
     pl.add_argument("--refresh", action="store_true", help="download + rebuild data first")
     pl.add_argument("--send", action="store_true", help="also send the report to Telegram")
     pl.add_argument("--once", action="store_true", help="skip if this week's report already exists")
+    mo = sub.add_parser("money", help="real-money list: carries bets beating the Kalshi price by 10+ pts")
+    mo.add_argument("--week", type=int)
+    mo.add_argument("--refresh", action="store_true")
+    mo.add_argument("--send", action="store_true")
     du = sub.add_parser("due", help="exit 0 if a game kicks off within the lock window (cheap: schedule only)")
     du.add_argument("--window", type=float, help="hours before kickoff ([auto] lock_window_hours)")
     bd = sub.add_parser("board", help="rebuild the prop board HTML (games not yet kicked off)")
@@ -149,6 +153,16 @@ def main(argv=None):
         if out and args.send:
             from .notify import send
             send(out.read_text().replace("**", ""))
+        return
+
+    if args.cmd == "money":
+        from .money import build as money_build, text as money_text
+        picks, wk = money_build(cfg, paths, args.week, refresh=args.refresh)
+        msg = money_text(picks, wk, cfg) if wk else "season over"
+        print(msg)
+        if args.send and wk:
+            from .notify import send
+            send(msg)
         return
 
     if args.cmd == "due":

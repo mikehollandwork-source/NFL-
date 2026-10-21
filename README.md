@@ -368,3 +368,11 @@ Settings → Secrets and variables → Actions. Scheduled runs only fire from th
 first. Any run can also be started by hand: Actions → NFL props → Run workflow → pick lock / grade / parlays / board.
 Each run commits its outputs (`output/<season>/paper`, `parlays`, `board`) back to the repo and keeps them as a run
 artifact for 30 days.
+
+### Real-money list
+
+`python -m nfl_proj money [--send]`: carries (rush-attempt) bets on Kalshi where the model's chance beats the price
+you would pay (YES at the ask, NO at 1 - bid) by 10+ points, one per player, quarter-Kelly stake on a `[money] bankroll`
+(default $50, max 5% per bet). The only strategy that beat Kalshi closing prices in the weeks 2-6 backtest (+28% ROI,
+157 bets, 90% range +10% to +52%); every other stat lost to the market. Picks are logged when they first qualify
+(`output/<season>/money/week_NN.csv`) and graded in the Tuesday grade run. Runs on every lock run and board refresh.
