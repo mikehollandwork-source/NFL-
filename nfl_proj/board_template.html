@@ -146,10 +146,10 @@ footer{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;display:
   if(T.length){
     const esc=x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;');
     const odds=t=>t.fair?('+'+((t.fair-1)*100).toLocaleString(undefined,{maximumFractionDigits:0})):'';
-    const card=(t,i)=>`<div class="ticket"><h3>${esc(t.kind)} #${i+1}<span>${(t.p*100).toFixed(t.p<0.001?3:2)}% · fair ${odds(t)}</span></h3><ol>${t.legs.map(l=>`<li><b>${esc(l.player)}</b> <small>${esc(l.team)} ${esc(l.pos)} · ${esc(l.what)} ${Math.round(l.p*100)}%${l.note?' · '+esc(l.note):''}</small></li>`).join('')}</ol></div>`;
+    const card=(t,i)=>`<div class="ticket"><h3>${t.kind==='SGP'?esc(t.games[0]):esc(t.kind)+' #'+(i+1)}<span>${(t.p*100).toFixed(t.p<0.001?3:2)}% · fair ${odds(t)}</span></h3><ol>${t.legs.map(l=>`<li><b>${esc(l.player)}</b> <small>${esc(l.team)} ${esc(l.pos)} · ${esc(l.what)} ${Math.round(l.p*100)}%${l.note?' · '+esc(l.note):''}</small></li>`).join('')}</ol></div>`;
     const grp=k=>T.filter(t=>t.kind===k);
-    $('tix').innerHTML=`<h2>$1 touchdown tickets</h2><p>Lottery tickets, not edges. First-TD chances are corrected for the model's measured overconfidence (each game's top pick scored first 12% of the time in backtests, not the 16% it predicted). Books usually pay less than fair on these; expect to lose most of the stake over time.</p>`+
-      ['First TD','Anytime TD'].filter(k=>grp(k).length).map(k=>`<h3 style="margin:14px 0 8px;font-size:14px">${k} (${grp(k).length})</h3><div class="tgrid">${grp(k).map(card).join('')}</div>`).join('');
+    $('tix').innerHTML=`<h2>Parlays for profit boosts</h2><p>Anytime-TD tickets: no player in two tickets, legs ranked by the blended TD model (volume, red-zone and end-zone usage, scoring environment). Same-game parlays: rush-attempt leans first, the only prop where the model has beaten market prices; other legs fill in. Each leg shows its measured hit rate against real lines (other props hit about 54% however confident the model is), and same-team legs are combined through the simulations. Fair odds assume no book margin; a boost is what makes these worth playing. Backtest: parlays have not been profitable without one.</p>`+
+      ['Anytime TD','SGP','First TD'].filter(k=>grp(k).length).map(k=>`<h3 style="margin:14px 0 8px;font-size:14px">${k==='SGP'?'Same-game parlays, one per game':k} (${grp(k).length})</h3><div class="tgrid">${grp(k).map(card).join('')}</div>`).join('');
     $('tix').hidden=false;
   }
   const state={q:'',game:'',stat:'',bet:true,minp:.5,sort:'p'};

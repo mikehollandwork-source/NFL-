@@ -939,3 +939,50 @@ def board_parlays(r: dict, cfg: dict, week: int, games: set | None = None,
         t["games"] = sorted(t["games"])
         t["fair"] = round(1 / t["p"]) if t["p"] > 0 else None
     return out
+
+
+# Against real market lines (Kalshi closes, 2026 weeks 2-6) only the carries lean carries signal:
+# carries hit 0.508 + 0.64 x (p - 0.5) (272 lines); every other stat ~0.54 whatever the model's
+# confidence (2,021 lines; leans the model put at 70%+ hit 46%). Same-game legs use those rates.
+SGP_REAL = {"carries": (0.508, 0.64)}
+SGP_OTHER = 0.54
+SGP_STATS = {"carries": 0, "completions": 1, "pass_yds": 1, "rec_yds": 1, "receptions": 1}
+
+
+def sgp_tickets(r: dict, lean: pd.DataFrame, cfg: dict, legs: int = 3, min_p: float = 0.55) -> list[dict]:
+    """One same-game parlay per game on posted lines: rush-attempt leans first
+    (the only prop the model reads better than the market), then the strongest
+    other leans, one leg per player. Each leg's chance is its measured hit
+    rate against real lines; same-team legs are combined through the
+    simulations (a team's players share each simulated game; the two
+    offenses are independent)."""
+    props = r["props"][r["props"]["_samples"].notna()]
+    smp = {(pid, st): np.asarray(v, float) for pid, st, v in zip(props["player_id"], props["stat"], props["_samples"])}
+    skip = r.get("no_qb_history", set())
+    L = lean[lean["stat"].isin(list(SGP_STATS)) & (lean["p_cal"] >= min_p) & ~lean["team"].isin(skip)].copy()
+    L["pri"] = L["stat"].map(SGP_STATS)
+    a, b = SGP_REAL["carries"]
+    L["p_real"] = np.where(L["stat"] == "carries", a + b * (L["p_cal"] - 0.5), SGP_OTHER)
+    out = []
+    for g, x in L.groupby("game"):
+        x = x.sort_values(["pri", "p_real", "p_cal"], ascending=[True, False, False]).drop_duplicates("player_id").head(legs)
+        if len(x) < legs:
+            continue
+        masks, scale, rows = {}, 1.0, []
+        for y in x.itertuples():
+            s = smp.get((y.player_id, y.stat))
+            if s is None:
+                break
+            hit = s > y.line if y.side == "over" else s < y.line
+            masks[y.team] = hit if y.team not in masks else (masks[y.team] & hit)
+            scale *= y.p_real / max(float(hit.mean()), 1e-6)
+            rows.append({"player": y.player, "team": y.team, "pos": y.pos, "game": g,
+                         "what": f"{y.side} {y.line:g} {y.stat.replace('_', ' ').replace('carries', 'rush attempts')}",
+                         "p": round(float(y.p_real), 3),
+                         "note": f"model {y.p_cal:.0%}, median {y.model_median:.1f}"})
+        if len(rows) < legs:
+            continue
+        joint = float(np.prod([m.mean() for m in masks.values()])) * scale
+        out.append({"kind": "SGP", "games": [g], "p": joint, "fair": round(1 / joint, 2), "legs": rows,
+                    "carries": int((x["stat"] == "carries").sum())})
+    return sorted(out, key=lambda t: (-t["carries"], -t["p"]))

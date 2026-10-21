@@ -63,8 +63,9 @@ def build(cfg: dict, paths: dict, root: Path, refresh: bool = False, log=print) 
                      "log": vals, "hit": int(hit), "n": len(vals), "bet": key in bk, "locked": key in lk,
                      "skip": x.team in skip})
     try:
-        from .parlays import board_parlays
-        tickets = board_parlays(r, cfg, week, future)
+        from .parlays import board_parlays, sgp_tickets
+        tickets = [t for t in board_parlays(r, cfg, week, future, n_first=0) if t["kind"] == "Anytime TD"]
+        tickets += sgp_tickets(r, lean, cfg)
     except Exception as e:      # the prop list matters more than the tickets
         log(f"board: TD parlays skipped ({e})")
         tickets = []
