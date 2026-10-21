@@ -52,6 +52,10 @@ def calibrate(p: float, cfg: dict, stat: str | None = None, side: str | None = N
     unders): the model is overconfident on overs, not on unders."""
     c = cfg.get("paper", {})
     p = float(np.clip(p, 1e-4, 1 - 1e-4))
+    key = f"{_CAL_FAMILY.get(STATS[stat][2], '')}_{side}" if stat in STATS else ""
+    sd = c.get("calib_side", {}).get(key)
+    if sd:   # per family and side, fitted across main and alternate lines
+        return float(_sigmoid(sd["a"] + sd["b"] * np.log(p / (1 - p))))
     fam = c.get("calib_family", {}).get(_CAL_FAMILY.get(STATS[stat][2], "")) if stat in STATS else None
     if fam and side in ("over", "under"):
         a = fam["a_over"] if side == "over" else -fam["a_over"]
