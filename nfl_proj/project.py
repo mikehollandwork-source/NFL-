@@ -722,7 +722,13 @@ class Projector:
         g["team_ypp"] = g[bucket_col].map(lambda b: team_eff.get(b, {}).get("ypp", np.nan))
         g["team_cmp"] = g[bucket_col].map(lambda b: team_eff.get(b, {}).get("cmp", np.nan))
         tc = g[bucket_col].map(team_c)
-        ratio = shrink(g["ypp"] / tc.replace(0, np.nan), g["n_raw"], 1.0, k)
+        # Pull toward the player's own last-season efficiency (vs his team), not toward average,
+        # when [players] eff_prior is on: stars keep proven efficiency early in a season.
+        prior = 1.0
+        ep = getattr(self, "eff_prior", {}).get(fam)
+        if ep:
+            prior = g[id_col].map(ep).fillna(1.0)
+        ratio = shrink(g["ypp"] / tc.replace(0, np.nan), g["n_raw"], prior, k)
         g["ypp_s"] = np.where(tc > 0, ratio * g["team_ypp"], shrink(g["ypp"], g["n_raw"], g["team_ypp"], k))
         g["cmp_s"] = shrink(g["cmp"], g["n_raw"], g["team_cmp"], k)
         f = self._streak_factors(dc, id_col, fam, "eff") if self.streak_cfg["method"] == "factor" else {}

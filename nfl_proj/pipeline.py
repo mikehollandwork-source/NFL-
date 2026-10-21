@@ -111,6 +111,8 @@ def run_week(tables: dict, cfg: dict, paths: dict, week: int, asof: bool = False
     proj = Projector(plays, t["player_games"], games, cfg, labels, overrides, scheme, coach,
                      corners=corners, tables=t, priors=priors)
     proj._live_injuries = injuries          # merged nflverse + ESPN + Sleeper report (defensive starters)
+    if cfg["players"].get("eff_prior"):
+        proj.eff_prior = _eff_prior(paths, cfg, proj, cfg["players"]["eff_prior"])
     _context_effects(proj, t, cfg, paths, week, teams, overrides, asof, log)
     n = n_sims or cfg["sim"]["n_sims"]
 
@@ -170,6 +172,30 @@ def _prev_tables(paths, cfg):
         return None
     with sqlite3.connect(db) as con:
         return {n: pd.read_sql(f"select * from {n}", con) for n in ("plays", "games", "player_games")}
+
+
+def _eff_prior(paths, cfg, proj, which) -> dict:
+    """Last season's yards per target / carry for each player relative to his
+    team (long plays capped as in the projection), shrunk toward 1 by its own
+    volume. Used as the point this season's efficiency is pulled toward."""
+    prev = _prev_tables(paths, cfg)
+    if not prev:
+        return {}
+    pl = prev["plays"]
+    k_prev = float(cfg["players"].get("eff_prior_k", 60))
+    out = {}
+    fams = {"rec": ("target_id", "pass"), "rush": ("rusher_id", "run")}
+    for fam, (col, pt) in fams.items():
+        if which not in ("both", fam):
+            continue
+        d = pl[(pl["play_type"] == pt) & pl[col].notna() & (pl.get("no_play", 0) != 1)].copy()
+        if d.empty:
+            continue
+        d["y"] = d["yards"].clip(upper=proj.streak_cfg["cap"][fam])
+        d["rel"] = d["y"] / d.groupby("offense")["y"].transform("mean").replace(0, np.nan)
+        g = d.groupby(col)["rel"].agg(["mean", "size"])
+        out[fam] = (1 + (g["mean"] - 1) * g["size"] / (g["size"] + k_prev)).to_dict()
+    return out
 
 
 def _context_effects(proj, t, cfg, paths, week, teams, overrides, asof, log):
