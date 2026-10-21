@@ -152,3 +152,11 @@ weeks 6-18 team MAE 7.768 -> 7.734 (pick lift 0.100 -> 0.099); 2026 weeks
 2-5 team MAE 7.856 -> 7.987 (pick lift 0.167 -> 0.147); projections spread
 widened (sd 3.6 -> 4.4). Not consistently better, so it is **off**
 ([scoring] drive_eff = {}); the weights stay in the config comment.
+
+## 9. Pass zones: offense success and defense completions allowed by area (2021-25)
+
+Six zones (short/deep x left/middle/right), team-game level, weeks 5+, season-to-date inputs, each season held out
+(`tools/pass_zone_test.py`). Adding offense-in-zone and defense-allowed-in-zone rates to the overall rates:
+completion % error -0.42%, EPA/attempt error -0.07% (both within noise). Split-half repeatability of a team's zone
+effect beyond its overall rate and the league's zone rate: defense r = 0.08, offense r = 0.01 (no zone above 0.16).
+Verdict: noise beyond what the model already uses (overall pass defense + deep share / deep efficiency). Not used.
