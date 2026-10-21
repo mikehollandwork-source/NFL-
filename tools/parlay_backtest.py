@@ -43,7 +43,9 @@ def first_td_scorers(season):
                     usecols=["game_id", "week", "touchdown", "td_player_id", "game_seconds_remaining", "season_type"])
     p = p[(p["touchdown"] == 1) & (p["season_type"] == "REG") & p["td_player_id"].notna()]
     p = p.sort_values(["game_id", "game_seconds_remaining"], ascending=[True, False])
-    return set(p.groupby("game_id").head(1)["td_player_id"]), set(p["game_id"])
+    f = p.groupby("game_id").head(1)
+    # (week, player): the first TD scorer of THAT week's game, not of any game this season
+    return set(zip(f["week"].astype(int), f["td_player_id"])), set(p["game_id"])
 
 
 def main(weeks=range(2, 7)):
@@ -103,7 +105,7 @@ def leg_result(stat, k, pid, team, pw, firsts):
     if stat == "two TD":
         return float(a["rec_td"].sum() + a["rush_td"].sum() >= 2)
     if stat == "first TD":
-        return float(pid in firsts)
+        return float((int(a["week"].iloc[0]), pid) in firsts)
     col = STATS[stat][0]
     return float(a[col].sum() >= k)
 

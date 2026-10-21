@@ -62,8 +62,14 @@ def build(cfg: dict, paths: dict, root: Path, refresh: bool = False, log=print) 
                      "p": round(float(x.p_cal), 3), "ev": round(float(x.ev), 3), "trend": x.usage_trend,
                      "log": vals, "hit": int(hit), "n": len(vals), "bet": key in bk, "locked": key in lk,
                      "skip": x.team in skip})
+    try:
+        from .parlays import board_parlays
+        tickets = board_parlays(r, cfg, week, future)
+    except Exception as e:      # the prop list matters more than the tickets
+        log(f"board: TD parlays skipped ({e})")
+        tickets = []
     data = {"generated": now.isoformat(timespec="minutes"), "flags": r["flags"], "rows": rows,
-            "price": cfg["odds"].get("assumed_price", -115)}
+            "price": cfg["odds"].get("assumed_price", -115), "parlays": tickets}
     out = paths["out"] / "board" / "prop-board.html"
     out.parent.mkdir(parents=True, exist_ok=True)
     html = TEMPLATE.read_text().replace("__WEEK__", str(week)).replace(

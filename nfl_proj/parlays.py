@@ -881,3 +881,61 @@ def run(cfg: dict, paths: dict, week: int | None = None, log=print, once: bool =
     out.write_text(md)
     log(f"parlays: {len(c)} milestone legs, {len(td)} TD legs -> {out}")
     return out
+
+
+# First-TD probabilities from the share-of-expected-TDs method run high at the top:
+# 2025 wk 4-18 + 2026 wk 3-6 (6,005 player-games), predicted 17% -> 12.7% actual,
+# 22.5% -> 16%; below 10% it is about right. Each game's top pick scored first 11.9%
+# (predicted 16.4%). Above the knee, keep 45% of the excess.
+FIRST_TD_KNEE, FIRST_TD_SLOPE = 0.10, 0.45
+
+
+def _first_td_adj(p):
+    p = np.asarray(p, float)
+    return np.where(p > FIRST_TD_KNEE, FIRST_TD_KNEE + FIRST_TD_SLOPE * (p - FIRST_TD_KNEE), p)
+
+
+def board_parlays(r: dict, cfg: dict, week: int, games: set | None = None,
+                  n_first: int = 10, first_legs: int = 4, n_any: int = 5, any_legs: int = 7) -> list[dict]:
+    """$1 touchdown tickets for the prop board: ``n_first`` first-TD parlays
+    (one leg per game, no player in two tickets, best legs first) and ``n_any``
+    anytime-TD parlays (the regular builder). ``games`` limits legs to games
+    not yet kicked off."""
+    out = []
+    td = td_candidates(r, cfg, week, floor=0.15)
+    if games is not None and len(td):
+        td = td[td["game"].isin({" @ ".join(sorted(g.split(" @ "))) for g in games})]
+    if td.empty:
+        return out
+    w = r["wide"][r["wide"]["anytime_td"] > 0][["player_id", "team", "opp", "anytime_td"]].copy()
+    blended = dict(zip(td["player_id"], td["p"]))
+    w["p"] = w["player_id"].map(blended).fillna(w["anytime_td"])
+    w["lam"] = -np.log(1 - w["p"].clip(upper=0.995))
+    w["game"] = [" @ ".join(sorted([a, b])) for a, b in zip(w["team"], w["opp"])]
+    lam_game = w.groupby("game")["lam"].sum() / 0.94
+    c = td.copy()
+    L = c["game"].map(lam_game)
+    c["p_raw"] = -np.log(1 - c["p"].clip(upper=0.995)) / L * (1 - np.exp(-L))
+    c["p_first"] = _first_td_adj(c["p_raw"])
+    c = c.sort_values("p_first", ascending=False)
+    used: set = set()
+    for i in range(n_first):
+        pool = c[~c["player_id"].isin(used)].drop_duplicates("game")
+        # spread the slate: each game appears in about the same number of tickets
+        if len(pool) < first_legs:
+            break
+        P = pool.head(first_legs) if i == 0 else pool.assign(
+            k=pool["game"].map(lambda g: sum(g in t for t in [x["games"] for x in out]))
+        ).sort_values(["k", "p_first"], ascending=[True, False]).head(first_legs).sort_values("p_first", ascending=False)
+        used |= set(P["player_id"])
+        out.append({"kind": "First TD", "games": set(P["game"]), "p": float(np.prod(P["p_first"])),
+                    "legs": [{"player": x.player, "team": x.team, "pos": x.pos, "game": x.game, "what": "first TD",
+                              "p": round(float(x.p_first), 3), "note": (x.pros[0] if x.pros else "")} for x in P.itertuples()]})
+    for P in build(td, n_any, any_legs, per_stat=any_legs):
+        out.append({"kind": "Anytime TD", "games": set(P["game"]), "p": float(np.prod(P["p"])),
+                    "legs": [{"player": x.player, "team": x.team, "pos": x.pos, "game": x.game, "what": "anytime TD",
+                              "p": round(float(x.p), 3), "note": (x.pros[0] if x.pros else "")} for x in P.itertuples()]})
+    for t in out:
+        t["games"] = sorted(t["games"])
+        t["fair"] = round(1 / t["p"]) if t["p"] > 0 else None
+    return out
