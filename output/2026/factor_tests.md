@@ -190,3 +190,18 @@ Applying it to rushers too: rushing props 0.6713 -> 0.6779 in 2026. Enabled for 
 **Backup-RB tell.** Both top-2 RBs' projected carries minus their season averages (484 team-games,
 2025 wk 4-18 + 2026 wk 3-6): adds +0.7 pt win chance per carry beyond the market spread (t 1.0),
 +0.5 pt cover (t 0.6). Both backs projected above their usual: 50% win, 50% cover (n 119). No tell.
+
+## 12. Underdog wins and rushing (2021-26, weeks 4+, `tools/dog_rush_study.py`)
+
+1,130 games; underdogs won 33.4%, covered 50.0%. Spread used only to label underdog / cover.
+
+**After the game** underdog wins look like a rushing story: dog 29.8 runs vs fav 21.1 (losses: 21.3 vs 28.9),
+dog's runs +5.7 over its usual, lead back +3.4 carries. That is game script from leading, not a cause.
+
+**Before the game**, 17 rushing signals from prior weeks only (rush EPA / YPC matchups, neutral run rate,
+last-3 trends in runs and lead-back carries, run-defense trends). Chosen on 2021-23, checked on 2024-26.
+No signal clears noise (one sd: corr 0.04-0.045, 20% bucket cover 4-5 pts):
+- Best in 2021-23, lead back's carries rising: 62.3% cover -> 50.5% in 2024-26. Did not repeat.
+- Underdog's team runs rising (last 3 vs season), top 20%: 59.2% -> 54.6%; by season 55/61/61/53/60/33 (2026 n=9).
+  Pooled 57% on 227, about 2 sd, but it is the best of 17 tries. Watchlist only, not a bet.
+- Underdog's rush EPA + favorite's run defense allowed: 50.0% -> 56.7%. Inconsistent.
