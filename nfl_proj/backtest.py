@@ -39,9 +39,15 @@ def _paper_ev(r: dict, week: int, cfg: dict, full_pg: pd.DataFrame) -> pd.DataFr
             floor = {"targets": c.get("min_targets", 4.0), "rush_att": c.get("min_carries", 8.0), "pass_att": 20}[ucol]
             if hh[ucol].mean() < floor:
                 continue
-            line = np.floor(hh[col].mean()) + 0.5
-            rows.append({"player": player, "stat": stat, "line": line, "over_odds": -110, "under_odds": -110,
-                         "book": "stand-in", "fetched_at": ""})
+            mu = hh[col].mean()
+            # The season-average line, plus alternate lines far from it (low / high milestones), so the
+            # calibration is also fitted where parlay legs live, not only near the median.
+            for mult in ([1.0] + list(c.get("alt_line_mults", []))):
+                line = np.floor(mu * mult) + 0.5
+                if line <= 0.5 and mult != 1.0:
+                    continue
+                rows.append({"player": player, "stat": stat, "line": line, "over_odds": -110, "under_odds": -110,
+                             "book": "stand-in" if mult == 1.0 else f"alt x{mult}", "fetched_at": ""})
     ev = evaluate(r["props"], pd.DataFrame(rows), pg, week, cfg)
     if ev.empty:
         return ev

@@ -183,6 +183,14 @@ def lock(props, lines, player_games, week, cfg, paper_dir: Path, root: Path, for
                        model_commit=_git_rev(root))
     if price_fn is not None and not bets.empty:
         bets = price_fn(bets)  # real book prices, recorded for grading only
+    if not bets.empty and cfg.get("odds", {}).get("kalshi", True):
+        try:   # Kalshi's price for the same bet (near-fair market probability), for grading only
+            from .kalshi import fetch as kalshi_fetch, price_for
+            k = kalshi_fetch(log=lambda *a: None)
+            kp = [price_for(k, b.player, b.stat, b.line, b.side) or {} for b in bets.itertuples()]
+            bets = pd.concat([bets.reset_index(drop=True), pd.DataFrame(kp)], axis=1)
+        except Exception:
+            pass
     out = bets if (prev.empty or force) else pd.concat([prev, bets], ignore_index=True)
     out.to_csv(path, index=False)
     return bets, path
@@ -292,6 +300,14 @@ def summary(paper_dir: Path) -> str:
              f"- Closing-line value: line moved our way on {(g['clv_line'] > 0).mean():.0%} of bets with a closing "
              f"line (avg {g['clv_line'].mean():+.2f})" if g["clv_line"].notna().any() else
              "- Closing-line value: no closing snapshots yet (pull `odds --label close` before kickoff)", ""]
+    if "kalshi_cost" in g and g["kalshi_cost"].notna().any():
+        kk = dec[dec.get("kalshi_cost", pd.Series(dtype=float)).notna()] if "kalshi_cost" in dec else dec.iloc[0:0]
+        if len(kk):
+            won = (kk["result"] == "win").astype(float)
+            pnl = (won - kk["kalshi_cost"]).sum()          # $1 contracts bought at the recorded Kalshi price
+            lines.insert(-1, f"- Kalshi check ({len(kk)} bets with a Kalshi market): hit {won.mean():.1%} vs "
+                             f"{kk['kalshi_cost'].mean():.1%} Kalshi price → ROI at Kalshi prices "
+                             f"{pnl / kk['kalshi_cost'].sum():+.1%}")
     led = paper_dir / "calls_ledger.csv"
     if led.exists():
         c = pd.read_csv(led)
