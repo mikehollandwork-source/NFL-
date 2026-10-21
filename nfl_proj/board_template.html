@@ -33,6 +33,7 @@ header p{margin:4px 0 0;color:var(--muted);max-width:70ch}
 .tile span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
 .notes{background:var(--warn-soft);color:var(--fg);border-radius:8px;padding:10px 12px;font-size:13px;display:grid;gap:4px;margin-bottom:16px}
 .notes strong{color:var(--warn)}
+.notes[hidden],.tix[hidden]{display:none}
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--line)}
 .bar select,.bar input[type=search]{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 9px;min-width:0}
 .bar input[type=search]{flex:1 1 180px}
@@ -69,7 +70,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .skipt{color:var(--warn)}
 .empty{padding:28px;text-align:center;color:var(--muted)}
 footer{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;display:grid;gap:6px}
-.tix{margin-top:30px}
+.tix{margin:6px 0 22px}
 .tix>h2{font-family:var(--display);font-size:24px;text-transform:uppercase;letter-spacing:.03em;margin:0 0 4px}
 .tix>p{margin:0 0 12px;color:var(--muted);max-width:80ch;font-size:13px}
 .tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:10px}
@@ -94,6 +95,7 @@ footer{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;display:
   </header>
   <div class="summary" id="summary"></div>
   <div class="notes" id="notes"></div>
+  <section class="tix" id="tix" hidden></section>
   <div class="bar" role="search">
     <input type="search" id="q" placeholder="Search player or team" aria-label="Search player or team">
     <select id="game" aria-label="Game"></select>
@@ -111,7 +113,6 @@ footer{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;display:
   </div>
   <div class="count" id="count"></div>
   <div id="list"></div>
-  <section class="tix" id="tix" hidden></section>
   <footer>
     <div><b>Win %</b> is the model's probability for the lean side after correcting for its measured overconfidence (backtests showed the raw simulation is too sure of itself). <b>Edge</b> is the expected return per unit at the assumed price; check the real price before betting.</div>
     <div><b>Season log</b>: one square per game this season, filled when the lean side would have won against today's line.</div>
