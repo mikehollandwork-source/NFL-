@@ -31,6 +31,8 @@ Read this first in every new session. It holds the rules, the record so far, wha
   - Maye 2 or fewer rush attempts (NO on 3+) at 13¢, $1.69
 - **Parlay backtest, weeks 2-6 (regraded Oct 21):** 65 tickets, 2 hits (both 9-13-leg milestone tickets), $11 back on $65 (-83%). First-TD tickets went 0-3. An earlier "first-TD hit" was a grading bug, now fixed.
 
+- **Closing-line value (CLV)** is tracked on every money pick from week 7 on (`nfl_proj/clv.py`, `output/2026/money/week_NN_clv.csv`). It is the main test of whether the carries edge is real: beating the close on most picks over about 50 picks means yes.
+
 ## What is proven and what isn't (details in `output/2026/factor_tests.md`)
 - **Only real edge: rush attempts (carries) vs the market.** Carries singles with edge ≥10 points vs the Kalshi close: +28% ROI over 157 bets, weeks 2-6 (90% range +10% to +52%). Against real lines, carries hit 0.508 + 0.64 × (p − 0.5).
 - **Kalshi close beats the model on every other stat** (log-loss 0.638 vs 0.700). Against real lines, non-carries leans hit about 54% however confident the model is; 70%+ leans hit 46%. Model disagreement with the market is uninformative except on carries.
@@ -58,6 +60,7 @@ Read this first in every new session. It holds the rules, the record so far, wha
 | `auto --mode grade` | weekly grade + review once the week is final |
 | `daily [--date YYYY-MM-DD] [--force]` | win/loss on everything for the latest finished game day → `output/2026/daily/<date>.md` |
 | `board [--refresh]` | prop board HTML (`output/2026/board/prop-board.html`): every line, lean, qualifying bets, 5 anytime-TD tickets, 1 same-game parlay per game; appends tickets to `week_NN_tickets.jsonl` (needed by `daily`) |
+| `clv [--week N]` | closing-line value of money picks: price listed vs Kalshi's closing midpoint (public candlesticks, no key, cached); also shown in `daily` |
 | `money [--refresh]` | real-money list: carries on Kalshi with edge ≥10, quarter Kelly, cap 5% of $50 (`[money]`) |
 | `parlays` | weekly long-shot parlays (`output/2026/parlays`) |
 | `backtest --weeks A-B --tag X [--config file]` | as-of backtest; for 2025 use a config with `season = 2025` and priors `season = 2024` |

@@ -121,6 +121,8 @@ def main(argv=None):
     mo.add_argument("--week", type=int)
     mo.add_argument("--refresh", action="store_true")
     mo.add_argument("--send", action="store_true")
+    cv = sub.add_parser("clv", help="money-list closing-line value vs Kalshi closes (no key)")
+    cv.add_argument("--week", type=int)
     dy = sub.add_parser("daily", help="grade win/loss on everything for the latest finished game day")
     dy.add_argument("--date", help="YYYY-MM-DD (default: latest finished game day)")
     dy.add_argument("--no-refresh", action="store_true")
@@ -168,6 +170,16 @@ def main(argv=None):
         if args.send and wk:
             from .notify import send
             send(msg)
+        return
+
+    if args.cmd == "clv":
+        from .clv import season_text, week_clv
+        weeks = [args.week] if args.week else sorted(int(f.stem.split("_")[1]) for f in (paths["out"] / "money").glob("week_??.csv"))
+        for w in weeks:
+            d = week_clv(w, paths)
+            for x in d.itertuples():
+                print(f"week {w} {x.player} {x.side} {x.k}+ paid {x.price:.2f} close {x.close_value:.2f} -> {x.clv * 100:+.0f}c")
+        print(season_text(paths))
         return
 
     if args.cmd == "daily":

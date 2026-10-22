@@ -140,10 +140,25 @@ def run(cfg: dict, paths: dict, date: str | None = None, refresh: bool = True, f
             staked += x.stake if w is not None else 0
             rows.append(("⛔" if w is None else "✅" if w else "❌", x.player, x.side, x.k, v, pr, x.price))
         if rows:
+            from .clv import season_text, week_clv
+            try:
+                cv = week_clv(week, paths, log=log)
+                cmap = dict(zip(cv["player"], cv["close_mid"])) if len(cv) else {}
+                cv = cv[cv["team"].isin(teams)] if len(cv) else cv
+            except Exception as e:
+                log(f"CLV skipped ({e})")
+                cv, cmap = pd.DataFrame(), {}
             wn, ls = sum(r[0] == "✅" for r in rows), sum(r[0] == "❌" for r in rows)
             head = f"💵 Money list: {wn}-{ls}, ${prof:+.2f} on ${staked:.2f}"
-            L += [f"## {head}", ""] + [f"- {r[0]} {r[1]} {r[2]} {r[3]}+ rush attempts @ {r[6]:.2f} → {'DNP' if r[4] is None else f'{r[4]:g}'} (${r[5]:+.2f})" for r in rows] + [""]
-            tg.append(head)
+            if len(cv):
+                head += f"; beat the closing price on {int(cv.beat_close.sum())} of {len(cv)} (avg {cv.clv.mean() * 100:+.1f}¢)"
+
+            def _close(name, side):
+                c = cmap.get(name)
+                return "" if c is None else f", close {(c if side == 'YES' else 1 - c):.2f}"
+            L += [f"## {head}", ""] + [f"- {r[0]} {r[1]} {r[2]} {r[3]}+ rush attempts @ {r[6]:.2f}{_close(r[1], r[2])} → {'DNP' if r[4] is None else f'{r[4]:g}'} (${r[5]:+.2f})" for r in rows]
+            L += ["", season_text(paths), ""]
+            tg += [head, season_text(paths)]
 
     # 3. Every lean on a posted line
     files = sorted((paths["out"] / "paper").glob(f"week_{week:02d}_all_lines_evaluated*.csv"))
