@@ -121,6 +121,11 @@ def main(argv=None):
     mo.add_argument("--week", type=int)
     mo.add_argument("--refresh", action="store_true")
     mo.add_argument("--send", action="store_true")
+    dy = sub.add_parser("daily", help="grade win/loss on everything for the latest finished game day")
+    dy.add_argument("--date", help="YYYY-MM-DD (default: latest finished game day)")
+    dy.add_argument("--no-refresh", action="store_true")
+    dy.add_argument("--force", action="store_true", help="regrade a date already graded")
+    dy.add_argument("--send", action="store_true")
     du = sub.add_parser("due", help="exit 0 if a game kicks off within the lock window (cheap: schedule only)")
     du.add_argument("--window", type=float, help="hours before kickoff ([auto] lock_window_hours)")
     bd = sub.add_parser("board", help="rebuild the prop board HTML (games not yet kicked off)")
@@ -161,6 +166,15 @@ def main(argv=None):
         msg = money_text(picks, wk, cfg) if wk else "season over"
         print(msg)
         if args.send and wk:
+            from .notify import send
+            send(msg)
+        return
+
+    if args.cmd == "daily":
+        from .daily import run as daily_run
+        msg = daily_run(cfg, paths, args.date, refresh=not args.no_refresh, force=args.force)
+        print(msg)
+        if args.send and msg.startswith("📋"):
             from .notify import send
             send(msg)
         return

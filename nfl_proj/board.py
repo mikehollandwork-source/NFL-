@@ -69,6 +69,16 @@ def build(cfg: dict, paths: dict, root: Path, refresh: bool = False, log=print) 
     except Exception as e:      # the prop list matters more than the tickets
         log(f"board: TD parlays skipped ({e})")
         tickets = []
+    # Log every build's tickets: the daily grader grades the last version shown before kickoff
+    kick_of = {}
+    for x in g.itertuples():
+        kick_of[x.home] = kick_of[x.away] = x.kickoff.isoformat()
+    try:
+        with open(paths["out"] / "board" / f"week_{week:02d}_tickets.jsonl", "a") as fh:
+            fh.write(json.dumps({"built": now.isoformat(), "tickets": [
+                {**t, "first_kick": min(kick_of.get(l["team"], "9999") for l in t["legs"])} for t in tickets]}) + "\n")
+    except Exception as e:
+        log(f"board: ticket log not written ({e})")
     data = {"generated": now.isoformat(timespec="minutes"), "flags": r["flags"], "rows": rows,
             "price": cfg["odds"].get("assumed_price", -115), "parlays": tickets}
     out = paths["out"] / "board" / "prop-board.html"

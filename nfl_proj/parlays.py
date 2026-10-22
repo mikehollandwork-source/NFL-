@@ -933,7 +933,8 @@ def board_parlays(r: dict, cfg: dict, week: int, games: set | None = None,
                               "p": round(float(x.p_first), 3), "note": (x.pros[0] if x.pros else "")} for x in P.itertuples()]})
     for P in build(td, n_any, any_legs, per_stat=any_legs):
         out.append({"kind": "Anytime TD", "games": set(P["game"]), "p": float(np.prod(P["p"])),
-                    "legs": [{"player": x.player, "team": x.team, "pos": x.pos, "game": x.game, "what": "anytime TD",
+                    "legs": [{"player": x.player, "player_id": x.player_id, "team": x.team, "pos": x.pos, "game": x.game,
+                              "stat": "anytime_td", "what": "anytime TD",
                               "p": round(float(x.p), 3), "note": (x.pros[0] if x.pros else "")} for x in P.itertuples()]})
     for t in out:
         t["games"] = sorted(t["games"])
@@ -976,7 +977,8 @@ def sgp_tickets(r: dict, lean: pd.DataFrame, cfg: dict, legs: int = 3, min_p: fl
             hit = s > y.line if y.side == "over" else s < y.line
             masks[y.team] = hit if y.team not in masks else (masks[y.team] & hit)
             scale *= y.p_real / max(float(hit.mean()), 1e-6)
-            rows.append({"player": y.player, "team": y.team, "pos": y.pos, "game": g,
+            rows.append({"player": y.player, "player_id": y.player_id, "team": y.team, "pos": y.pos, "game": g,
+                         "stat": y.stat, "side": y.side, "line": float(y.line),
                          "what": f"{y.side} {y.line:g} {y.stat.replace('_', ' ').replace('carries', 'rush attempts')}",
                          "p": round(float(y.p_real), 3),
                          "note": f"model {y.p_cal:.0%}, median {y.model_median:.1f}"})
