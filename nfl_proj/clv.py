@@ -66,10 +66,11 @@ def close_price(ticker: str, kickoff: pd.Timestamp, cache_dir) -> dict | None:
 
 def week_clv(week: int, paths: dict, log=print) -> pd.DataFrame:
     """CLV for every money pick of the week whose game has kicked off."""
+    from .money import week_picks
     f = paths["out"] / "money" / f"week_{week:02d}.csv"
-    if not f.exists():
+    m = week_picks(week, paths)
+    if m.empty:
         return pd.DataFrame()
-    m = pd.read_csv(f)
     cache = paths["out"].parents[1] / "data" / "odds" / "kalshi"     # repo/data/odds/kalshi
     cache.mkdir(parents=True, exist_ok=True)
     now = pd.Timestamp.now(tz="UTC")

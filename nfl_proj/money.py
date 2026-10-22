@@ -98,7 +98,54 @@ def build(cfg: dict, paths: dict, week: int | None = None, refresh: bool = False
         old = pd.read_csv(logf) if logf.exists() else pd.DataFrame()
         new = picks[~picks["ticker"].isin(set(old.get("ticker", [])))] if len(old) else picks
         pd.concat([old, new], ignore_index=True).to_csv(logf, index=False)
+    picks = freeze(picks, week, paths, now)
     return picks, week
+
+
+def week_picks(week: int, paths: dict) -> pd.DataFrame:
+    """The picks that count: frozen picks for games past their lock run,
+    the logged picks for any game never frozen (e.g. weeks before freezing)."""
+    d = paths["out"] / "money"
+    logf, finalf = d / f"week_{week:02d}.csv", d / f"week_{week:02d}_final.csv"
+    lg = pd.read_csv(logf) if logf.exists() else pd.DataFrame()
+    fz = frozen_games(week, paths)
+    fn = pd.read_csv(finalf) if finalf.exists() else pd.DataFrame()
+    if len(lg) and fz:
+        lg = lg[~lg["game"].isin(fz)]
+    return pd.concat([fn, lg], ignore_index=True)
+
+
+def frozen_games(week: int, paths: dict) -> set:
+    f = paths["out"] / "money" / f"week_{week:02d}_frozen_games.txt"
+    return set(f.read_text().splitlines()) if f.exists() else set()
+
+
+def freeze(picks: pd.DataFrame, week: int, paths: dict, now) -> pd.DataFrame:
+    """Once a game's lock run has happened, its money picks are fixed: the
+    first money run after the lock records them (price, stake) in
+    week_NN_final.csv, and every later run shows exactly those for that game.
+    Grading and CLV use the final picks."""
+    lockf = paths["out"] / "paper" / f"week_{week:02d}_lock_log.csv"
+    locked = set(pd.read_csv(lockf)["label"]) if lockf.exists() else set()
+    finalf = paths["out"] / "money" / f"week_{week:02d}_final.csv"
+    gf = paths["out"] / "money" / f"week_{week:02d}_frozen_games.txt"
+    done = frozen_games(week, paths)
+    final = pd.read_csv(finalf) if finalf.exists() else pd.DataFrame()
+    picks = picks if picks is not None else pd.DataFrame()
+    newly = locked - done
+    if newly:
+        add = picks[picks["game"].isin(newly)].assign(frozen_at=pd.Timestamp(now).isoformat(timespec="seconds")) \
+            if len(picks) else pd.DataFrame()
+        if len(add):
+            final = pd.concat([final, add], ignore_index=True)
+            final.to_csv(finalf, index=False)
+        gf.write_text("\n".join(sorted(done | newly)))
+        done |= newly
+    open_ = picks[~picks["game"].isin(done)].assign(frozen=False) if len(picks) else picks
+    if len(final):
+        live = final[final["game"].isin(done) & (pd.to_datetime(final["kickoff"], utc=True) > pd.Timestamp(now))]
+        open_ = pd.concat([live.assign(frozen=True), open_], ignore_index=True)
+    return open_.sort_values("edge", ascending=False) if len(open_) else open_
 
 
 def _hold(pg: pd.DataFrame, team: str, player: str, kick: pd.Timestamp, now, outs: set = frozenset()) -> str:
@@ -107,7 +154,7 @@ def _hold(pg: pd.DataFrame, team: str, player: str, kick: pd.Timestamp, now, out
     guess, so such picks are held. 2021-25: a lead back returning after one
     missed game gets 96% of his old share, so the projection itself holds up
     if he plays; the risk is betting before knowing whether he does."""
-    if kick - pd.Timestamp(now) <= pd.Timedelta(minutes=80):
+    if kick - pd.Timestamp(now) <= pd.Timedelta(minutes=90):
         return ""                                 # inactives are out: the projection already knows
     t = pg[pg["team"] == team]
     if t.empty:
@@ -139,8 +186,9 @@ def text(picks: pd.DataFrame, week: int, cfg: dict) -> str:
     for x in picks.itertuples():
         what = f"{x.k}+ rush attempts" if x.side == "YES" else f"UNDER {x.k} rush attempts (≤{x.k - 1})"
         lines.append(f"• {x.player} ({x.team}) {what}: model {x.model:.0%} vs price {x.price:.0%} "
-                     f"→ edge +{x.edge * 100:.0f}, stake ${x.stake:.2f} [{x.game}]" + (f"\n   {x.dk}" if x.dk else "")
-                     + (f"\n   ⏸ {x.hold}" if getattr(x, "hold", "") else ""))
+                     f"→ edge +{x.edge * 100:.0f}, stake ${x.stake:.2f} [{x.game}]" + (f"\n   {x.dk}" if isinstance(x.dk, str) and x.dk else "")
+                     + (f"\n   ⏸ {x.hold}" if isinstance(getattr(x, "hold", ""), str) and x.hold else "")
+                     + ("\n   🔒 locked: fixed at the lock run, won't change" if getattr(x, "frozen", False) is True else ""))
     lines.append("Kalshi: buy the contract at or below the price shown. Backtest: +28% ROI over 157 bets, weeks 2-6.")
     return "\n".join(lines)
 
@@ -148,9 +196,9 @@ def text(picks: pd.DataFrame, week: int, cfg: dict) -> str:
 def grade(week: int, player_games: pd.DataFrame, paths: dict) -> str | None:
     from .picks import STATS
     f = paths["out"] / "money" / f"week_{week:02d}.csv"
-    if not f.exists():
+    m = week_picks(week, paths)
+    if m.empty:
         return None
-    m = pd.read_csv(f)
     pw = player_games[player_games["week"] == week].copy()
     pw["key"] = pw["player"].map(norm_name)
     res = []

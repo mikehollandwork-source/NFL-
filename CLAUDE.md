@@ -45,6 +45,7 @@ Read this first in every new session. It holds the rules, the record so far, wha
   - `pass_rate_per_point = 0` (game script was double-counted).
   - Side-specific calibration `[paper] calib_side`.
   - Game-day inactives.
+  - Money picks are frozen at each game's lock run (`week_NN_final.csv`, `week_NN_frozen_games.txt`); later runs show them unchanged, and grading/CLV use only the frozen picks.
   - Money-list HOLD rule: picks on a team whose lead back missed its last game are held until inactives post (section 14).
 - **Tested and OFF or no signal:**
   - Defensive injuries (`def_injuries.enabled = false`)

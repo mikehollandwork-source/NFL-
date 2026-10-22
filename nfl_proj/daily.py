@@ -125,9 +125,9 @@ def run(cfg: dict, paths: dict, date: str | None = None, refresh: bool = True, f
             tg.append(head)
 
     # 2. Money list
-    f = paths["out"] / "money" / f"week_{week:02d}.csv"
-    if f.exists():
-        m = pd.read_csv(f)
+    from .money import week_picks
+    m = week_picks(week, paths)
+    if len(m):
         m = m[m["team"].isin(teams)]
         pk = pw.assign(key=pw["player"].map(norm_name))
         rows, prof, staked = [], 0.0, 0.0
