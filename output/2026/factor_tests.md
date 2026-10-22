@@ -213,3 +213,16 @@ that week's game: first-TD tickets 0 of 3 (1 of 12 legs won, 8%), not 1 of 3. Al
 65 tickets, 2 hits (both 9-13 leg milestone tickets, +6.3 and +4.7), $11 back on $65 (-83%).
 First-TD model: each game's top pick scored first 11.9% vs 16.4% predicted (2025-26, 285 games);
 chances above 10% are now shrunk (keep 45% of the excess).
+
+## 14. Lead back returning from a missed game (2021-25, 103 returns) -> money-list hold rule, no model change
+
+Lead back (45%+ of RB carries over his last 2-3 games) misses 1-4 games, then returns:
+- His share on return vs before: 0.96x after 1 missed game (55 cases), 0.81x after 2, 0.79x after 3+.
+  Same in 2021-23 (0.87x overall) and 2024-25 (0.92x).
+- The fill-in keeps part of his bump: 31% of RB carries on return vs 22% before the injury (73% while filling in).
+The model only treats backs who played in the team's last 2 games as active, so nearly every case
+it sees is a 1-game absence, where the share barely changes: no projection change.
+The failure on Oct 22 (Woody Marks, Bam Knight, Tyler Allgeier unders at 35-52 point "edges") was
+betting before knowing whether the lead back plays. Rule added to `money`: picks on a team whose
+lead back (35%+ share, 2+ games) missed its last game and isn't ruled Out are marked HOLD until
+game-day inactives post (~90 min before kickoff); after that the projection knows who is active.

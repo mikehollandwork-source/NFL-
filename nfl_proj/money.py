@@ -87,6 +87,11 @@ def build(cfg: dict, paths: dict, week: int | None = None, refresh: bool = False
     # one bet per player and stat (the backtest priced one market per player): his biggest edge
     picks = (pd.DataFrame(rows).sort_values("edge", ascending=False).drop_duplicates(["player", "stat"])
              if rows else pd.DataFrame())
+    if len(picks):
+        ov = r.get("overrides")
+        outs = set(ov.loc[ov["status"].str.lower() == "out", "player"]) if ov is not None and len(ov) else set()
+        picks["hold"] = [_hold(r["tables"]["player_games"], x.team, x.player, pd.Timestamp(x.kickoff), now, outs)
+                         for x in picks.itertuples()]
     logf = paths["out"] / "money" / f"week_{week:02d}.csv"
     logf.parent.mkdir(parents=True, exist_ok=True)
     if len(picks):
@@ -94,6 +99,35 @@ def build(cfg: dict, paths: dict, week: int | None = None, refresh: bool = False
         new = picks[~picks["ticker"].isin(set(old.get("ticker", [])))] if len(old) else picks
         pd.concat([old, new], ignore_index=True).to_csv(logf, index=False)
     return picks, week
+
+
+def _hold(pg: pd.DataFrame, team: str, player: str, kick: pd.Timestamp, now, outs: set = frozenset()) -> str:
+    """A team's carries depend on whether a back who missed its last game
+    plays. Until game-day inactives post (~90 min before kickoff) that is a
+    guess, so such picks are held. 2021-25: a lead back returning after one
+    missed game gets 96% of his old share, so the projection itself holds up
+    if he plays; the risk is betting before knowing whether he does."""
+    if kick - pd.Timestamp(now) <= pd.Timedelta(minutes=80):
+        return ""                                 # inactives are out: the projection already knows
+    t = pg[pg["team"] == team]
+    if t.empty:
+        return ""
+    last = t["week"].max()
+    rb = t[t["pos"] == "RB"]
+    tot = rb.groupby("player")["rush_att"].sum()
+    gp = rb[rb["rush_att"] > 0].groupby("player")["week"].nunique()
+    team_tot = rb.groupby("week")["rush_att"].sum()
+    out = []
+    for name, c in tot.items():
+        weeks = set(rb[(rb["player"] == name) & (rb["rush_att"] > 0)]["week"])
+        if last in weeks or gp.get(name, 0) < 2 or name in outs:     # played, too few games, or ruled Out
+            continue
+        share = c / team_tot[team_tot.index.isin(weeks)].sum()
+        if share >= 0.35:
+            out.append(name)
+    if not out:
+        return ""
+    return f"HOLD until inactives (~90 min before kickoff): {', '.join(out)} missed {team}'s last game"
 
 
 def text(picks: pd.DataFrame, week: int, cfg: dict) -> str:
@@ -105,7 +139,8 @@ def text(picks: pd.DataFrame, week: int, cfg: dict) -> str:
     for x in picks.itertuples():
         what = f"{x.k}+ rush attempts" if x.side == "YES" else f"UNDER {x.k} rush attempts (≤{x.k - 1})"
         lines.append(f"• {x.player} ({x.team}) {what}: model {x.model:.0%} vs price {x.price:.0%} "
-                     f"→ edge +{x.edge * 100:.0f}, stake ${x.stake:.2f} [{x.game}]" + (f"\n   {x.dk}" if x.dk else ""))
+                     f"→ edge +{x.edge * 100:.0f}, stake ${x.stake:.2f} [{x.game}]" + (f"\n   {x.dk}" if x.dk else "")
+                     + (f"\n   ⏸ {x.hold}" if getattr(x, "hold", "") else ""))
     lines.append("Kalshi: buy the contract at or below the price shown. Backtest: +28% ROI over 157 bets, weeks 2-6.")
     return "\n".join(lines)
 
