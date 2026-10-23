@@ -76,7 +76,7 @@ def run(tables: dict, cfg: dict, paths: dict, weeks: list[int], n_sims: int = 20
     from .market import implied_totals
     from .pipeline import run_week
     full_pg = tables["player_games"]
-    picks, calls, proj_err, totals, paper, tds = [], [], [], [], [], []
+    picks, calls, proj_err, totals, paper, tds, wides = [], [], [], [], [], [], []
     imp = implied_totals(tables["games"])
     for w in weeks:
         log(f"backtest: week {w} (data through week {w - 1})")
@@ -105,6 +105,8 @@ def run(tables: dict, cfg: dict, paths: dict, weeks: list[int], n_sims: int = 20
                 proj_err.append({"week": w, "stat": stat, "n": len(m),
                                  "model_mae": float((m["proj"] - m[col]).abs().mean()),
                                  "naive_mae": float((m["naive"] - m[col]).abs().mean())})
+        # Every player's projection (for error attribution: tools/attribution.py)
+        wides.append(r["wide"].drop(columns=[c for c in r["wide"].columns if c.startswith("_")]).assign(week=w))
         # Anytime-TD calibration: every projected skill player vs whether he scored
         if "anytime_td" in wide:
             cols = [c for c in ["player_id", "team", "opp", "player", "pos", "targets", "carries", "rec_td",
@@ -130,7 +132,8 @@ def run(tables: dict, cfg: dict, paths: dict, weeks: list[int], n_sims: int = 20
            "proj_err": pd.DataFrame(proj_err),
            "totals": pd.concat(totals, ignore_index=True) if totals else pd.DataFrame(),
            "paper_ev": pd.concat(paper, ignore_index=True) if paper else pd.DataFrame(),
-           "td": pd.concat(tds, ignore_index=True) if tds else pd.DataFrame()}
+           "td": pd.concat(tds, ignore_index=True) if tds else pd.DataFrame(),
+           "proj": pd.concat(wides, ignore_index=True) if wides else pd.DataFrame()}
     from .components import actual_components
     out["actual_components"] = actual_components(tables["plays"], tables["games"])
     try:
