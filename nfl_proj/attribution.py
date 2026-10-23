@@ -41,7 +41,11 @@ def attribute(proj: pd.DataFrame, pg: pd.DataFrame, min_proj: dict | None = None
     for stat, (pv, av, ac) in FAMILY.items():
         if stat not in proj or pv not in proj:
             continue
-        p = proj[["week", "team", "player_id", "player", "pos", pv, stat]].rename(columns={pv: "v_p", stat: "y_p"})
+        if stat == pv:
+            p = proj[["week", "team", "player_id", "player", "pos", pv]].rename(columns={pv: "v_p"})
+            p["y_p"] = p["v_p"]
+        else:
+            p = proj[["week", "team", "player_id", "player", "pos", pv, stat]].rename(columns={pv: "v_p", stat: "y_p"})
         if pv == "pass_att":      # team passing volume = the projected QB's attempts
             p = p[p["pos"] == "QB"]
         V_p = proj.groupby(["week", "team"])[pv].sum().rename("V_p") if pv != "pass_att" else \
@@ -61,7 +65,8 @@ def attribute(proj: pd.DataFrame, pg: pd.DataFrame, min_proj: dict | None = None
         r_a = (m["y_a"] / m["v_a"].replace(0, np.nan)).fillna(r_p)
         m["team_c"] = np.where(played, (m["V_a"] - m["V_p"]) * s_p * r_p, 0.0)
         m["share_c"] = np.where(played, (s_a - s_p) * m["V_a"] * r_p, 0.0)
-        m["eff_c"] = np.where(played, m["v_a"] * (r_a - r_p), 0.0) if av != ac else 0.0
+        # yards with no recorded volume (laterals, scoring quirks) count as efficiency
+        m["eff_c"] = np.where(played, np.where(m["v_a"] > 0, m["v_a"] * (r_a - r_p), m["y_a"]), 0.0) if av != ac else 0.0
         m["dnp_c"] = np.where(played, 0.0, -m["y_p"])
         m["err"] = m["y_a"] - m["y_p"]
         m["stat"] = stat
