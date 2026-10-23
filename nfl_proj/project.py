@@ -667,6 +667,13 @@ class Projector:
         if vf:
             pb["share"] = pb["share"] * pb[id_col].map(vf).fillna(1.0)
         pb["share"] = pb["share"] / pb.groupby(bucket_col)["share"].transform("sum")
+        # Share flattening ([players] target_share_power / carry_share_power, 1 = off): backtests showed
+        # projections too spread out (top targets -14%, RB targets -21%); share^b with b < 1 pulls the
+        # top of the depth chart toward the rest, keeping the order.
+        b = self.cfg["players"].get("target_share_power" if id_col == "target_id" else "carry_share_power", 1.0)
+        if b != 1.0:
+            pb["share"] = pb["share"].clip(lower=0) ** b
+            pb["share"] = pb["share"] / pb.groupby(bucket_col)["share"].transform("sum")
         if team is not None and kind is not None and not players.empty:
             # Coach angle: pull the top player's share toward the play-caller's
             # career star reliance (fades as this season's games accumulate).
