@@ -79,7 +79,9 @@ def build(cfg: dict, paths: dict, root: Path, refresh: bool = False, log=print) 
                 {**t, "first_kick": min(kick_of.get(l["team"], "9999") for l in t["legs"])} for t in tickets]}) + "\n")
     except Exception as e:
         log(f"board: ticket log not written ({e})")
+    money, money_at = _money(paths, week, now)
     data = {"generated": now.isoformat(timespec="minutes"), "flags": r["flags"], "rows": rows,
+            "money": money, "money_at": money_at,
             "price": cfg["odds"].get("assumed_price", -115), "parlays": tickets}
     out = paths["out"] / "board" / "prop-board.html"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -89,6 +91,36 @@ def build(cfg: dict, paths: dict, root: Path, refresh: bool = False, log=print) 
     log(f"board: {len(rows)} lines, {sum(r['bet'] for r in rows)} qualifying, "
         f"{sum(r['locked'] for r in rows)} locked, {len(future)} games -> {out}")
     return out
+
+
+def _money(paths: dict, week: int, now) -> tuple[list, str | None]:
+    """Latest money list (written by `money`), games not yet started."""
+    f = paths["out"] / "money" / f"week_{week:02d}_current.csv"
+    if not f.exists():
+        return [], None
+    m = pd.read_csv(f)
+    at = m["listed_at"].iloc[0] if "listed_at" in m and len(m) else None
+    m = m[pd.to_datetime(m["kickoff"], utc=True) > pd.Timestamp(now)]
+    keep = ["player", "team", "game", "kickoff", "k", "side", "model", "price", "edge", "stake", "dk", "hold", "frozen"]
+    m = m[[c for c in keep if c in m]].astype(object).where(m[[c for c in keep if c in m]].notna(), "")
+    return m.to_dict("records"), at
+
+
+def attach_money(paths: dict, week: int) -> bool:
+    """Put the latest money list into the already-built board page."""
+    out = paths["out"] / "board" / "prop-board.html"
+    if not out.exists():
+        return False
+    html = out.read_text()
+    a = html.find('<script id="data" type="application/json">')
+    if a < 0:
+        return False
+    a += len('<script id="data" type="application/json">')
+    b = html.find("</script>", a)
+    data = json.loads(html[a:b].replace("<\\/", "</"))
+    data["money"], data["money_at"] = _money(paths, week, datetime.now(timezone.utc))
+    out.write_text(html[:a] + json.dumps(data).replace("</", "<\\/") + html[b:])
+    return True
 
 
 def summary_text(path: Path) -> str:

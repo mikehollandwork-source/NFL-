@@ -99,6 +99,14 @@ def build(cfg: dict, paths: dict, week: int | None = None, refresh: bool = False
         new = picks[~picks["ticker"].isin(set(old.get("ticker", [])))] if len(old) else picks
         pd.concat([old, new], ignore_index=True).to_csv(logf, index=False)
     picks = freeze(picks, week, paths, now)
+    cur = paths["out"] / "money" / f"week_{week:02d}_current.csv"
+    (picks if len(picks) else pd.DataFrame(columns=["player", "kickoff"])).assign(
+        listed_at=now.isoformat(timespec="minutes")).to_csv(cur, index=False)
+    try:
+        from .board import attach_money
+        attach_money(paths, week)
+    except Exception as e:
+        log(f"board not updated with the money list ({e})")
     return picks, week
 
 

@@ -70,6 +70,18 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .skipt{color:var(--warn)}
 .empty{padding:28px;text-align:center;color:var(--muted)}
 footer{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;display:grid;gap:6px}
+.bets{margin:6px 0 22px}
+.bets>h2,.leanh{font-family:var(--display);font-size:24px;text-transform:uppercase;letter-spacing:.03em;margin:0 0 4px}
+.leanh{margin-top:26px}.leanh small{display:block;font-family:var(--body);font-size:13px;text-transform:none;letter-spacing:0;color:var(--muted);font-weight:400}
+.bets>p{margin:0 0 10px;color:var(--muted);font-size:13px;max-width:80ch}
+.bets h3{margin:14px 0 8px;font-size:14px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:10px}
+.bet-card{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:10px 12px;display:grid;gap:3px}
+.bet-card.hold{border-left-color:var(--warn)}
+.bet-card .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.bet-card .st{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;color:var(--accent);white-space:nowrap}
+.bet-card.hold .st{color:var(--warn)}
+.bet-card .sub{color:var(--muted);font-size:12px}
 .tix{margin:6px 0 22px}
 .tix>h2{font-family:var(--display);font-size:24px;text-transform:uppercase;letter-spacing:.03em;margin:0 0 4px}
 .tix>p{margin:0 0 12px;color:var(--muted);max-width:80ch;font-size:13px}
@@ -90,20 +102,18 @@ footer{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;display:
 <div class="wrap">
   <header>
     <h1>Week __WEEK__ Prop Board</h1>
-    <p>Every DraftKings player prop posted for Sunday and Monday, with the model's lean, calibrated win chance and edge at an assumed <span id="price"></span> price. Rows marked <span class="tag">Qualifies</span> pass the paper-trading rules (edge, usage trend, per-game caps).</p>
+    <p>Every DraftKings player prop posted for Sunday and Monday, with the model's lean, calibrated win chance and edge at an assumed <span id="price"></span> price. The Bets section lists only what is locked or will lock before kickoff; everything else is under Leans.</p>
     <div class="stamp" id="stamp"></div>
   </header>
   <div class="summary" id="summary"></div>
   <div class="notes" id="notes"></div>
+  <section class="bets" id="bets"></section>
   <section class="tix" id="tix" hidden></section>
+  <h2 class="leanh" id="leans">Leans <small>the model's side on every other posted line: information, not bets</small></h2>
   <div class="bar" role="search">
     <input type="search" id="q" placeholder="Search player or team" aria-label="Search player or team">
     <select id="game" aria-label="Game"></select>
     <select id="stat" aria-label="Stat"></select>
-    <div class="seg" role="group" aria-label="Show">
-      <button type="button" id="v-bet" aria-pressed="true">Qualifying bets</button>
-      <button type="button" id="v-all" aria-pressed="false">All lines</button>
-    </div>
     <label for="minp">Min win <input type="range" id="minp" min="50" max="80" step="1" value="50"> <span class="num" id="minpv">50%</span></label>
     <select id="sort" aria-label="Sort">
       <option value="p">Sort: win chance</option>
@@ -134,10 +144,10 @@ footer{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;display:
   $('game').innerHTML='<option value="">All games</option>'+games.map(([g])=>`<option>${g}</option>`).join('');
   const stats=[...new Set(rows.map(r=>r.stat))];
   $('stat').innerHTML='<option value="">All props</option>'+stats.map(s=>`<option value="${s}">${NAMES[s]||s}</option>`).join('');
-  const bets=rows.filter(r=>r.bet||r.locked);
+  const bets=(D.money||[]);
   const strong=rows.filter(r=>r.p>=0.65&&!r.skip).length;
   $('summary').innerHTML=[
-    [rows.length,'lines posted'],[games.length,'games'],[bets.length,'qualifying / locked'],[strong,'leans at 65%+'],
+    [rows.length,'lines posted'],[games.length,'games'],[bets.length,'real-money bets'],[strong,'leans at 65%+'],
   ].map(([n,l])=>`<div class="tile"><b>${n}</b><span>${l}</span></div>`).join('');
   const notes=D.flags.filter(f=>!/injury report isn't out/.test(f));
   $('notes').innerHTML=notes.length?notes.map(f=>`<div><strong>Availability</strong> ${f.replace(/</g,'&lt;')}</div>`).join(''):'';
@@ -152,7 +162,26 @@ footer{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;display:
       ['Anytime TD','SGP','First TD'].filter(k=>grp(k).length).map(k=>`<h3 style="margin:14px 0 8px;font-size:14px">${k==='SGP'?'Same-game parlays, one per game':k} (${grp(k).length})</h3><div class="tgrid">${grp(k).map(card).join('')}</div>`).join('');
     $('tix').hidden=false;
   }
-  const state={q:'',game:'',stat:'',bet:true,minp:.5,sort:'p'};
+  {
+    const esc=x=>String(x??'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    const et=iso=>new Date(iso).toLocaleString('en-US', {weekday:'short',hour:'numeric',minute:'2-digit',timeZone:'America/New_York'})+' ET';
+    const M=(D.money||[]).slice().sort((a,b)=>a.kickoff.localeCompare(b.kickoff)||b.edge-a.edge);
+    const status=m=>m.frozen?['🔒 Locked','']:m.hold?['⏸ Hold','hold']:['⏳ Locks before kickoff',''];
+    const mcard=m=>{const [st,cls]=status(m);const what=m.side==='YES'?`${m.k}+ rush attempts`:`UNDER ${m.k} rush attempts (≤${m.k-1})`;
+      return `<div class="bet-card ${cls}"><div class="top"><b>${esc(m.player)} <span class="sub">${esc(m.team)}</span></b><span class="st">${st}</span></div>
+      <div>${what} · buy at ≤ ${Math.round(m.price*100)}¢ · <b>$${Number(m.stake).toFixed(2)}</b></div>
+      <div class="sub">model ${Math.round(m.model*100)}% vs price ${Math.round(m.price*100)}% (edge +${Math.round(m.edge*100)}) · ${esc(m.game)} ${et(m.kickoff)}</div>
+      ${m.dk?`<div class="sub">${esc(m.dk)}</div>`:''}${m.hold?`<div class="sub">${esc(m.hold)}</div>`:''}</div>`};
+    const P=rows.filter(r=>r.locked||r.bet).sort((a,b)=>a.ko.localeCompare(b.ko)||b.ev-a.ev);
+    const pcard=r=>`<div class="bet-card"><div class="top"><b>${esc(r.player)} <span class="sub">${esc(r.team)} ${esc(r.pos)}</span></b><span class="st">${r.locked?'🔒 Locked':'⏳ Locks before kickoff'}</span></div>
+      <div>${NAMES[r.stat]||r.stat} <b>${r.side.toUpperCase()} ${r.line}</b> · model ${r.model} · win ${fmtPct(r.p)}</div>
+      <div class="sub">edge ${r.ev>0?'+':''}${Math.round(r.ev*100)}% at ${D.price} · ${esc(r.game)} ${esc(r.kick)} ET</div></div>`;
+    $('bets').innerHTML=`<h2>Bets</h2><p>Only bets that are locked or will lock before kickoff. 🔒 Locked = fixed at the lock run about 1.5 hours before kickoff and never changes. ⏳ = would be placed if the game locked now; can still change with injuries and prices until it locks.</p>`+
+      `<h3>Real money: Kalshi rush attempts (${M.length})</h3>`+(M.length?`<div class="bgrid">${M.map(mcard).join('')}</div>`:'<p class="sub">None right now.</p>')+
+      `<h3>Paper bets: DraftKings, tracked not wagered (${P.length})</h3>`+(P.length?`<div class="bgrid">${P.map(pcard).join('')}</div>`:'<p class="sub">None right now.</p>')+
+      (D.money_at?`<p class="sub" style="margin-top:8px">Money list as of ${new Date(D.money_at).toLocaleString([], {weekday:'short',hour:'numeric',minute:'2-digit'})}</p>`:'');
+  }
+  const state={q:'',game:'',stat:'',minp:.5,sort:'p'};
   try{const s=JSON.parse(localStorage.getItem('propboard2')||'{}');Object.assign(state,s)}catch(e){}
   $('q').value=state.q;$('game').value=state.game;$('stat').value=state.stat;$('minp').value=Math.round(state.minp*100);$('sort').value=state.sort;
   function save(){try{localStorage.setItem('propboard2',JSON.stringify(state))}catch(e){}}
@@ -172,10 +201,10 @@ footer{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;display:
   const head=`<div class="row head"><div>Player</div><div>Prop &amp; line</div><div>Lean</div><div>Model</div><div>Win %</div><div>Edge</div><div>Season log</div></div>`;
   function render(){
     const q=state.q.trim().toLowerCase();
-    let f=rows.filter(r=>(!state.game||r.game===state.game)&&(!state.stat||r.stat===state.stat)&&(!state.bet||r.bet||r.locked)&&r.p>=state.minp&&(!q||r.player.toLowerCase().includes(q)||r.team.toLowerCase()===q));
+    let f=rows.filter(r=>(!state.game||r.game===state.game)&&(!state.stat||r.stat===state.stat)&&!r.bet&&!r.locked&&r.p>=state.minp&&(!q||r.player.toLowerCase().includes(q)||r.team.toLowerCase()===q));
     const key=state.sort==='ev'?(a,b)=>b.ev-a.ev:state.sort==='time'?(a,b)=>a.ko.localeCompare(b.ko)||b.p-a.p:(a,b)=>b.p-a.p;
     f.sort(key);
-    $('count').textContent=`${f.length} of ${rows.length} lines`;
+    $('count').textContent=`${f.length} leans`;
     if(!f.length){$('list').innerHTML='<div class="empty">No lines match these filters. Lower the minimum win % or clear the search.</div>';return}
     const by=new Map();f.forEach(r=>{if(!by.has(r.game))by.set(r.game,[]);by.get(r.game).push(r)});
     const order=[...by.keys()].sort((a,b)=>by.get(a)[0].ko.localeCompare(by.get(b)[0].ko));
@@ -186,9 +215,7 @@ footer{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;display:
   $('stat').addEventListener('change',e=>{state.stat=e.target.value;save();render()});
   $('sort').addEventListener('change',e=>{state.sort=e.target.value;save();render()});
   $('minp').addEventListener('input',e=>{state.minp=e.target.value/100;$('minpv').textContent=e.target.value+'%';save();render()});
-  function setView(b){state.bet=b;$('v-all').setAttribute('aria-pressed',!b);$('v-bet').setAttribute('aria-pressed',b);save();render()}
-  $('v-all').addEventListener('click',()=>setView(false));$('v-bet').addEventListener('click',()=>setView(true));
   $('minpv').textContent=Math.round(state.minp*100)+'%';
-  setView(state.bet);
+  render();
 })();
 </script>
