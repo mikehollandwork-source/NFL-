@@ -244,3 +244,21 @@ Each miss split into team volume + player share + per-touch efficiency + did-not
 Candidate fixes (none applied; each needs the out-of-sample backtest): stronger shrinkage of player shares
 (or a share calibration slope), RB target share, QB carry share, availability probability for Questionable players.
 Tracked live in the weekly grade (`nfl_proj/attribution.weekly`, `output/2026/attribution_live.csv`).
+
+## 16. Share flattening (share^b, renormalized per team): ON for targets (b = 0.9), OFF for carries
+
+Fixes the over-spread found in section 15. Same code, b = 1 (current) vs 0.9 vs 0.8 for targets and carries:
+
+| | 2025 wk 4-18: 1.0 / 0.9 / 0.8 | 2026 wk 3-6: 1.0 / 0.9 / 0.8 |
+|---|---|---|
+| Targets MAE | 2.300 / 2.244 / 2.207 | 2.602 / 2.552 / 2.520 |
+| Receptions MAE | 1.691 / 1.662 / 1.640 | 1.901 / 1.866 / 1.846 |
+| Rec yds MAE | 22.55 / 22.14 / 21.77 | 24.58 / 24.04 / 23.69 |
+| Carries MAE | 3.935 / 3.840 / 3.837 | 3.863 / 3.782 / 3.757 |
+| Top-target bias | -14% / -8% / -1% | -13% / -7% / -1% |
+| Receiving-prop log-loss | 0.6543 / 0.6525 / 0.6556 | 0.6471 / 0.6456 / 0.6472 |
+| Rush-attempt prop log-loss | 0.6383 / 0.6455 / 0.6626 | 0.6415 / 0.6441 / 0.6705 |
+
+b = 0.9 for targets: chosen on 2025, holds on 2026. Carries: averages improve but the rush-attempt prop
+probabilities get worse in both seasons (the only stat with a market edge), so carries stay unflattened.
+RB target over-projection (-19% / -25%) is unchanged by flattening: a separate fix to test.

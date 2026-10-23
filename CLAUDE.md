@@ -45,6 +45,7 @@ Read this first in every new session. It holds the rules, the record so far, wha
   - `pass_rate_per_point = 0` (game script was double-counted).
   - Side-specific calibration `[paper] calib_side`.
   - Game-day inactives.
+  - Target-share flattening `[players] target_share_power = 0.9` (section 16). Carries left at 1.0 (hurt rush-attempt props).
   - Money picks are frozen at each game's lock run (`week_NN_final.csv`, `week_NN_frozen_games.txt`); later runs show them unchanged, and grading/CLV use only the frozen picks.
   - Money-list HOLD rule: picks on a team whose lead back missed its last game are held until inactives post (section 14).
 - **Tested and OFF or no signal:**
@@ -105,7 +106,7 @@ Still pending for the user:
 4. Then turn off the claude.ai scheduled tasks.
 
 ## Key config (`config/projection.toml`)
-- `[players] eff_prior = "rec"`, `eff_prior_k = 60` (default)
+- `[players] eff_prior = "rec"`, `eff_prior_k = 60` (default), `target_share_power = 0.9`
 - `[sim] td_calib = {a=-0.248, b=0.781}`
 - `[script] pass_rate_per_point = 0.0`
 - `[paper]`:
