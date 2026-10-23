@@ -226,3 +226,21 @@ The failure on Oct 22 (Woody Marks, Bam Knight, Tyler Allgeier unders at 35-52 p
 betting before knowing whether the lead back plays. Rule added to `money`: picks on a team whose
 lead back (35%+ share, 2+ games) missed its last game and isn't ruled Out are marked HOLD until
 game-day inactives post (~90 min before kickoff); after that the projection knows who is active.
+
+## 15. Why projections miss (2025 wk 4-18 + 2026 wk 3-7 backtests, 12,155 projections; `tools/attribution_study.py`, `output/2026/attribution.md`)
+
+Each miss split into team volume + player share + per-touch efficiency + did-not-play (parts add up exactly).
+- Player props miss mostly on **share** (targets 61%, carries 50%, receptions 45%); QB props on **team volume
+  and per-attempt efficiency** (pass yds 41% / 41%, share 8%).
+- Game script: the final margin vs the projected one explains 26% of team carry misses (+0.30 carries per point)
+  and 9% of pass-attempt misses: real but unknowable before kickoff.
+- Across ALL projected players the bias is ~0 (targets -0.05, carries -0.02 per player), but projections are
+  **too spread out**: top players come in under, depth players over. Steady in both seasons (|t| >= 5):
+  - RB targets -21% (2025 -0.79, 2026 -1.06), RB receiving yds -24%; mostly share.
+  - Each team's top target -14% (both seasons -1.1); WR1s -12%.
+  - QB rush attempts -19% (4.5 projected -> 3.9 actual, both seasons); QB rushing yds -20%.
+  - Did-not-play costs 5-10% of every stat's miss: projections assume everyone listed plays.
+- Volume going to players the model never projected: 4-7% of team targets / carries.
+Candidate fixes (none applied; each needs the out-of-sample backtest): stronger shrinkage of player shares
+(or a share calibration slope), RB target share, QB carry share, availability probability for Questionable players.
+Tracked live in the weekly grade (`nfl_proj/attribution.weekly`, `output/2026/attribution_live.csv`).

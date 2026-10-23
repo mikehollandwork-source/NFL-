@@ -138,3 +138,38 @@ def error_mix(d: pd.DataFrame) -> pd.DataFrame:
         rows.append({"stat": stat, "n": len(g), "mae": g["err"].abs().mean(), "bias": g["err"].mean(),
                      **{c.replace("_c", ""): a[c] / tot for c in comps}})
     return pd.DataFrame(rows)
+
+
+# Biases found in the 2025 + 2026 backtests (tools/attribution_study.py, factor_tests section 15);
+# tracked live every week to see whether they hold.
+WATCH = [("targets", "pos", "RB", "RB targets"), ("targets", "role", "1 lead", "each team's top target"),
+         ("carries", "pos", "QB", "QB rush attempts"), ("rec_yds", "pos", "RB", "RB receiving yards"),
+         ("pass_yds", "pos", "QB", "QB passing yards")]
+
+
+def weekly(paths: dict, week: int, pg: pd.DataFrame) -> str | None:
+    """Attribute the week's locked projections (paper/week_NN_proj.csv), add
+    them to output/<season>/attribution_live.csv and summarize season to date."""
+    f = paths["out"] / "paper" / f"week_{week:02d}_proj.csv"
+    if not f.exists():
+        return None
+    proj = pd.read_csv(f)
+    d = segments(attribute(proj, pg[pg["week"] == week]))
+    live = paths["out"] / "attribution_live.csv"
+    old = pd.read_csv(live) if live.exists() else pd.DataFrame()
+    if len(old):
+        old = old[old["week"] != week]
+    allw = pd.concat([old, d], ignore_index=True)
+    allw.to_csv(live, index=False)
+    mix = error_mix(d)
+    lines = [f"🔎 Week {week} misses by cause (team volume / player share / per-touch / didn't play):"]
+    for r in mix.itertuples():
+        lines.append(f"• {r.stat.replace('_', ' ')}: avg miss {r.mae:.1f}, bias {r.bias:+.1f} → "
+                     f"{r.team:.0%} / {r.share:.0%} / {r.eff:.0%} / {r.dnp:.0%}")
+    lines.append(f"Known biases, season to date ({allw['week'].nunique()} weeks):")
+    for stat, col, val, name in WATCH:
+        x = allw[(allw["stat"] == stat) & (allw[col] == val)]
+        if len(x) >= 10:
+            lines.append(f"• {name}: actual {x['err'].mean():+.2f} vs projected {x['y_p'].mean():.1f} "
+                         f"({x['err'].mean() / x['y_p'].mean():+.0%}, n {len(x)})")
+    return "\n".join(lines)

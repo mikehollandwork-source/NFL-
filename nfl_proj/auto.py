@@ -201,6 +201,13 @@ def run_grade(cfg: dict, paths: dict, root: Path, refresh: bool = True, log=prin
         mg = money_grade(week, pg, paths)
         if mg:
             msgs.append(mg)
+        try:
+            from .attribution import weekly as attrib_weekly
+            at = attrib_weekly(paths, week, pg)
+            if at:
+                msgs.append(at)
+        except Exception as e:  # grading must not fail on this
+            log(f"miss attribution skipped: {e}")
     if not msgs:
         return "nothing to grade"
     summ = summary(paper_dir)
