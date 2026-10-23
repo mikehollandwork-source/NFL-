@@ -110,11 +110,11 @@ Still pending for the user:
 - `[script] pass_rate_per_point = 0.0`
 - `[paper]`:
   - `min_prob = 0.54`, `min_ev = 0.03`
-  - `max_per_game = 2`, `max_per_team_side = 1`
+  - `max_per_game = 99` (no per-game cap since Oct 23), `max_per_team_side = 1`, `max_bets = 100`
   - `exclude_stats = ["rush_yds"]`
   - `calib_side` per family and side (refit Oct 21 on alt lines 0.4×–1.8×)
 - `[money]`: edge ≥0.10, spread ≤0.10, quarter Kelly, cap 5%, bankroll $50
-- **Qualifying bet** = the model's lean that also passes `[paper]` rules (p ≥ 54%, EV ≥ 3% at −115, per-game and per-team caps, no rushing yards). **Lean** = the model's side on any posted line.
+- **Qualifying bet** = the model's lean that also passes `[paper]` rules (p ≥ 54%, EV ≥ 3% at −115, one per team per direction, no rushing yards). **Lean** = the model's side on any posted line.
 
 ## Data notes
 - Free sources only:

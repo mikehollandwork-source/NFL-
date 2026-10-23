@@ -330,7 +330,7 @@ min_prob = 0.54              # calibrated probability floor
 kelly_fraction = 0.25        # quarter Kelly on the calibrated probability
 max_stake = 1.5              # units
 min_stake = 0.5
-max_per_game = 2             # correlated outcomes: cap exposure per game
+max_per_game = 99            # no per-game cap (owner, Oct 23); the team-side rule below still limits correlated stacking
 max_per_team_side = 1        # no stacking two same-team props in the same direction
 
 # Calibration by stat family and side (replaces calib_a/b where present).
@@ -346,5 +346,5 @@ calib_family = { rec = { a_over = -0.253, b = 0.361 }, rush = { a_over = -0.194,
 # extreme probabilities (95% -> 69%, 5% -> 21%); Kalshi prices exposed it. On 2026 weeks 3-6
 # (all lines) log-loss 0.520 -> 0.497, every 10% bucket within ~1 pt; main lines unchanged (0.652 vs 0.653).
 calib_side = { qb_over = { a = -0.04, b = 0.75 }, qb_under = { a = 0.04, b = 0.75 }, rec_over = { a = -0.178, b = 0.782 }, rec_under = { a = 0.178, b = 0.782 }, rush_over = { a = -0.213, b = 0.688 }, rush_under = { a = 0.213, b = 0.688 } }
-max_bets = 32                # games are locked slate by slate, so the per-game cap (2) is the real limit
+max_bets = 100               # weekly ceiling, set high so it never binds
 require_usage_trend = true   # your rule: overs need rising usage, unders falling (stars / QBs exempt)
