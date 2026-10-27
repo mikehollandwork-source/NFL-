@@ -1,0 +1,221 @@
+<title>Week __WEEK__ Prop Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: sticky filter bar over a scoreboard-style list; each prop is one row of fixed columns that folds to a two-line card on phones */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --line:#d9dfdc; --fg:#17201c; --muted:#5d6a64;
+  --accent:#0f7a55; --accent-soft:#e1f1ea; --under:#3d4fa8; --under-soft:#e6e9f7;
+  --hit:#0f7a55; --miss:#c4cbc8; --warn:#9a5b00; --warn-soft:#fbefdc;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1513; --surface:#161e1b; --line:#27322e; --fg:#e4ebe7; --muted:#93a39b;
+  --accent:#3fc28f; --accent-soft:#163428; --under:#8d9cf0; --under-soft:#1d2240;
+  --hit:#3fc28f; --miss:#3a4641; --warn:#e6a23c; --warn-soft:#33270f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1513; --surface:#161e1b; --line:#27322e; --fg:#e4ebe7; --muted:#93a39b;
+  --accent:#3fc28f; --accent-soft:#163428; --under:#8d9cf0; --under-soft:#1d2240;
+  --hit:#3fc28f; --miss:#3a4641; --warn:#e6a23c; --warn-soft:#33270f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+header h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5vw,40px);letter-spacing:.01em;margin:0;text-wrap:balance;text-transform:uppercase}
+header p{margin:4px 0 0;color:var(--muted);max-width:70ch}
+.stamp{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:18px 0}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.tile b{display:block;font-family:var(--display);font-size:28px;line-height:1;font-variant-numeric:tabular-nums}
+.tile span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.notes{background:var(--warn-soft);color:var(--fg);border-radius:8px;padding:10px 12px;font-size:13px;display:grid;gap:4px;margin-bottom:16px}
+.notes strong{color:var(--warn)}
+.notes[hidden],.tix[hidden]{display:none}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+.bar select,.bar input[type=search]{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 9px;min-width:0}
+.bar input[type=search]{flex:1 1 180px}
+.bar label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);white-space:nowrap}
+.bar input[type=range]{width:110px;accent-color:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;border:0;background:var(--surface);color:var(--muted);padding:7px 10px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--fg);color:var(--bg)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.count{font-size:13px;color:var(--muted);margin:10px 0 6px}
+.game{margin-top:18px}
+.game h2{font-family:var(--display);font-size:20px;text-transform:uppercase;letter-spacing:.03em;margin:0 0 6px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.game h2 small{font-family:var(--mono);font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0}
+.rows{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.1fr) 92px 70px minmax(110px,1fr) 64px minmax(96px,.9fr);gap:10px;align-items:center;padding:9px 12px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row.head{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:var(--bg)}
+.row.bet{box-shadow:inset 3px 0 0 var(--accent)}
+.who b{font-weight:600}.who span{color:var(--muted);font-size:12px;margin-left:6px}
+.prop{color:var(--fg)}.prop .ln{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.pill{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:4px;justify-self:start}
+.pill.over{background:var(--accent-soft);color:var(--accent)}.pill.under{background:var(--under-soft);color:var(--under)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.prob{display:grid;grid-template-columns:38px 1fr;gap:6px;align-items:center}
+.track{height:6px;background:var(--line);border-radius:3px;position:relative;overflow:hidden}
+.track i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:3px}
+.track i.u{background:var(--under)}
+.ev.pos{color:var(--accent)}.ev.neg{color:var(--muted)}
+.log{display:flex;gap:3px;align-items:center;flex-wrap:wrap}
+.log i{width:9px;height:9px;border-radius:2px;background:var(--miss)}
+.log i.h{background:var(--hit)}
+.log em{font-style:normal;font-size:12px;color:var(--muted);margin-left:4px;font-family:var(--mono)}
+.tag{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);font-weight:600}
+.skipt{color:var(--warn)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+footer{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;display:grid;gap:6px}
+.bets{margin:6px 0 22px}
+.bets>h2,.leanh{font-family:var(--display);font-size:24px;text-transform:uppercase;letter-spacing:.03em;margin:0 0 4px}
+.leanh{margin-top:26px}.leanh small{display:block;font-family:var(--body);font-size:13px;text-transform:none;letter-spacing:0;color:var(--muted);font-weight:400}
+.bets>p{margin:0 0 10px;color:var(--muted);font-size:13px;max-width:80ch}
+.bets h3{margin:14px 0 8px;font-size:14px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:10px}
+.bet-card{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:10px 12px;display:grid;gap:3px}
+.bet-card.hold{border-left-color:var(--warn)}
+.bet-card .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.bet-card .st{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;color:var(--accent);white-space:nowrap}
+.bet-card.hold .st{color:var(--warn)}
+.bet-card .sub{color:var(--muted);font-size:12px}
+.tix{margin:6px 0 22px}
+.tix>h2{font-family:var(--display);font-size:24px;text-transform:uppercase;letter-spacing:.03em;margin:0 0 4px}
+.tix>p{margin:0 0 12px;color:var(--muted);max-width:80ch;font-size:13px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:10px}
+.ticket{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.ticket h3{margin:0 0 6px;font-size:13px;display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.ticket h3 span{font-family:var(--mono);color:var(--muted);font-weight:400}
+.ticket ol{margin:0;padding-left:18px;display:grid;gap:3px}
+.ticket li small{color:var(--muted)}
+@media (max-width:760px){
+  .row.head{display:none}
+  .row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"who pill" "prop ev" "prob prob" "log log";row-gap:6px}
+  .who{grid-area:who}.pill{grid-area:pill;justify-self:end}.prop{grid-area:prop}.model{display:none}
+  .prob{grid-area:prob}.ev{grid-area:ev;justify-self:end}.log{grid-area:log}
+}
+@media (prefers-reduced-motion:no-preference){.track i{transition:width .3s ease}}
+</style>
+<div class="wrap">
+  <header>
+    <h1>Week __WEEK__ Prop Board</h1>
+    <p>Every DraftKings player prop posted for Sunday and Monday, with the model's lean, calibrated win chance and edge at an assumed <span id="price"></span> price. The Bets section lists only what is locked or will lock before kickoff; everything else is under Leans.</p>
+    <div class="stamp" id="stamp"></div>
+  </header>
+  <div class="summary" id="summary"></div>
+  <div class="notes" id="notes"></div>
+  <section class="bets" id="bets"></section>
+  <section class="tix" id="tix" hidden></section>
+  <h2 class="leanh" id="leans">Leans <small>the model's side on every other posted line: information, not bets</small></h2>
+  <div class="bar" role="search">
+    <input type="search" id="q" placeholder="Search player or team" aria-label="Search player or team">
+    <select id="game" aria-label="Game"></select>
+    <select id="stat" aria-label="Stat"></select>
+    <label for="minp">Min win <input type="range" id="minp" min="50" max="80" step="1" value="50"> <span class="num" id="minpv">50%</span></label>
+    <select id="sort" aria-label="Sort">
+      <option value="p">Sort: win chance</option>
+      <option value="ev">Sort: edge</option>
+      <option value="time">Sort: kickoff</option>
+    </select>
+  </div>
+  <div class="count" id="count"></div>
+  <div id="list"></div>
+  <footer>
+    <div><b>Win %</b> is the model's probability for the lean side after correcting for its measured overconfidence (backtests showed the raw simulation is too sure of itself). <b>Edge</b> is the expected return per unit at the assumed price; check the real price before betting.</div>
+    <div><b>Season log</b>: one square per game this season, filled when the lean side would have won against today's line.</div>
+    <div>The board is rebuilt on every scheduled lock run with the latest injury reports (ESPN + Sleeper) and lines. Games that have kicked off drop off. <b>Locked</b> marks bets already placed on paper about two hours before that game; <b>Qualifies</b> marks bets that would be placed if the game locked right now.</div>
+  </footer>
+</div>
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function(){
+  const D=JSON.parse(document.getElementById('data').textContent);
+  const NAMES={pass_yds:'Passing yds',completions:'Completions',pass_att:'Pass attempts',receptions:'Receptions',rec_yds:'Receiving yds',rush_yds:'Rushing yds',carries:'Rush attempts'};
+  const $=id=>document.getElementById(id);
+  const fmtPct=x=>Math.round(x*100)+'%';
+  $('price').textContent=(D.price>0?'+':'')+D.price;
+  const gen=new Date(D.generated);
+  $('stamp').textContent='Lines and injuries as of '+gen.toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  const rows=D.rows;
+  const games=[...new Map(rows.map(r=>[r.game,r.ko])).entries()].sort((a,b)=>a[1].localeCompare(b[1]));
+  $('game').innerHTML='<option value="">All games</option>'+games.map(([g])=>`<option>${g}</option>`).join('');
+  const stats=[...new Set(rows.map(r=>r.stat))];
+  $('stat').innerHTML='<option value="">All props</option>'+stats.map(s=>`<option value="${s}">${NAMES[s]||s}</option>`).join('');
+  const bets=(D.money||[]);
+  const strong=rows.filter(r=>r.p>=0.65&&!r.skip).length;
+  $('summary').innerHTML=[
+    [rows.length,'lines posted'],[games.length,'games'],[bets.length,'real-money bets'],[strong,'leans at 65%+'],
+  ].map(([n,l])=>`<div class="tile"><b>${n}</b><span>${l}</span></div>`).join('');
+  const notes=D.flags.filter(f=>!/injury report isn't out/.test(f));
+  $('notes').innerHTML=notes.length?notes.map(f=>`<div><strong>Availability</strong> ${f.replace(/</g,'&lt;')}</div>`).join(''):'';
+  $('notes').hidden=!notes.length;
+  const T=D.parlays||[];
+  if(T.length){
+    const esc=x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    const odds=t=>t.fair?('+'+((t.fair-1)*100).toLocaleString(undefined,{maximumFractionDigits:0})):'';
+    const card=(t,i)=>`<div class="ticket"><h3>${t.kind==='SGP'?esc(t.games[0]):esc(t.kind)+' #'+(i+1)}<span>${(t.p*100).toFixed(t.p<0.001?3:2)}% · fair ${odds(t)}</span></h3><ol>${t.legs.map(l=>`<li><b>${esc(l.player)}</b> <small>${esc(l.team)} ${esc(l.pos)} · ${esc(l.what)} ${Math.round(l.p*100)}%${l.note?' · '+esc(l.note):''}</small></li>`).join('')}</ol></div>`;
+    const grp=k=>T.filter(t=>t.kind===k);
+    $('tix').innerHTML=`<h2>Parlays for profit boosts</h2><p>Anytime-TD tickets: no player in two tickets, legs ranked by the blended TD model (volume, red-zone and end-zone usage, scoring environment). Same-game parlays: rush-attempt leans first, the only prop where the model has beaten market prices; other legs fill in. Each leg shows its measured hit rate against real lines (other props hit about 54% however confident the model is), and same-team legs are combined through the simulations. Fair odds assume no book margin; a boost is what makes these worth playing. Backtest: parlays have not been profitable without one.</p>`+
+      ['Anytime TD','SGP','First TD'].filter(k=>grp(k).length).map(k=>`<h3 style="margin:14px 0 8px;font-size:14px">${k==='SGP'?'Same-game parlays, one per game':k} (${grp(k).length})</h3><div class="tgrid">${grp(k).map(card).join('')}</div>`).join('');
+    $('tix').hidden=false;
+  }
+  {
+    const esc=x=>String(x??'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    const et=iso=>new Date(iso).toLocaleString('en-US', {weekday:'short',hour:'numeric',minute:'2-digit',timeZone:'America/New_York'})+' ET';
+    const M=(D.money||[]).slice().sort((a,b)=>a.kickoff.localeCompare(b.kickoff)||b.edge-a.edge);
+    const status=m=>m.frozen?['🔒 Locked','']:m.hold?['⏸ Hold','hold']:['⏳ Locks before kickoff',''];
+    const mcard=m=>{const [st,cls]=status(m);const what=m.side==='YES'?`${m.k}+ rush attempts`:`UNDER ${m.k} rush attempts (≤${m.k-1})`;
+      return `<div class="bet-card ${cls}"><div class="top"><b>${esc(m.player)} <span class="sub">${esc(m.team)}</span></b><span class="st">${st}</span></div>
+      <div>${what} · buy at ≤ ${Math.round(m.price*100)}¢ · <b>$${Number(m.stake).toFixed(2)}</b></div>
+      <div class="sub">model ${Math.round(m.model*100)}% vs price ${Math.round(m.price*100)}% (edge +${Math.round(m.edge*100)}) · ${esc(m.game)} ${et(m.kickoff)}</div>
+      ${m.dk?`<div class="sub">${esc(m.dk)}</div>`:''}${m.hold?`<div class="sub">${esc(m.hold)}</div>`:''}</div>`};
+    const P=rows.filter(r=>r.locked||r.bet).sort((a,b)=>a.ko.localeCompare(b.ko)||b.ev-a.ev);
+    const pcard=r=>`<div class="bet-card"><div class="top"><b>${esc(r.player)} <span class="sub">${esc(r.team)} ${esc(r.pos)}</span></b><span class="st">${r.locked?'🔒 Locked':'⏳ Locks before kickoff'}</span></div>
+      <div>${NAMES[r.stat]||r.stat} <b>${r.side.toUpperCase()} ${r.line}</b> · model ${r.model} · win ${fmtPct(r.p)}</div>
+      <div class="sub">edge ${r.ev>0?'+':''}${Math.round(r.ev*100)}% at ${D.price} · ${esc(r.game)} ${esc(r.kick)} ET</div></div>`;
+    $('bets').innerHTML=`<h2>Bets</h2><p>Only bets that are locked or will lock before kickoff. 🔒 Locked = fixed at the lock run about 1.5 hours before kickoff and never changes. ⏳ = would be placed if the game locked now; can still change with injuries and prices until it locks.</p>`+
+      `<h3>Real money: Kalshi rush attempts (${M.length})</h3>`+(M.length?`<div class="bgrid">${M.map(mcard).join('')}</div>`:'<p class="sub">None right now.</p>')+
+      `<h3>Paper bets: DraftKings, tracked not wagered (${P.length})</h3>`+(P.length?`<div class="bgrid">${P.map(pcard).join('')}</div>`:'<p class="sub">None right now.</p>')+
+      (D.money_at?`<p class="sub" style="margin-top:8px">Money list as of ${new Date(D.money_at).toLocaleString([], {weekday:'short',hour:'numeric',minute:'2-digit'})}</p>`:'');
+  }
+  const state={q:'',game:'',stat:'',minp:.5,sort:'p'};
+  try{const s=JSON.parse(localStorage.getItem('propboard2')||'{}');Object.assign(state,s)}catch(e){}
+  $('q').value=state.q;$('game').value=state.game;$('stat').value=state.stat;$('minp').value=Math.round(state.minp*100);$('sort').value=state.sort;
+  function save(){try{localStorage.setItem('propboard2',JSON.stringify(state))}catch(e){}}
+  function row(r){
+    const hits=r.log.map(v=>r.side==='over'?v>r.line:v<r.line);
+    const sq=hits.map((h,i)=>`<i class="${h?'h':''}" title="${r.log[i]}"></i>`).join('');
+    return `<div class="row${r.bet||r.locked?' bet':''}">
+      <div class="who"><b>${r.player}</b><span>${r.team} ${r.pos}</span>${r.locked?' <span class="tag">Locked</span>':r.bet?' <span class="tag">Qualifies</span>':''}${r.skip?' <span class="tag skipt">Skipped: no QB data</span>':''}</div>
+      <div class="prop">${NAMES[r.stat]||r.stat} <span class="ln">${r.line}</span></div>
+      <span class="pill ${r.side}">${r.side}</span>
+      <div class="model num" title="model median (mean ${r.mean})">${r.model}</div>
+      <div class="prob"><span class="num">${fmtPct(r.p)}</span><div class="track"><i class="${r.side==='under'?'u':''}" style="width:${Math.max(0,Math.min(100,(r.p-.5)*200))}%"></i></div></div>
+      <div class="ev num ${r.ev>0?'pos':'neg'}">${r.ev>0?'+':''}${Math.round(r.ev*100)}%</div>
+      <div class="log">${sq}<em>${r.hit}/${r.n}</em></div>
+    </div>`;
+  }
+  const head=`<div class="row head"><div>Player</div><div>Prop &amp; line</div><div>Lean</div><div>Model</div><div>Win %</div><div>Edge</div><div>Season log</div></div>`;
+  function render(){
+    const q=state.q.trim().toLowerCase();
+    let f=rows.filter(r=>(!state.game||r.game===state.game)&&(!state.stat||r.stat===state.stat)&&!r.bet&&!r.locked&&r.p>=state.minp&&(!q||r.player.toLowerCase().includes(q)||r.team.toLowerCase()===q));
+    const key=state.sort==='ev'?(a,b)=>b.ev-a.ev:state.sort==='time'?(a,b)=>a.ko.localeCompare(b.ko)||b.p-a.p:(a,b)=>b.p-a.p;
+    f.sort(key);
+    $('count').textContent=`${f.length} leans`;
+    if(!f.length){$('list').innerHTML='<div class="empty">No lines match these filters. Lower the minimum win % or clear the search.</div>';return}
+    const by=new Map();f.forEach(r=>{if(!by.has(r.game))by.set(r.game,[]);by.get(r.game).push(r)});
+    const order=[...by.keys()].sort((a,b)=>by.get(a)[0].ko.localeCompare(by.get(b)[0].ko));
+    $('list').innerHTML=order.map(g=>{const rs=by.get(g);return `<section class="game"><h2>${g}<small>${rs[0].kick} ET · ${rs.length} line${rs.length>1?'s':''}</small></h2><div class="rows">${head}${rs.map(row).join('')}</div></section>`}).join('');
+  }
+  $('q').addEventListener('input',e=>{state.q=e.target.value;save();render()});
+  $('game').addEventListener('change',e=>{state.game=e.target.value;save();render()});
+  $('stat').addEventListener('change',e=>{state.stat=e.target.value;save();render()});
+  $('sort').addEventListener('change',e=>{state.sort=e.target.value;save();render()});
+  $('minp').addEventListener('input',e=>{state.minp=e.target.value/100;$('minpv').textContent=e.target.value+'%';save();render()});
+  $('minpv').textContent=Math.round(state.minp*100)+'%';
+  render();
+})();
+</script>

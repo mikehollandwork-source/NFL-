@@ -1,0 +1,357 @@
+# Every modeling choice lives here. Change a value, re-run `project`.
+# The CLI prints the active choices before it projects anything.
+
+season = 2026
+
+[source]
+# "nflverse" (default): public nflverse CSV releases, structured play-by-play.
+# "pfr": scrape Pro-Football-Reference HTML. PFR serves a Cloudflare bot check
+#        to cloud machines, so this only works from a home connection.
+provider = "nflverse"
+
+[scrape]
+delay_seconds = 4.0          # PFR only: PFR bans clients above ~20 requests/minute
+
+[filters]
+# Plays dropped before measuring tendencies (garbage time distorts play-calling).
+garbage_time_quarter = 4
+garbage_time_score_margin = 17
+# "Neutral" situations used for pass rate: score within this margin, quarters 1-3.
+neutral_score_margin = 8
+
+[definitions]
+# What counts as a "negative play" when deciding what a coach cuts:
+#   "custom"  -> nets 0 or less (incl. incompletions, sacks), a turnover, or a
+#                3rd/4th-down play that fails to convert (your definition)
+#   "epa"     -> expected points added < 0 (uses PFR's EP before/after)
+#   "success" -> fails the success-rate bar (40% / 60% / 100% of yards to go)
+#   "loss"    -> lost yardage, sack, or turnover only
+negative_play = "custom"
+explosive_pass_yards = 20
+explosive_run_yards = 10
+
+[weighting]
+# Exponential recency weighting: a game this many weeks old counts half.
+half_life_weeks = 4.0
+
+[adaptation]
+# "Coaches cut what failed and do more of what worked."
+# "measured" -> use the effect size estimated from this season's data, scaled
+#               down when it is not statistically clear (recommended)
+# "assume"   -> apply `assumed_strength` no matter what the data says
+# "off"      -> ignore last week's results
+mode = "measured"
+assumed_strength = 0.5
+# Minimum plays of a type in the last game before it can trigger an adjustment.
+min_plays = 3
+
+[matchup]
+# How much the opponent's defense moves the projection. 0 = ignore opponent,
+# 1 = fully trust the defense's allowed rates (after shrinkage).
+defense_weight = 0.75
+# Plays of evidence needed before a defense's rate is trusted at 50%.
+# Higher = more regression to league average.
+shrink_plays = 40
+# "measured": per-stat trust levels below (plays before a team's rate counts
+# 50%, measured 2021-25 odd vs even weeks, output/2026/factor_tests.md) and
+# zone / lane efficiency taken from the team's overall rate, since zone
+# splits don't repeat for offenses or defenses. "legacy": shrink_plays for all.
+method = "measured"
+run_def_by_lane = false
+# Defense labels to use for "how offenses perform against different defenses":
+#   "auto"   -> derive from scraped data (deep-pass allowed, 3rd-down pressure, run defense)
+#   "manual" -> use data/manual/defense_tags.csv (your coverage / blitz labels)
+#   "both"   -> manual where provided, auto otherwise
+defense_labels = "both"
+
+[players]
+# Plays of evidence before a player's own per-target / per-carry rate is trusted at 50%.
+shrink_targets = 25
+shrink_carries = 40
+# A player must have appeared in one of the team's last N games to be projected.
+active_within_games = 2
+# A player's target / carry share is measured over the games he played (games
+# he missed aren't zero-share games), capped at 2x, for players with 2+ games.
+share_games_played = true
+games_played_cap = 2.0
+games_played_min = 2
+# Target-share flattening (share^b, renormalized per team): projections were too spread out (top target
+# -14%, both seasons). b = 0.9 chosen on 2025 wk 4-18, confirmed on 2026 wk 3-6: targets MAE 2.30 -> 2.24 /
+# 2.60 -> 2.55, rec yds 22.6 -> 22.1 / 24.6 -> 24.0, receiving-prop log-loss 0.6543 -> 0.6525 / 0.6471 -> 0.6456.
+# 0.8 cut the bias to ~0 but hurt prop log-loss. Carries stay at 1.0: flattening them lowered carries MAE but
+# made rush-attempt props worse in both seasons (0.6383 -> 0.6455, 0.6415 -> 0.6441) - the one stat with an edge.
+target_share_power = 0.9
+# Receivers' yards per target are pulled toward their OWN last-season rate (vs their team,
+# long plays capped, shrunk by its volume with eff_prior_k = 60) instead of the team average.
+# Stars were underprojected: top-40 WR/TE rec yds bias -5.8 -> -3.4 (2025 wk 4-18), -6.5 -> -3.5
+# (2026 wk 3-6); rec yds MAE 18.28 -> 18.20 / 19.49 -> 19.36; prop log-loss 0.6536 -> 0.6522 /
+# 0.6530 -> 0.6512. Doing the same for rushers hurt 2026 rushing props (0.671 -> 0.678): "rec" only.
+eff_prior = "rec"
+
+[sim]
+# Simulated games per matchup. Every prop (medians, ranges, longest plays,
+# anytime TD, over/under vs your lines) is read off these simulations.
+n_sims = 5000
+seed = 0
+# Anytime-TD probabilities are too spread out: players given 50-60% scored 41%
+# (2025 backtest, 3,773 WR/TE/RB games); long shots score a bit more often than
+# predicted. p' = sigmoid(a + b * logit(p)), fitted on 2025, improves 2026 weeks
+# 3-6 out of sample (log-loss 0.494 -> 0.485). 58% -> 50%, 38% -> 35%, 20% -> 21%.
+td_calib = { a = -0.248, b = 0.781 }
+
+# QB kneel-downs per game (official rushing attempts include them), by win chance
+kneels = {loser = 0.22, winner = 1.34, margin_sd = 13.5}
+
+[scheme]
+# Online / tagged scheme data (data/external/defense_scheme.csv, data/manual/defense_tags.csv).
+# Label thresholds, in percent of dropbacks.
+blitz_heavy_pct = 33.0
+blitz_light_pct = 20.0
+man_heavy_pct = 30.0
+man_light_pct = 18.0
+# How much evidence (plays of THIS offense vs that scheme) before the
+# offense-specific scheme effect is trusted at 50%.
+shrink_plays = 40
+
+[coach]
+# Games of this season before the play-caller's career tendencies
+# (pass lean, star reliance) count half. They fade as games accumulate.
+prior_games = 3.0
+# Volume spread multiplier for first-time / newly arrived play-callers.
+new_caller_sd_mult = 1.15
+
+[sos]
+# Strength of schedule: re-rate each team's raw pass/run yards per play and
+# points per game against the opponents it actually faced.
+enabled = true
+shrink_plays = 60.0          # ridge penalty for per-play ratings (plays)
+shrink_games = 3.0           # ridge penalty for points ratings (games)
+min_factor = 0.85            # cap on how far schedule can move an input
+max_factor = 1.15
+
+[market]
+# The betting market is NOT used for any projection. It is used only to
+# grade paper trades (lines and odds recorded at lock and at close).
+# enabled = true would blend implied team totals into scoring (kept for
+# comparison runs only).
+enabled = false
+hit_tolerance = 4.0
+min_hit_rate = 0.6
+min_games = 4
+weight = 0.6
+miss_shrink_games = 6.0
+yards_elasticity = 0.3
+min_factor = 0.6
+max_factor = 1.6
+
+[availability]
+# Injury report + depth chart -> automatic outs and starting QB.
+# data/manual/player_overrides.csv always wins.
+doubtful_plays = false
+
+[corners]
+# Cornerback matchups (PFR coverage charting + depth chart + researched
+# shadow corners in data/external/defense_personnel.csv).
+enabled = true
+shrink_targets = 160.0       # targets before a corner's yds/target is trusted at 50% (measured 2024-25: odd vs even weeks r 0.16 at 29 targets)
+replacement_ypt_mult = 1.08  # an out corner's targets go to a replacement this much worse than league
+shadow_share = 0.7           # share of WR1's routes spent against an active shadow corner
+te_weight = 0.5              # tight ends get this share of the corner-group effect
+min_factor = 0.8
+max_factor = 1.2
+
+[script]
+# Game script from the model's own projected margin (used when [market] is off):
+# the team projected to lead passes less, the trailing team passes more.
+enabled = true
+pass_rate_per_point = 0.0
+# Was 0.004. Backtest: the model's pass rate fell 0.0056 per point of projected
+# margin vs 0.0012 in reality (base team tendencies already carry script), so big
+# favorites' RB carries ran 17% high and big underdogs' targets 19% high.
+# 0.0 vs 0.004: prop log-loss 2025 wk 4-18 0.6543 -> 0.6522, 2026 wk 3-6
+# 0.6559 -> 0.6521; team points MAE 7.68 -> 7.70 (2025), 7.32 -> 7.27 (2026).
+
+[defense]
+# Position-group weakness (WR / TE / RB) and struggle-week diagnosis.
+shrink_targets = 40.0        # targets vs a position group before the split is trusted at 50%
+# Off: a defense's yards per target vs WR / TE / RB beyond its overall pass
+# defense is noise (odd vs even weeks r = 0.00 WR, 0.00 TE, -0.06 RB, 2021-25).
+position_factor = false
+struggle_epa = 0.12          # a "struggle" = EPA/play allowed this much above the defense's other games
+absent_game_weight = 0.5     # weight of a struggle game played without starters who are back now
+min_factor = 0.8
+max_factor = 1.25
+
+[comps]
+# Similar offenses (structure, not results) and how they fared vs this defense.
+enabled = true
+bandwidth = 0.6              # smaller = only very close offenses count
+shrink_games = 2.0           # weighted games of evidence before the effect is trusted at 50%
+min_factor = 0.88
+max_factor = 1.12
+
+[picks]
+min_games = 3                # games played this season to qualify
+min_prob = 0.55              # simulated chance of beating the baseline in the pick's direction
+min_edge = 0.06              # ...and how much of that comes from the projection (skew removed)
+min_targets = 4.0            # usage floor per game for receiving picks
+min_carries = 8.0            # usage floor per game for rushing picks
+min_signals = 2              # independent signals that must agree
+per_game = 5
+star_target_share = 0.25     # "consistent action" exemption from the usage-trend rule
+star_carry_share = 0.55
+star_cv = 0.35               # max game-to-game variation in usage for the exemption
+
+[matchup.shrink]
+off_pass_ypp = 150
+off_cmp = 275
+off_run_ypp = 325
+off_sack = 285
+off_pass_td = 410
+off_int = 4400
+# Defense TD / INT rates stay on the legacy shrink_plays + defense_weight: on their own
+# they don't repeat, but the 2025 full-season backtest is better with them (MAE 7.73
+# vs 7.97 with the measured constants), likely because they carry overall defense quality.
+def_pass_ypp = 1000
+def_cmp = 470
+def_run_ypp = 380
+def_sack = 1075
+def_pass_rate = 1030  # how much opponents throw against this defense
+def_deep_share = 830  # how often opponents throw deep against it (attempts)
+def_deep_eff = 205    # deep yards/attempt allowed beyond its overall pass defense (deep attempts)
+
+[priors]
+# Last season's team rates, regressed toward league average, as the
+# starting point that this season's games gradually replace.
+season = 2025
+enabled = true
+regress = 0.5                # keep this share of a team's 2025 edge over league (offense)
+regress_new_caller = 0.3     # ...for offenses with a new play-caller
+regress_defense = 0.4
+volume_prior_games = 3.0     # plays per game: 2025 counts as this many games
+# Measured share of a team's 2025 edge over league that repeats (2021-25
+# season pairs); replaces regress / regress_defense per stat. A new
+# play-caller scales the offense values by regress_new_caller / regress.
+# Defensive play caller (data/external/coordinators.csv): same caller as last
+# season -> defense carryover x def_same_caller_scale, new caller -> x
+# def_new_caller_scale (2022-25: carryover ~0 with a new caller; 57% keep theirs).
+def_same_caller_scale = 1.0   # off: backtest 2025 wk 6-18 MAE 7.77 vs 7.73 without
+def_new_caller_scale = 1.0
+carryover = {off_pass = 0.46, off_run = 0.29, off_cmp = 0.48, off_pass_td = 0.37, off_run_td = 0.27, off_plays = 0.15, def_pass = 0.20, def_run = 0.23, def_cmp = 0.22, def_pass_td = 0.4, def_run_td = 0.4}
+
+[player_adaptation]
+# Per player: play types (buckets) that failed for him last game are cut by
+# their failure rate (custom negative-play rule) and his volume moves to the
+# play types that worked; his total volume is unchanged. The team's play mix
+# is rebuilt from the players' plans, and the defense's numbers on those
+# play types decide what they're worth.
+#   "assume"   -> cut = the value below (1.0 = cancel what failed)
+#   "measured" -> estimate the cut from this season's data
+#   "off"      -> no player-level adaptation
+mode = "measured"
+cut = 1.0
+min_plays = 1                # plays of a type last game before it can be cut
+play_level = true            # judge kept plays by their exact kind (play action, screens) vs this defense
+
+[weather]
+# Wind / cold / rain effects measured from 2025-26 outdoor games; forecasts
+# from the National Weather Service (Open-Meteo abroad). Domes and
+# retractable roofs: no effect.
+enabled = true
+
+[oline]
+# Missing starting offensive linemen: per-starter effects measured from
+# 2025-26 team-games, applied for starters listed out this week.
+enabled = true
+
+[streaks]
+# Regression after hot / cold streaks. The share of a two-game streak that
+# carries into the next game is measured on last season (efficiency and
+# volume separately) and only that share is kept. Long plays are capped
+# when measuring a player's efficiency (they mostly don't repeat).
+enabled = true
+# "equal_weight": a player's efficiency weights every game the same (recent
+#                 hot games get no extra weight) with long plays capped
+# "factor":       keep only the measured share of the last two games' streak
+method = "equal_weight"
+cap_rec_yards = 40.0
+cap_rush_yards = 30.0
+
+[volume]
+# How each team's plays are projected.
+#   "clock" (default): drives come from the shared game clock (both teams'
+#           pace and plays per drive); plays = drives x plays per drive.
+#           Possession share falls out of it. See nfl_proj/clock.py.
+#   "average": the team's plays per game x the opponent's plays allowed.
+method = "clock"
+ppd_shrink_games = 8.0       # plays per drive barely repeats: shrink hard
+pace_shrink_games = 3.0
+pace_prior_regress = 0.7     # 2025 pace kept at 70% as the starting point
+
+[scoring]
+# Drive sustaining, beyond yards/play and TD rate (2021-25, each season held
+# out: team points MAE 7.724 -> 7.692, better in 4 of 5 seasons). Points per
+# drive change per unit of: offense 3rd-down conversion rate, offense
+# success rate, defense success rate allowed (deviation from league).
+# Defense 3rd-down rate allowed, sacks and yards per drive added nothing.
+# OFF: in the full model it didn't hold up (2025 wk 6-18 team MAE 7.77 -> 7.73,
+# but 2026 wk 2-5 7.86 -> 7.99 and pick lift 0.167 -> 0.147; projections spread
+# too wide). Weights kept for reference:
+# drive_eff = {conv3 = 1.526, succ_off = 2.715, succ_def = 2.331, lg_ppd = 2.13, clip = 0.15}
+drive_eff = {}
+
+[auto]
+# A game is locked on the scheduled run that falls within this many hours of
+# its kickoff (after the final injury report and game-day inactives).
+# Lock about an hour before kickoff, after game-day inactives post (~90 min before).
+lock_window_hours = 1.25
+
+[odds]
+# source: "auto" = The Odds API when ODDS_API_KEY is set, else ESPN's public
+# feed (no key; DraftKings lines, current + opening, but no prices: both
+# sides are graded at assumed_price). "espn" / "the_odds_api" force one.
+source = "auto"
+assumed_price = -115         # conservative vs the usual DraftKings prop price (-110 to -120)
+espn_provider = 100          # ESPN's id for DraftKings
+# Player prop lines and prices for paper trading, from The Odds API
+# (free key at https://the-odds-api.com; set ODDS_API_KEY). Cost on the free
+# tier (500 credits/month) = markets x events per pull; 5 markets x ~14
+# games x 2 pulls (lock + close) ~ 140 per week.
+markets = ["player_pass_yds", "player_pass_completions", "player_receptions", "player_reception_yds",
+           "player_rush_attempts"]
+regions = "us"
+book = "draftkings"          # price to trade at; falls back to the first book with the line
+
+[paper]
+# Paper trading. Probabilities are calibrated first: the backtest showed
+# the model overconfident (an 80% call hit ~68%):
+#   p = sigmoid(calib_a + calib_b * logit(model probability))
+# Refit as graded paper trades accumulate (`paper-summary` reports it).
+calib_a = 0.13
+calib_b = 0.45
+# Props the backtest found no skill on are skipped (rushing yards: 44%
+# hit, -6 points vs no-information on 25 calls).
+exclude_stats = ["rush_yds"]
+min_ev = 0.03                # expected value per unit staked at the posted price
+min_prob = 0.54              # calibrated probability floor
+kelly_fraction = 0.25        # quarter Kelly on the calibrated probability
+max_stake = 1.5              # units
+min_stake = 0.5
+max_per_game = 99            # no per-game cap (owner, Oct 23); the team-side rule below still limits correlated stacking
+max_per_team_side = 1        # no stacking two same-team props in the same direction
+
+# Calibration by stat family and side (replaces calib_a/b where present).
+# Fitted on the 2025 backtest (11.7k graded sides); the intercept is scaled
+# to 75% because the backtest's stand-in lines (season averages) overstate the
+# over/under gap. Out of sample it lowers log-loss on 2026 weeks 4-5
+# (0.675 -> 0.662) and on week 6 real DraftKings lines (0.706 -> 0.698,
+# better in 93% of game resamples). The model is overconfident on overs.
+# rec = receptions / receiving yds / targets, rush = carries / rushing yds, qb = passing yds / completions
+calib_family = { rec = { a_over = -0.253, b = 0.361 }, rush = { a_over = -0.194, b = 0.459 }, qb = { a_over = 0.09, b = 0.761 } }
+# Refit (Oct 21) on the 2025 backtest with alternate lines from 0.4x to 1.8x each player's average,
+# per stat family AND side. The fit above was made on season-average lines only and squeezed
+# extreme probabilities (95% -> 69%, 5% -> 21%); Kalshi prices exposed it. On 2026 weeks 3-6
+# (all lines) log-loss 0.520 -> 0.497, every 10% bucket within ~1 pt; main lines unchanged (0.652 vs 0.653).
+calib_side = { qb_over = { a = -0.04, b = 0.75 }, qb_under = { a = 0.04, b = 0.75 }, rec_over = { a = -0.178, b = 0.782 }, rec_under = { a = 0.178, b = 0.782 }, rush_over = { a = -0.213, b = 0.688 }, rush_under = { a = 0.213, b = 0.688 } }
+max_bets = 100               # weekly ceiling, set high so it never binds
+require_usage_trend = true   # your rule: overs need rising usage, unders falling (stars / QBs exempt)

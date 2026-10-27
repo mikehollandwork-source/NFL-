@@ -1,0 +1,33 @@
+team,head_coach,play_caller,caller_role,hc_tier,hc_seasons,caller_tier,caller_seasons,new_caller_2026,history_seasons,history_listed,confidence,pass_lean,star_target,star_carry,style,star_reliance
+ARI,Mike LaFleur,Mike LaFleur,HC,first-year HC,0,developing play-caller,2,True,2,2,medium,0.039371638528440694,-0.04858043568476067,-0.15230655196958048,pass-first,spreads it around
+ATL,Kevin Stefanski,Tommy Rees,OC,new to team,6,developing play-caller,1,True,1,1,medium,0.014671115333369893,-0.03486465301384711,0.05984994444432318,balanced,spreads it around
+BAL,Jesse Minter,Declan Doyle,OC,first-year HC,0,first-time play-caller,0,True,0,0,high,,,,no history,no history
+BUF,Joe Brady,Joe Brady,HC,first-year HC,0,developing play-caller,4,False,4,4,medium,-0.018907473311125748,-0.004372287705471434,-0.04398948792040058,balanced,typical
+CAR,Dave Canales,Dave Canales,HC,young HC,2,developing play-caller,3,False,3,3,high,-0.008699864350252332,-0.018644977225205805,0.09395720814650971,balanced,leans on stars
+CHI,Ben Johnson,Ben Johnson,HC,young HC,1,developing play-caller,4,False,4,4,high,-0.008035752076279582,0.00623630531898095,-0.013072773902733759,balanced,typical
+CIN,Zac Taylor,Zac Taylor,HC,veteran HC,7,veteran play-caller,7,False,7,7,high,0.046662774354588085,0.008171227736409326,0.09958813829167784,pass-first,leans on stars
+CLE,Todd Monken,Todd Monken,HC,first-year HC,0,developing play-caller,4,True,4,4,medium,-0.04842291282721402,0.01954723724645946,0.0926376324712263,run-first,leans on stars
+DAL,Brian Schottenheimer,Brian Schottenheimer,HC,young HC,1,developing play-caller,4,False,4,4,high,-0.025403481583248736,-0.020674924578750642,-0.005090702405999237,run-first,typical
+DEN,Sean Payton,Davis Webb,OC,veteran HC,20,first-time play-caller,0,True,0,0,medium,,,,no history,no history
+DET,Dan Campbell,Drew Petzing,OC,veteran HC,5,developing play-caller,3,True,3,3,medium,0.011221143621007549,0.010578850325176137,-0.08556870174483822,balanced,typical
+GNB,Matt LaFleur,Matt LaFleur,HC,veteran HC,7,veteran play-caller,8,False,8,8,high,-0.01679563978674543,-0.015267112849400633,-0.006546954462623489,balanced,typical
+HOU,DeMeco Ryans,Nick Caley,OC,young HC,3,developing play-caller,1,False,1,1,medium,0.01817342157074778,-0.022847304243988537,-0.07383676639453174,balanced,typical
+IND,Shane Steichen,Shane Steichen,HC,young HC,3,veteran play-caller,5,False,5,5,high,-0.032983702113788246,0.006553650398742894,0.00403814875129116,run-first,typical
+JAX,Liam Coen,Liam Coen,HC,young HC,1,developing play-caller,2,False,2,2,high,0.011006496295873136,-0.05531726020756539,-0.006333960299539643,balanced,spreads it around
+KAN,Andy Reid,Andy Reid,HC,veteran HC,27,veteran play-caller,13,False,13,13,high,0.030881053810122207,-0.010396329222089884,-0.03230086686277428,pass-first,typical
+LAC,Jim Harbaugh,Mike McDaniel,OC,veteran HC,15,developing play-caller,4,True,4,4,medium,0.010968922545395544,0.02189601039021971,-0.004846639501444316,balanced,typical
+LAR,Sean McVay,Sean McVay,HC,veteran HC,9,veteran play-caller,9,False,9,9,high,0.011669439045726898,0.001889687263447709,0.03850867658563445,balanced,typical
+LVR,Klint Kubiak,Klint Kubiak,HC,first-year HC,0,developing play-caller,3,True,3,3,medium,-0.010396609928961768,0.03325986934631969,0.014857204981423011,balanced,leans on stars
+MIA,Jeff Hafley,Bobby Slowik,OC,first-year HC,0,developing play-caller,2,True,2,2,medium,0.021462583427284722,-0.05306214181302499,0.03903296241747217,balanced,spreads it around
+MIN,Kevin O'Connell,Kevin O'Connell,HC,young HC,4,developing play-caller,4,False,4,4,low,0.03877611858329178,0.034098711789919245,0.027849745322140296,pass-first,leans on stars
+NWE,Mike Vrabel,Josh McDaniels,OC,veteran HC,8,veteran play-caller,13,False,13,13,high,0.006714441054867491,0.0063850268562239965,-0.0246176528864257,balanced,typical
+NOR,Kellen Moore,Kellen Moore,HC,young HC,1,veteran play-caller,7,False,7,7,high,-0.0009496893733667652,-0.004934209401868228,0.005806514166629695,balanced,typical
+NYG,John Harbaugh,Matt Nagy,OC,new to team,18,developing play-caller,3,True,3,3,medium,0.012057675314590932,-0.0025293469725134188,0.10531331791526793,balanced,leans on stars
+NYJ,Aaron Glenn,Frank Reich,OC,young HC,1,veteran play-caller,5,True,5,5,medium,-0.009167484167513304,-0.037616968951128565,0.03563010020760343,balanced,spreads it around
+PHI,Nick Sirianni,Sean Mannion,OC,veteran HC,5,first-time play-caller,0,True,0,0,high,,,,no history,no history
+PIT,Mike McCarthy,Mike McCarthy,HC,new to team,20,veteran play-caller,15,True,15,15,medium,0.03411282008335107,0.016862294383056642,-0.0023741386625260597,pass-first,typical
+SFO,Kyle Shanahan,Kyle Shanahan,HC,veteran HC,9,veteran play-caller,11,False,11,11,high,-0.012936475814191271,-0.006974206337613864,-0.03735289787824564,balanced,typical
+SEA,Mike Macdonald,Brian Fleury,OC,young HC,2,first-time play-caller,0,True,0,0,medium,,,,no history,no history
+TAM,Todd Bowles,Zac Robinson,OC,veteran HC,11,developing play-caller,2,True,2,2,medium,-0.025295830778350466,0.020402376213146778,0.12144093615228696,run-first,leans on stars
+TEN,Robert Saleh,Brian Daboll,OC,new to team,5,veteran play-caller,6,True,6,6,medium,-0.007423649371918663,0.02493757509066058,-0.105529947838577,balanced,typical
+WAS,Dan Quinn,David Blough,OC,veteran HC,11,first-time play-caller,0,True,0,0,high,,,,no history,no history

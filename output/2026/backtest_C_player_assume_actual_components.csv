@@ -1,0 +1,791 @@
+boxscore_id,team,week,plays,dropbacks,pass_att,runs,sacks,interceptions,fumbles_lost,pass_td,rush_td,td,fga,fgm,drives,rz_trips,rz_td_rate,points,points_per_drive
+202609090sea,NWE,1,67,42,33,25,3,3,0,1,0,1,1,1,9,2,0.5,"boxscore_id   team
+202609090sea  NWE     10.0
+Name: points, dtype: float64","boxscore_id   team
+202609090sea  NWE     1.111111
+Name: points, dtype: float64"
+202609090sea,SEA,1,47,27,24,20,2,0,0,1,0,1,2,2,9,2,0.0,"boxscore_id   team
+202609090sea  SEA     13.0
+Name: points, dtype: float64","boxscore_id   team
+202609090sea  SEA     1.444444
+Name: points, dtype: float64"
+202609100ram,LAR,1,56,29,28,27,0,1,1,0,1,1,0,0,9,3,0.3333333333333333,"boxscore_id   team
+202609100ram  LAR     7.0
+Name: points, dtype: float64","boxscore_id   team
+202609100ram  LAR     0.777778
+Name: points, dtype: float64"
+202609100ram,SFO,1,64,36,34,28,0,1,0,3,0,3,3,2,9,3,0.6666666666666666,"boxscore_id   team
+202609100ram  SFO     27.0
+Name: points, dtype: float64","boxscore_id   team
+202609100ram  SFO     3.0
+Name: points, dtype: float64"
+202609130car,CAR,1,62,43,38,19,2,1,1,3,2,5,1,1,13,4,1.0,"boxscore_id   team
+202609130car  CAR     37.0
+Name: points, dtype: float64","boxscore_id   team
+202609130car  CAR     2.846154
+Name: points, dtype: float64"
+202609130car,CHI,1,70,38,29,32,2,0,1,2,6,8,1,1,14,4,1.0,"boxscore_id   team
+202609130car  CHI     59.0
+Name: points, dtype: float64","boxscore_id   team
+202609130car  CHI     4.214286
+Name: points, dtype: float64"
+202609130cin,CIN,1,62,37,35,25,1,1,0,1,1,2,4,4,9,5,0.4,"boxscore_id   team
+202609130cin  CIN     33.0
+Name: points, dtype: float64","boxscore_id   team
+202609130cin  CIN     3.666667
+Name: points, dtype: float64"
+202609130cin,TAM,1,51,36,28,15,4,0,4,0,2,2,2,2,8,4,0.5,"boxscore_id   team
+202609130cin  TAM     27.0
+Name: points, dtype: float64","boxscore_id   team
+202609130cin  TAM     3.375
+Name: points, dtype: float64"
+202609130clt,BAL,1,60,29,24,31,2,0,1,1,4,5,2,2,13,4,0.75,"boxscore_id   team
+202609130clt  BAL     41.0
+Name: points, dtype: float64","boxscore_id   team
+202609130clt  BAL     3.153846
+Name: points, dtype: float64"
+202609130clt,IND,1,53,34,31,19,2,1,1,1,2,3,1,1,12,3,1.0,"boxscore_id   team
+202609130clt  IND     23.0
+Name: points, dtype: float64","boxscore_id   team
+202609130clt  IND     1.916667
+Name: points, dtype: float64"
+202609130det,DET,1,73,41,39,32,1,0,1,2,2,4,1,1,14,5,0.8,"boxscore_id   team
+202609130det  DET     31.0
+Name: points, dtype: float64","boxscore_id   team
+202609130det  DET     2.214286
+Name: points, dtype: float64"
+202609130det,NOR,1,85,62,55,23,5,2,1,3,1,4,2,1,14,5,0.8,"boxscore_id   team
+202609130det  NOR     30.0
+Name: points, dtype: float64","boxscore_id   team
+202609130det  NOR     2.142857
+Name: points, dtype: float64"
+202609130htx,BUF,1,51,32,29,19,2,0,0,2,2,4,3,3,11,3,0.3333333333333333,"boxscore_id   team
+202609130htx  BUF     36.0
+Name: points, dtype: float64","boxscore_id   team
+202609130htx  BUF     3.272727
+Name: points, dtype: float64"
+202609130htx,HOU,1,73,42,38,31,3,0,2,2,2,4,1,1,11,5,0.8,"boxscore_id   team
+202609130htx  HOU     31.0
+Name: points, dtype: float64","boxscore_id   team
+202609130htx  HOU     2.818182
+Name: points, dtype: float64"
+202609130jax,CLE,1,49,30,22,19,5,1,2,1,0,1,1,1,9,2,0.0,"boxscore_id   team
+202609130jax  CLE     10.0
+Name: points, dtype: float64","boxscore_id   team
+202609130jax  CLE     1.111111
+Name: points, dtype: float64"
+202609130jax,JAX,1,53,24,23,29,1,0,0,4,0,4,2,2,8,2,1.0,"boxscore_id   team
+202609130jax  JAX     34.0
+Name: points, dtype: float64","boxscore_id   team
+202609130jax  JAX     4.25
+Name: points, dtype: float64"
+202609130min,GNB,1,67,46,42,21,4,1,1,2,0,2,3,3,12,4,0.25,"boxscore_id   team
+202609130min  GNB     22.0
+Name: points, dtype: float64","boxscore_id   team
+202609130min  GNB     1.833333
+Name: points, dtype: float64"
+202609130min,MIN,1,58,30,24,28,3,1,0,3,2,5,1,1,12,5,0.8,"boxscore_id   team
+202609130min  MIN     39.0
+Name: points, dtype: float64","boxscore_id   team
+202609130min  MIN     3.25
+Name: points, dtype: float64"
+202609130nyg,DAL,1,52,36,34,16,0,1,0,2,1,3,0,0,7,3,1.0,"boxscore_id   team
+202609130nyg  DAL     20.0
+Name: points, dtype: float64","boxscore_id   team
+202609130nyg  DAL     2.857143
+Name: points, dtype: float64"
+202609130nyg,NYG,1,65,33,29,32,2,0,1,3,1,4,0,0,7,4,1.0,"boxscore_id   team
+202609130nyg  NYG     28.0
+Name: points, dtype: float64","boxscore_id   team
+202609130nyg  NYG     4.0
+Name: points, dtype: float64"
+202609130oti,NYJ,1,60,26,24,34,0,0,1,0,2,2,4,3,11,3,0.6666666666666666,"boxscore_id   team
+202609130oti  NYJ     23.0
+Name: points, dtype: float64","boxscore_id   team
+202609130oti  NYJ     2.090909
+Name: points, dtype: float64"
+202609130oti,TEN,1,49,39,32,10,3,0,0,1,0,1,1,1,9,1,1.0,"boxscore_id   team
+202609130oti  TEN     10.0
+Name: points, dtype: float64","boxscore_id   team
+202609130oti  TEN     1.111111
+Name: points, dtype: float64"
+202609130phi,PHI,1,51,33,25,18,3,0,0,3,0,3,1,1,11,3,0.6666666666666666,"boxscore_id   team
+202609130phi  PHI     24.0
+Name: points, dtype: float64","boxscore_id   team
+202609130phi  PHI     2.181818
+Name: points, dtype: float64"
+202609130phi,WAS,1,67,38,34,29,1,0,0,2,1,3,2,1,12,3,1.0,"boxscore_id   team
+202609130phi  WAS     22.0
+Name: points, dtype: float64","boxscore_id   team
+202609130phi  WAS     1.833333
+Name: points, dtype: float64"
+202609130pit,ATL,1,57,26,22,31,4,2,1,1,0,1,4,2,13,0,,"boxscore_id   team
+202609130pit  ATL     13.0
+Name: points, dtype: float64","boxscore_id   team
+202609130pit  ATL     1.0
+Name: points, dtype: float64"
+202609130pit,PIT,1,61,43,41,18,2,0,1,1,0,1,3,2,13,2,0.5,"boxscore_id   team
+202609130pit  PIT     20.0
+Name: points, dtype: float64","boxscore_id   team
+202609130pit  PIT     1.538462
+Name: points, dtype: float64"
+202609130rai,LVR,1,64,31,30,33,0,2,0,3,0,3,2,2,10,4,0.75,"boxscore_id   team
+202609130rai  LVR     27.0
+Name: points, dtype: float64","boxscore_id   team
+202609130rai  LVR     2.7
+Name: points, dtype: float64"
+202609130rai,MIA,1,50,37,27,13,5,1,1,0,1,1,3,2,11,2,0.5,"boxscore_id   team
+202609130rai  MIA     13.0
+Name: points, dtype: float64","boxscore_id   team
+202609130rai  MIA     1.181818
+Name: points, dtype: float64"
+202609130sdg,ARI,1,69,39,37,30,1,0,0,1,1,2,5,4,10,5,0.4,"boxscore_id   team
+202609130sdg  ARI     26.0
+Name: points, dtype: float64","boxscore_id   team
+202609130sdg  ARI     2.6
+Name: points, dtype: float64"
+202609130sdg,LAC,1,51,35,27,16,3,1,1,1,1,2,0,0,10,3,0.6666666666666666,"boxscore_id   team
+202609130sdg  LAC     14.0
+Name: points, dtype: float64","boxscore_id   team
+202609130sdg  LAC     1.4
+Name: points, dtype: float64"
+202609140kan,DEN,1,46,33,28,13,4,1,1,1,0,1,1,1,11,2,0.5,"boxscore_id   team
+202609140kan  DEN     10.0
+Name: points, dtype: float64","boxscore_id   team
+202609140kan  DEN     0.909091
+Name: points, dtype: float64"
+202609140kan,KAN,1,64,33,27,31,2,1,0,2,2,4,1,1,12,5,0.6,"boxscore_id   team
+202609140kan  KAN     31.0
+Name: points, dtype: float64","boxscore_id   team
+202609140kan  KAN     2.583333
+Name: points, dtype: float64"
+202609170buf,BUF,2,66,38,31,28,2,0,0,3,3,6,0,0,9,5,1.0,"boxscore_id   team
+202609170buf  BUF     41.0
+Name: points, dtype: float64","boxscore_id   team
+202609170buf  BUF     4.555556
+Name: points, dtype: float64"
+202609170buf,DET,2,62,44,38,18,4,0,2,4,0,4,1,1,9,3,1.0,"boxscore_id   team
+202609170buf  DET     31.0
+Name: points, dtype: float64","boxscore_id   team
+202609170buf  DET     3.444444
+Name: points, dtype: float64"
+202609200atl,ATL,2,67,39,32,28,3,3,2,0,0,0,2,1,12,0,,"boxscore_id   team
+202609200atl  ATL     3.0
+Name: points, dtype: float64","boxscore_id   team
+202609200atl  ATL     0.25
+Name: points, dtype: float64"
+202609200atl,CAR,2,59,39,36,20,2,0,0,3,0,3,2,2,10,6,0.5,"boxscore_id   team
+202609200atl  CAR     34.0
+Name: points, dtype: float64","boxscore_id   team
+202609200atl  CAR     3.4
+Name: points, dtype: float64"
+202609200chi,CHI,2,69,41,34,28,4,1,1,0,0,0,2,1,10,3,0.0,"boxscore_id   team
+202609200chi  CHI     3.0
+Name: points, dtype: float64","boxscore_id   team
+202609200chi  CHI     0.3
+Name: points, dtype: float64"
+202609200chi,MIN,2,51,24,20,27,3,0,1,0,0,0,3,3,9,1,0.0,"boxscore_id   team
+202609200chi  MIN     9.0
+Name: points, dtype: float64","boxscore_id   team
+202609200chi  MIN     1.0
+Name: points, dtype: float64"
+202609200crd,ARI,2,47,31,28,16,2,1,0,1,0,1,0,0,10,1,1.0,"boxscore_id   team
+202609200crd  ARI     7.0
+Name: points, dtype: float64","boxscore_id   team
+202609200crd  ARI     0.7
+Name: points, dtype: float64"
+202609200crd,SEA,2,67,27,26,40,1,0,1,3,1,4,1,1,10,5,0.6,"boxscore_id   team
+202609200crd  SEA     31.0
+Name: points, dtype: float64","boxscore_id   team
+202609200crd  SEA     3.1
+Name: points, dtype: float64"
+202609200dal,DAL,2,54,36,31,18,2,0,0,4,0,4,3,3,8,4,0.75,"boxscore_id   team
+202609200dal  DAL     37.0
+Name: points, dtype: float64","boxscore_id   team
+202609200dal  DAL     4.625
+Name: points, dtype: float64"
+202609200dal,WAS,2,67,42,35,25,0,0,2,2,0,2,3,2,9,4,0.5,"boxscore_id   team
+202609200dal  WAS     20.0
+Name: points, dtype: float64","boxscore_id   team
+202609200dal  WAS     2.222222
+Name: points, dtype: float64"
+202609200den,DEN,2,56,31,31,25,0,1,0,1,1,2,2,2,9,4,0.5,"boxscore_id   team
+202609200den  DEN     20.0
+Name: points, dtype: float64","boxscore_id   team
+202609200den  DEN     2.222222
+Name: points, dtype: float64"
+202609200den,JAX,2,55,31,29,24,2,1,0,0,1,1,3,2,9,2,0.5,"boxscore_id   team
+202609200den  JAX     13.0
+Name: points, dtype: float64","boxscore_id   team
+202609200den  JAX     1.444444
+Name: points, dtype: float64"
+202609200htx,CIN,2,58,36,31,22,5,0,0,2,0,2,2,2,12,1,1.0,"boxscore_id   team
+202609200htx  CIN     20.0
+Name: points, dtype: float64","boxscore_id   team
+202609200htx  CIN     1.666667
+Name: points, dtype: float64"
+202609200htx,HOU,2,76,61,54,15,4,0,1,0,0,0,3,2,13,4,0.0,"boxscore_id   team
+202609200htx  HOU     6.0
+Name: points, dtype: float64","boxscore_id   team
+202609200htx  HOU     0.461538
+Name: points, dtype: float64"
+202609200kan,IND,2,63,33,31,30,0,1,0,1,2,3,3,3,10,3,0.6666666666666666,"boxscore_id   team
+202609200kan  IND     30.0
+Name: points, dtype: float64","boxscore_id   team
+202609200kan  IND     3.0
+Name: points, dtype: float64"
+202609200kan,KAN,2,78,51,47,27,2,0,0,3,0,3,5,4,11,5,0.6,"boxscore_id   team
+202609200kan  KAN     33.0
+Name: points, dtype: float64","boxscore_id   team
+202609200kan  KAN     3.0
+Name: points, dtype: float64"
+202609200nwe,NWE,2,51,27,22,24,3,1,1,0,1,1,3,2,11,1,0.0,"boxscore_id   team
+202609200nwe  NWE     20.0
+Name: points, dtype: float64","boxscore_id   team
+202609200nwe  NWE     1.818182
+Name: points, dtype: float64"
+202609200nwe,PIT,2,67,46,40,21,4,1,2,0,0,0,2,1,12,1,0.0,"boxscore_id   team
+202609200nwe  PIT     3.0
+Name: points, dtype: float64","boxscore_id   team
+202609200nwe  PIT     0.25
+Name: points, dtype: float64"
+202609200nyj,GNB,2,50,32,29,18,3,0,2,2,0,2,2,2,12,3,0.6666666666666666,"boxscore_id   team
+202609200nyj  GNB     20.0
+Name: points, dtype: float64","boxscore_id   team
+202609200nyj  GNB     1.666667
+Name: points, dtype: float64"
+202609200nyj,NYJ,2,71,48,40,23,4,0,1,1,1,2,1,1,12,3,0.6666666666666666,"boxscore_id   team
+202609200nyj  NYJ     17.0
+Name: points, dtype: float64","boxscore_id   team
+202609200nyj  NYJ     1.416667
+Name: points, dtype: float64"
+202609200oti,PHI,2,72,42,37,30,3,2,0,2,1,3,1,1,8,4,0.75,"boxscore_id   team
+202609200oti  PHI     24.0
+Name: points, dtype: float64","boxscore_id   team
+202609200oti  PHI     3.0
+Name: points, dtype: float64"
+202609200oti,TEN,2,51,24,20,27,2,0,0,0,2,2,2,2,9,4,0.5,"boxscore_id   team
+202609200oti  TEN     20.0
+Name: points, dtype: float64","boxscore_id   team
+202609200oti  TEN     2.222222
+Name: points, dtype: float64"
+202609200rav,BAL,2,55,37,30,18,3,1,0,1,1,2,2,1,8,2,0.5,"boxscore_id   team
+202609200rav  BAL     17.0
+Name: points, dtype: float64","boxscore_id   team
+202609200rav  BAL     2.125
+Name: points, dtype: float64"
+202609200rav,NOR,2,63,39,34,24,3,0,1,1,1,2,3,3,8,2,0.5,"boxscore_id   team
+202609200rav  NOR     24.0
+Name: points, dtype: float64","boxscore_id   team
+202609200rav  NOR     3.0
+Name: points, dtype: float64"
+202609200sdg,LAC,2,62,31,27,31,3,2,3,1,1,2,1,0,13,2,1.0,"boxscore_id   team
+202609200sdg  LAC     14.0
+Name: points, dtype: float64","boxscore_id   team
+202609200sdg  LAC     1.076923
+Name: points, dtype: float64"
+202609200sdg,LVR,2,57,32,29,25,2,1,0,3,0,3,1,1,12,3,0.6666666666666666,"boxscore_id   team
+202609200sdg  LVR     26.0
+Name: points, dtype: float64","boxscore_id   team
+202609200sdg  LVR     2.166667
+Name: points, dtype: float64"
+202609200sfo,MIA,2,56,28,23,28,4,0,1,1,0,1,3,2,8,2,0.0,"boxscore_id   team
+202609200sfo  MIA     13.0
+Name: points, dtype: float64","boxscore_id   team
+202609200sfo  MIA     1.625
+Name: points, dtype: float64"
+202609200sfo,SFO,2,47,25,22,22,0,0,0,2,3,5,0,0,8,5,1.0,"boxscore_id   team
+202609200sfo  SFO     35.0
+Name: points, dtype: float64","boxscore_id   team
+202609200sfo  SFO     4.375
+Name: points, dtype: float64"
+202609200tam,CLE,2,53,35,30,18,2,0,0,2,0,2,3,3,10,3,0.3333333333333333,"boxscore_id   team
+202609200tam  CLE     23.0
+Name: points, dtype: float64","boxscore_id   team
+202609200tam  CLE     2.3
+Name: points, dtype: float64"
+202609200tam,TAM,2,62,40,34,22,3,1,0,1,0,1,4,4,11,4,0.25,"boxscore_id   team
+202609200tam  TAM     19.0
+Name: points, dtype: float64","boxscore_id   team
+202609200tam  TAM     1.727273
+Name: points, dtype: float64"
+202609210ram,LAR,2,56,32,30,24,1,1,1,4,0,4,1,0,11,3,1.0,"boxscore_id   team
+202609210ram  LAR     28.0
+Name: points, dtype: float64","boxscore_id   team
+202609210ram  LAR     2.545455
+Name: points, dtype: float64"
+202609210ram,NYG,2,55,34,32,21,2,1,0,0,0,0,2,2,10,2,0.0,"boxscore_id   team
+202609210ram  NYG     6.0
+Name: points, dtype: float64","boxscore_id   team
+202609210ram  NYG     0.6
+Name: points, dtype: float64"
+202609240gnb,ATL,3,64,25,25,39,0,1,0,1,3,4,2,2,10,5,0.8,"boxscore_id   team
+202609240gnb  ATL     35.0
+Name: points, dtype: float64","boxscore_id   team
+202609240gnb  ATL     3.5
+Name: points, dtype: float64"
+202609240gnb,GNB,3,63,54,53,9,1,1,0,2,0,2,1,0,10,4,0.5,"boxscore_id   team
+202609240gnb  GNB     14.0
+Name: points, dtype: float64","boxscore_id   team
+202609240gnb  GNB     1.4
+Name: points, dtype: float64"
+202609270buf,BUF,3,62,31,26,31,4,2,3,0,3,3,1,1,11,4,0.75,"boxscore_id   team
+202609270buf  BUF     24.0
+Name: points, dtype: float64","boxscore_id   team
+202609270buf  BUF     2.181818
+Name: points, dtype: float64"
+202609270buf,LAC,3,64,38,34,26,2,1,0,1,0,1,4,3,11,4,0.25,"boxscore_id   team
+202609270buf  LAC     16.0
+Name: points, dtype: float64","boxscore_id   team
+202609270buf  LAC     1.454545
+Name: points, dtype: float64"
+202609270cle,CAR,3,73,50,47,23,3,1,0,1,0,1,4,4,12,2,0.5,"boxscore_id   team
+202609270cle  CAR     18.0
+Name: points, dtype: float64","boxscore_id   team
+202609270cle  CAR     1.5
+Name: points, dtype: float64"
+202609270cle,CLE,3,61,38,31,23,2,0,0,2,0,2,2,2,10,3,0.6666666666666666,"boxscore_id   team
+202609270cle  CLE     21.0
+Name: points, dtype: float64","boxscore_id   team
+202609270cle  CLE     2.1
+Name: points, dtype: float64"
+202609270clt,HOU,3,51,31,27,20,3,0,0,1,1,2,1,1,10,3,0.6666666666666666,"boxscore_id   team
+202609270clt  HOU     17.0
+Name: points, dtype: float64","boxscore_id   team
+202609270clt  HOU     1.7
+Name: points, dtype: float64"
+202609270clt,IND,3,71,41,36,30,4,1,2,1,0,1,4,4,10,3,0.3333333333333333,"boxscore_id   team
+202609270clt  IND     19.0
+Name: points, dtype: float64","boxscore_id   team
+202609270clt  IND     1.9
+Name: points, dtype: float64"
+202609270dal,BAL,3,58,22,20,36,0,0,0,2,2,4,2,2,12,6,0.6666666666666666,"boxscore_id   team
+202609270dal  BAL     34.0
+Name: points, dtype: float64","boxscore_id   team
+202609270dal  BAL     2.833333
+Name: points, dtype: float64"
+202609270dal,DAL,3,71,45,40,26,1,0,2,1,2,3,4,3,11,6,0.5,"boxscore_id   team
+202609270dal  DAL     31.0
+Name: points, dtype: float64","boxscore_id   team
+202609270dal  DAL     2.818182
+Name: points, dtype: float64"
+202609270den,DEN,3,60,35,34,25,1,1,0,2,1,3,1,0,10,3,1.0,"boxscore_id   team
+202609270den  DEN     30.0
+Name: points, dtype: float64","boxscore_id   team
+202609270den  DEN     3.0
+Name: points, dtype: float64"
+202609270den,LAR,3,80,58,53,22,4,2,0,2,0,2,4,4,12,5,0.2,"boxscore_id   team
+202609270den  LAR     26.0
+Name: points, dtype: float64","boxscore_id   team
+202609270den  LAR     2.166667
+Name: points, dtype: float64"
+202609270det,DET,3,62,36,32,26,2,0,0,2,2,4,1,1,8,5,0.8,"boxscore_id   team
+202609270det  DET     31.0
+Name: points, dtype: float64","boxscore_id   team
+202609270det  DET     3.875
+Name: points, dtype: float64"
+202609270det,NYJ,3,61,44,37,17,5,0,1,3,0,3,1,1,9,3,0.6666666666666666,"boxscore_id   team
+202609270det  NYJ     24.0
+Name: points, dtype: float64","boxscore_id   team
+202609270det  NYJ     2.666667
+Name: points, dtype: float64"
+202609270jax,JAX,3,59,31,28,28,1,1,0,3,2,5,1,0,10,5,1.0,"boxscore_id   team
+202609270jax  JAX     35.0
+Name: points, dtype: float64","boxscore_id   team
+202609270jax  JAX     3.5
+Name: points, dtype: float64"
+202609270jax,NWE,3,60,37,31,23,3,2,1,0,0,0,3,2,10,4,0.0,"boxscore_id   team
+202609270jax  NWE     6.0
+Name: points, dtype: float64","boxscore_id   team
+202609270jax  NWE     0.6
+Name: points, dtype: float64"
+202609270mia,KAN,3,49,25,24,24,0,1,0,2,1,3,2,1,9,5,0.6,"boxscore_id   team
+202609270mia  KAN     24.0
+Name: points, dtype: float64","boxscore_id   team
+202609270mia  KAN     2.666667
+Name: points, dtype: float64"
+202609270mia,MIA,3,67,42,36,25,0,1,1,0,1,1,1,1,9,2,0.5,"boxscore_id   team
+202609270mia  MIA     10.0
+Name: points, dtype: float64","boxscore_id   team
+202609270mia  MIA     1.111111
+Name: points, dtype: float64"
+202609270nor,LVR,3,61,37,33,24,3,0,1,3,1,4,3,3,10,6,0.5,"boxscore_id   team
+202609270nor  LVR     35.0
+Name: points, dtype: float64","boxscore_id   team
+202609270nor  LVR     3.5
+Name: points, dtype: float64"
+202609270nor,NOR,3,72,45,42,27,2,1,4,4,0,4,0,0,11,5,0.8,"boxscore_id   team
+202609270nor  NOR     27.0
+Name: points, dtype: float64","boxscore_id   team
+202609270nor  NOR     2.454545
+Name: points, dtype: float64"
+202609270nyg,NYG,3,57,26,22,31,3,0,0,0,0,0,4,4,10,2,0.0,"boxscore_id   team
+202609270nyg  NYG     12.0
+Name: points, dtype: float64","boxscore_id   team
+202609270nyg  NYG     1.2
+Name: points, dtype: float64"
+202609270nyg,TEN,3,57,36,36,21,0,1,0,1,0,1,1,0,9,3,0.3333333333333333,"boxscore_id   team
+202609270nyg  TEN     7.0
+Name: points, dtype: float64","boxscore_id   team
+202609270nyg  TEN     0.777778
+Name: points, dtype: float64"
+202609270pit,CIN,3,56,40,37,16,1,0,1,3,0,3,2,2,8,2,0.5,"boxscore_id   team
+202609270pit  CIN     27.0
+Name: points, dtype: float64","boxscore_id   team
+202609270pit  CIN     3.375
+Name: points, dtype: float64"
+202609270pit,PIT,3,56,36,33,20,2,1,0,3,0,3,3,3,9,3,0.3333333333333333,"boxscore_id   team
+202609270pit  PIT     30.0
+Name: points, dtype: float64","boxscore_id   team
+202609270pit  PIT     3.333333
+Name: points, dtype: float64"
+202609270sfo,ARI,3,80,53,51,27,2,0,0,2,1,3,3,3,10,5,0.6,"boxscore_id   team
+202609270sfo  ARI     30.0
+Name: points, dtype: float64","boxscore_id   team
+202609270sfo  ARI     3.0
+Name: points, dtype: float64"
+202609270sfo,SFO,3,49,28,27,21,0,0,0,4,1,5,1,1,9,3,1.0,"boxscore_id   team
+202609270sfo  SFO     36.0
+Name: points, dtype: float64","boxscore_id   team
+202609270sfo  SFO     4.0
+Name: points, dtype: float64"
+202609270tam,MIN,3,55,34,29,21,3,1,0,1,0,1,3,3,13,0,,"boxscore_id   team
+202609270tam  MIN     23.0
+Name: points, dtype: float64","boxscore_id   team
+202609270tam  MIN     1.769231
+Name: points, dtype: float64"
+202609270tam,TAM,3,64,46,37,18,6,2,0,1,0,1,3,3,15,2,0.0,"boxscore_id   team
+202609270tam  TAM     16.0
+Name: points, dtype: float64","boxscore_id   team
+202609270tam  TAM     1.066667
+Name: points, dtype: float64"
+202609270was,SEA,3,64,47,46,17,0,2,1,4,0,4,1,1,13,5,0.8,"boxscore_id   team
+202609270was  SEA     31.0
+Name: points, dtype: float64","boxscore_id   team
+202609270was  SEA     2.384615
+Name: points, dtype: float64"
+202609270was,WAS,3,63,35,31,28,2,0,0,3,0,3,2,2,13,3,0.6666666666666666,"boxscore_id   team
+202609270was  WAS     33.0
+Name: points, dtype: float64","boxscore_id   team
+202609270was  WAS     2.538462
+Name: points, dtype: float64"
+202609280chi,CHI,3,67,35,34,32,0,0,0,2,1,3,2,2,9,4,0.5,"boxscore_id   team
+202609280chi  CHI     27.0
+Name: points, dtype: float64","boxscore_id   team
+202609280chi  CHI     3.0
+Name: points, dtype: float64"
+202609280chi,PHI,3,47,31,26,16,2,2,1,0,1,1,0,0,9,2,0.5,"boxscore_id   team
+202609280chi  PHI     7.0
+Name: points, dtype: float64","boxscore_id   team
+202609280chi  PHI     0.777778
+Name: points, dtype: float64"
+202610010cle,CLE,4,60,37,33,23,2,1,1,1,2,3,2,2,11,2,1.0,"boxscore_id   team
+202610010cle  CLE     27.0
+Name: points, dtype: float64","boxscore_id   team
+202610010cle  CLE     2.454545
+Name: points, dtype: float64"
+202610010cle,PIT,4,64,45,40,19,5,2,0,3,0,3,2,1,12,3,0.6666666666666666,"boxscore_id   team
+202610010cle  PIT     24.0
+Name: points, dtype: float64","boxscore_id   team
+202610010cle  PIT     2.0
+Name: points, dtype: float64"
+202610040buf,BUF,4,54,35,33,19,1,1,1,1,2,3,2,2,10,3,0.6666666666666666,"boxscore_id   team
+202610040buf  BUF     26.0
+Name: points, dtype: float64","boxscore_id   team
+202610040buf  BUF     2.6
+Name: points, dtype: float64"
+202610040buf,NWE,4,71,42,37,29,1,1,1,3,1,4,0,0,11,3,1.0,"boxscore_id   team
+202610040buf  NWE     29.0
+Name: points, dtype: float64","boxscore_id   team
+202610040buf  NWE     2.636364
+Name: points, dtype: float64"
+202610040car,CAR,4,70,45,41,25,3,0,0,2,2,4,2,2,9,4,0.75,"boxscore_id   team
+202610040car  CAR     32.0
+Name: points, dtype: float64","boxscore_id   team
+202610040car  CAR     3.555556
+Name: points, dtype: float64"
+202610040car,DET,4,68,53,52,15,1,0,0,1,1,2,4,4,10,4,0.5,"boxscore_id   team
+202610040car  DET     26.0
+Name: points, dtype: float64","boxscore_id   team
+202610040car  DET     2.6
+Name: points, dtype: float64"
+202610040chi,CHI,4,86,36,34,50,1,1,1,0,2,2,3,3,9,7,0.2857142857142857,"boxscore_id   team
+202610040chi  CHI     23.0
+Name: points, dtype: float64","boxscore_id   team
+202610040chi  CHI     2.555556
+Name: points, dtype: float64"
+202610040chi,NYJ,4,32,18,15,14,3,0,0,1,0,1,2,2,8,1,0.0,"boxscore_id   team
+202610040chi  NYJ     12.0
+Name: points, dtype: float64","boxscore_id   team
+202610040chi  NYJ     1.5
+Name: points, dtype: float64"
+202610040cin,CIN,4,71,58,54,13,2,2,0,1,1,2,1,1,9,4,0.5,"boxscore_id   team
+202610040cin  CIN     17.0
+Name: points, dtype: float64","boxscore_id   team
+202610040cin  CIN     1.888889
+Name: points, dtype: float64"
+202610040cin,JAX,4,52,27,23,25,4,0,0,1,1,2,3,3,8,2,0.5,"boxscore_id   team
+202610040cin  JAX     22.0
+Name: points, dtype: float64","boxscore_id   team
+202610040cin  JAX     2.75
+Name: points, dtype: float64"
+202610040htx,DAL,4,73,50,45,23,3,0,0,1,3,4,4,2,10,4,1.0,"boxscore_id   team
+202610040htx  DAL     34.0
+Name: points, dtype: float64","boxscore_id   team
+202610040htx  DAL     3.4
+Name: points, dtype: float64"
+202610040htx,HOU,4,50,33,29,17,2,0,0,2,1,3,3,3,11,3,0.6666666666666666,"boxscore_id   team
+202610040htx  HOU     30.0
+Name: points, dtype: float64","boxscore_id   team
+202610040htx  HOU     2.727273
+Name: points, dtype: float64"
+202610040min,MIA,4,37,20,17,17,2,0,1,0,1,1,1,1,9,2,0.5,"boxscore_id   team
+202610040min  MIA     10.0
+Name: points, dtype: float64","boxscore_id   team
+202610040min  MIA     1.111111
+Name: points, dtype: float64"
+202610040min,MIN,4,69,43,37,26,4,0,0,0,0,0,5,5,10,3,0.0,"boxscore_id   team
+202610040min  MIN     15.0
+Name: points, dtype: float64","boxscore_id   team
+202610040min  MIN     1.5
+Name: points, dtype: float64"
+202610040nyg,ARI,4,63,39,35,24,2,3,0,2,1,3,1,1,13,3,0.6666666666666666,"boxscore_id   team
+202610040nyg  ARI     24.0
+Name: points, dtype: float64","boxscore_id   team
+202610040nyg  ARI     1.846154
+Name: points, dtype: float64"
+202610040nyg,NYG,4,61,33,29,28,4,2,1,3,0,3,3,3,12,3,0.6666666666666666,"boxscore_id   team
+202610040nyg  NYG     36.0
+Name: points, dtype: float64","boxscore_id   team
+202610040nyg  NYG     3.0
+Name: points, dtype: float64"
+202610040phi,LAR,4,76,54,51,22,1,2,0,0,3,3,2,1,12,4,0.75,"boxscore_id   team
+202610040phi  LAR     24.0
+Name: points, dtype: float64","boxscore_id   team
+202610040phi  LAR     2.0
+Name: points, dtype: float64"
+202610040phi,PHI,4,58,32,27,26,4,0,0,2,0,2,2,2,13,4,0.5,"boxscore_id   team
+202610040phi  PHI     20.0
+Name: points, dtype: float64","boxscore_id   team
+202610040phi  PHI     1.538462
+Name: points, dtype: float64"
+202610040rai,KAN,4,57,33,30,24,2,0,0,2,2,4,1,1,11,4,0.75,"boxscore_id   team
+202610040rai  KAN     30.0
+Name: points, dtype: float64","boxscore_id   team
+202610040rai  KAN     2.727273
+Name: points, dtype: float64"
+202610040rai,LVR,4,75,49,49,26,0,1,0,2,0,2,4,4,11,3,0.3333333333333333,"boxscore_id   team
+202610040rai  LVR     27.0
+Name: points, dtype: float64","boxscore_id   team
+202610040rai  LVR     2.454545
+Name: points, dtype: float64"
+202610040rav,BAL,4,59,33,29,26,2,0,0,2,1,3,2,1,11,3,1.0,"boxscore_id   team
+202610040rav  BAL     24.0
+Name: points, dtype: float64","boxscore_id   team
+202610040rav  BAL     2.181818
+Name: points, dtype: float64"
+202610040rav,TEN,4,58,36,31,22,1,1,0,1,1,2,1,1,11,4,0.5,"boxscore_id   team
+202610040rav  TEN     18.0
+Name: points, dtype: float64","boxscore_id   team
+202610040rav  TEN     1.636364
+Name: points, dtype: float64"
+202610040sea,LAC,4,68,41,32,27,4,2,1,1,1,2,3,3,13,2,1.0,"boxscore_id   team
+202610040sea  LAC     23.0
+Name: points, dtype: float64","boxscore_id   team
+202610040sea  LAC     1.769231
+Name: points, dtype: float64"
+202610040sea,SEA,4,56,26,22,30,3,1,0,2,2,4,1,1,13,3,0.6666666666666666,"boxscore_id   team
+202610040sea  SEA     30.0
+Name: points, dtype: float64","boxscore_id   team
+202610040sea  SEA     2.307692
+Name: points, dtype: float64"
+202610040sfo,DEN,4,64,44,42,20,0,0,0,1,0,1,3,2,9,1,1.0,"boxscore_id   team
+202610040sfo  DEN     14.0
+Name: points, dtype: float64","boxscore_id   team
+202610040sfo  DEN     1.555556
+Name: points, dtype: float64"
+202610040sfo,SFO,4,62,33,29,29,0,0,0,2,1,3,2,1,10,3,0.6666666666666666,"boxscore_id   team
+202610040sfo  SFO     24.0
+Name: points, dtype: float64","boxscore_id   team
+202610040sfo  SFO     2.4
+Name: points, dtype: float64"
+202610040tam,GNB,4,52,30,30,22,0,1,1,2,0,2,1,1,9,3,0.6666666666666666,"boxscore_id   team
+202610040tam  GNB     17.0
+Name: points, dtype: float64","boxscore_id   team
+202610040tam  GNB     1.888889
+Name: points, dtype: float64"
+202610040tam,TAM,4,61,36,27,25,3,2,0,1,1,2,0,0,9,2,1.0,"boxscore_id   team
+202610040tam  TAM     14.0
+Name: points, dtype: float64","boxscore_id   team
+202610040tam  TAM     1.555556
+Name: points, dtype: float64"
+202610040was,IND,4,64,36,34,28,2,1,1,0,3,3,3,3,13,3,1.0,"boxscore_id   team
+202610040was  IND     30.0
+Name: points, dtype: float64","boxscore_id   team
+202610040was  IND     2.307692
+Name: points, dtype: float64"
+202610040was,WAS,4,61,41,37,20,2,1,0,1,0,1,2,2,12,2,0.0,"boxscore_id   team
+202610040was  WAS     13.0
+Name: points, dtype: float64","boxscore_id   team
+202610040was  WAS     1.083333
+Name: points, dtype: float64"
+202610050nor,ATL,4,54,21,20,33,1,0,0,1,5,6,1,1,10,5,0.8,"boxscore_id   team
+202610050nor  ATL     45.0
+Name: points, dtype: float64","boxscore_id   team
+202610050nor  ATL     4.5
+Name: points, dtype: float64"
+202610050nor,NOR,4,69,51,48,18,2,0,1,1,2,3,2,1,10,4,0.75,"boxscore_id   team
+202610050nor  NOR     24.0
+Name: points, dtype: float64","boxscore_id   team
+202610050nor  NOR     2.4
+Name: points, dtype: float64"
+202610080dal,DAL,5,55,42,42,13,0,2,0,1,1,2,1,1,9,2,1.0,"boxscore_id   team
+202610080dal  DAL     16.0
+Name: points, dtype: float64","boxscore_id   team
+202610080dal  DAL     1.777778
+Name: points, dtype: float64"
+202610080dal,TAM,5,63,31,25,32,1,0,0,1,2,3,1,1,11,4,0.75,"boxscore_id   team
+202610080dal  TAM     24.0
+Name: points, dtype: float64","boxscore_id   team
+202610080dal  TAM     2.181818
+Name: points, dtype: float64"
+202610110atl,ATL,5,64,40,35,24,3,1,0,1,0,1,3,3,10,3,0.3333333333333333,"boxscore_id   team
+202610110atl  ATL     23.0
+Name: points, dtype: float64","boxscore_id   team
+202610110atl  ATL     2.3
+Name: points, dtype: float64"
+202610110atl,BAL,5,70,38,32,32,4,0,1,3,1,4,3,3,11,4,0.75,"boxscore_id   team
+202610110atl  BAL     30.0
+Name: points, dtype: float64","boxscore_id   team
+202610110atl  BAL     2.727273
+Name: points, dtype: float64"
+202610110crd,ARI,5,70,53,47,17,5,1,0,3,0,3,1,0,12,4,0.75,"boxscore_id   team
+202610110crd  ARI     21.0
+Name: points, dtype: float64","boxscore_id   team
+202610110crd  ARI     1.75
+Name: points, dtype: float64"
+202610110crd,DET,5,65,33,30,32,3,0,1,3,3,6,1,1,11,4,1.0,"boxscore_id   team
+202610110crd  DET     45.0
+Name: points, dtype: float64","boxscore_id   team
+202610110crd  DET     4.090909
+Name: points, dtype: float64"
+202610110gnb,CHI,5,68,47,40,21,4,3,2,0,1,1,1,0,12,3,0.3333333333333333,"boxscore_id   team
+202610110gnb  CHI     7.0
+Name: points, dtype: float64","boxscore_id   team
+202610110gnb  CHI     0.583333
+Name: points, dtype: float64"
+202610110gnb,GNB,5,57,34,31,23,2,0,0,2,2,4,3,1,12,3,0.6666666666666666,"boxscore_id   team
+202610110gnb  GNB     31.0
+Name: points, dtype: float64","boxscore_id   team
+202610110gnb  GNB     2.583333
+Name: points, dtype: float64"
+202610110jax,JAX,5,68,44,39,24,2,1,2,2,0,2,2,2,11,3,0.0,"boxscore_id   team
+202610110jax  JAX     19.0
+Name: points, dtype: float64","boxscore_id   team
+202610110jax  JAX     1.727273
+Name: points, dtype: float64"
+202610110jax,PHI,5,59,42,40,17,1,0,1,1,1,2,1,1,11,1,1.0,"boxscore_id   team
+202610110jax  PHI     17.0
+Name: points, dtype: float64","boxscore_id   team
+202610110jax  PHI     1.545455
+Name: points, dtype: float64"
+202610110mia,CIN,5,61,33,32,28,0,0,1,4,0,4,1,1,9,5,0.6,"boxscore_id   team
+202610110mia  CIN     31.0
+Name: points, dtype: float64","boxscore_id   team
+202610110mia  CIN     3.444444
+Name: points, dtype: float64"
+202610110mia,MIA,5,63,33,26,30,3,2,1,1,2,3,1,1,10,4,0.75,"boxscore_id   team
+202610110mia  MIA     24.0
+Name: points, dtype: float64","boxscore_id   team
+202610110mia  MIA     2.4
+Name: points, dtype: float64"
+202610110nor,MIN,5,64,38,29,26,2,0,3,2,1,3,3,3,11,4,0.5,"boxscore_id   team
+202610110nor  MIN     23.0
+Name: points, dtype: float64","boxscore_id   team
+202610110nor  MIN     2.090909
+Name: points, dtype: float64"
+202610110nor,NOR,5,43,26,25,17,1,2,0,0,1,1,0,0,8,1,1.0,"boxscore_id   team
+202610110nor  NOR     13.0
+Name: points, dtype: float64","boxscore_id   team
+202610110nor  NOR     1.625
+Name: points, dtype: float64"
+202610110nwe,LVR,5,57,40,36,17,3,0,1,1,1,2,2,1,11,3,0.6666666666666666,"boxscore_id   team
+202610110nwe  LVR     17.0
+Name: points, dtype: float64","boxscore_id   team
+202610110nwe  LVR     1.545455
+Name: points, dtype: float64"
+202610110nwe,NWE,5,63,38,34,25,1,0,1,4,2,6,1,1,11,5,0.8,"boxscore_id   team
+202610110nwe  NWE     45.0
+Name: points, dtype: float64","boxscore_id   team
+202610110nwe  NWE     4.090909
+Name: points, dtype: float64"
+202610110nyj,CLE,5,65,44,33,21,8,0,3,1,0,1,2,2,13,1,0.0,"boxscore_id   team
+202610110nyj  CLE     12.0
+Name: points, dtype: float64","boxscore_id   team
+202610110nyj  CLE     0.923077
+Name: points, dtype: float64"
+202610110nyj,NYJ,5,64,35,30,29,4,0,2,1,1,2,1,1,12,1,0.0,"boxscore_id   team
+202610110nyj  NYJ     17.0
+Name: points, dtype: float64","boxscore_id   team
+202610110nyj  NYJ     1.416667
+Name: points, dtype: float64"
+202610110oti,HOU,5,61,36,34,25,2,0,0,1,1,2,4,4,8,4,0.5,"boxscore_id   team
+202610110oti  HOU     26.0
+Name: points, dtype: float64","boxscore_id   team
+202610110oti  HOU     3.25
+Name: points, dtype: float64"
+202610110oti,TEN,5,58,41,36,17,4,1,1,0,0,0,1,1,9,1,0.0,"boxscore_id   team
+202610110oti  TEN     3.0
+Name: points, dtype: float64","boxscore_id   team
+202610110oti  TEN     0.333333
+Name: points, dtype: float64"
+202610110pit,IND,5,69,45,44,24,1,0,0,0,1,1,5,5,10,3,0.3333333333333333,"boxscore_id   team
+202610110pit  IND     22.0
+Name: points, dtype: float64","boxscore_id   team
+202610110pit  IND     2.2
+Name: points, dtype: float64"
+202610110pit,PIT,5,52,33,31,19,1,0,0,3,1,4,2,2,10,2,1.0,"boxscore_id   team
+202610110pit  PIT     34.0
+Name: points, dtype: float64","boxscore_id   team
+202610110pit  PIT     3.4
+Name: points, dtype: float64"
+202610110sdg,DEN,5,57,29,27,28,1,0,1,1,1,2,4,3,13,5,0.4,"boxscore_id   team
+202610110sdg  DEN     23.0
+Name: points, dtype: float64","boxscore_id   team
+202610110sdg  DEN     1.769231
+Name: points, dtype: float64"
+202610110sdg,LAC,5,62,31,23,31,5,1,3,1,1,2,1,1,13,1,1.0,"boxscore_id   team
+202610110sdg  LAC     17.0
+Name: points, dtype: float64","boxscore_id   team
+202610110sdg  LAC     1.307692
+Name: points, dtype: float64"
+202610110sea,SEA,5,60,35,29,25,5,2,2,1,2,3,5,5,15,3,0.6666666666666666,"boxscore_id   team
+202610110sea  SEA     29.0
+Name: points, dtype: float64","boxscore_id   team
+202610110sea  SEA     1.933333
+Name: points, dtype: float64"
+202610110sea,SFO,5,54,34,29,20,3,1,1,2,1,3,2,1,12,3,1.0,"boxscore_id   team
+202610110sea  SFO     32.0
+Name: points, dtype: float64","boxscore_id   team
+202610110sea  SFO     2.666667
+Name: points, dtype: float64"
+202610110was,NYG,5,83,60,54,23,2,0,2,3,0,3,5,2,12,3,1.0,"boxscore_id   team
+202610110was  NYG     27.0
+Name: points, dtype: float64","boxscore_id   team
+202610110was  NYG     2.25
+Name: points, dtype: float64"
+202610110was,WAS,5,59,37,25,22,5,0,0,0,3,3,2,2,12,1,0.0,"boxscore_id   team
+202610110was  WAS     27.0
+Name: points, dtype: float64","boxscore_id   team
+202610110was  WAS     2.25
+Name: points, dtype: float64"
+202610120ram,BUF,5,57,28,19,29,1,1,1,1,3,4,3,3,10,5,0.8,"boxscore_id   team
+202610120ram  BUF     37.0
+Name: points, dtype: float64","boxscore_id   team
+202610120ram  BUF     3.7
+Name: points, dtype: float64"
+202610120ram,LAR,5,78,55,54,23,1,0,0,3,2,5,2,0,10,5,1.0,"boxscore_id   team
+202610120ram  LAR     34.0
+Name: points, dtype: float64","boxscore_id   team
+202610120ram  LAR     3.4
+Name: points, dtype: float64"

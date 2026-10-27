@@ -1,0 +1,33 @@
+team,head_coach,hc_first_nfl_season,hc_first_season_with_team,play_caller,caller_role,caller_first_season_calling,new_caller_2026,caller_history,source,confidence
+ARI,Mike LaFleur,2026,2026,Mike LaFleur,HC,2021,yes,NYJ:2021-2022,DirecTV/Yahoo 2026 hires; acmepackingcompany play-callers,medium
+ATL,Kevin Stefanski,2020,2026,Tommy Rees,OC,2025,yes,CLE:2025,DirecTV 2026 hires; CBS play-caller rankings,medium
+BAL,Jesse Minter,2026,2026,Declan Doyle,OC,2026,yes,,ESPN/ABC7 play-callers 2026,high
+BUF,Joe Brady,2026,2026,Joe Brady,HC,2020,no,CAR:2020-2021;BUF:2024-2025,acmepackingcompany play-callers,medium
+CAR,Dave Canales,2024,2024,Dave Canales,HC,2023,no,TAM:2023;CAR:2024-2025,acmepackingcompany play-callers,high
+CHI,Ben Johnson,2025,2025,Ben Johnson,HC,2022,no,DET:2022-2024;CHI:2025,acmepackingcompany play-callers,high
+CIN,Zac Taylor,2019,2019,Zac Taylor,HC,2019,no,CIN:2019-2025,acmepackingcompany play-callers,high
+CLE,Todd Monken,2026,2026,Todd Monken,HC,2019,yes,CLE:2019;BAL:2023-2025,ABC7 play-callers 2026,medium
+DAL,Brian Schottenheimer,2025,2025,Brian Schottenheimer,HC,2006,no,SEA:2018-2020;DAL:2025,acmepackingcompany play-callers,high
+DEN,Sean Payton,2006,2023,Davis Webb,OC,2026,yes,,ESPN play-callers 2026 (Payton handed off play-calling),medium
+DET,Dan Campbell,2021,2021,Drew Petzing,OC,2023,yes,ARI:2023-2025,CBS play-caller rankings,medium
+GNB,Matt LaFleur,2019,2019,Matt LaFleur,HC,2018,no,TEN:2018;GNB:2019-2025,acmepackingcompany play-callers,high
+HOU,DeMeco Ryans,2023,2023,Nick Caley,OC,2025,no,HOU:2025,acmepackingcompany play-callers,medium
+IND,Shane Steichen,2023,2023,Shane Steichen,HC,2020,no,PHI:2021-2022;IND:2023-2025,acmepackingcompany play-callers,high
+JAX,Liam Coen,2025,2025,Liam Coen,HC,2024,no,TAM:2024;JAX:2025,acmepackingcompany play-callers,high
+KAN,Andy Reid,1999,2013,Andy Reid,HC,1999,no,KAN:2013-2025,ESPN play-callers 2026,high
+LAC,Jim Harbaugh,2011,2024,Mike McDaniel,OC,2022,yes,MIA:2022-2025,ESPN play-callers 2026,medium
+LAR,Sean McVay,2017,2017,Sean McVay,HC,2016,no,LAR:2017-2025,ESPN play-callers 2026,high
+LVR,Klint Kubiak,2026,2026,Klint Kubiak,HC,2021,yes,MIN:2021;NOR:2024;SEA:2025,acmepackingcompany play-callers,medium
+MIA,Jeff Hafley,2026,2026,Bobby Slowik,OC,2023,yes,HOU:2023-2024,CBS/ESPN play-callers 2026,medium
+MIN,Kevin O'Connell,2022,2022,Kevin O'Connell,HC,2022,no,MIN:2022-2025,not confirmed in 2026 sources (prior seasons),low
+NWE,Mike Vrabel,2018,2025,Josh McDaniels,OC,2006,no,NWE:2012-2021;LVR:2022-2023;NWE:2025,ESPN play-callers 2026,high
+NOR,Kellen Moore,2025,2025,Kellen Moore,HC,2019,no,DAL:2019-2022;LAC:2023;PHI:2024;NOR:2025,acmepackingcompany play-callers,high
+NYG,John Harbaugh,2008,2026,Matt Nagy,OC,2018,yes,CHI:2018-2020,DirecTV 2026 hires; CBS play-caller rankings,medium
+NYJ,Aaron Glenn,2025,2025,Frank Reich,OC,2018,yes,IND:2018-2022,ESPN/ABC7 play-callers 2026,medium
+PHI,Nick Sirianni,2021,2021,Sean Mannion,OC,2026,yes,,ESPN play-callers 2026,high
+PIT,Mike McCarthy,2006,2026,Mike McCarthy,HC,2006,yes,GNB:2006-2018;DAL:2023-2024,DirecTV 2026 hires; acmepackingcompany,medium
+SFO,Kyle Shanahan,2017,2017,Kyle Shanahan,HC,2008,no,ATL:2015-2016;SFO:2017-2025,ESPN play-callers 2026,high
+SEA,Mike Macdonald,2024,2024,Brian Fleury,OC,2026,yes,,ESPN/ABC7 play-callers 2026,medium
+TAM,Todd Bowles,2015,2022,Zac Robinson,OC,2024,yes,ATL:2024-2025,CBS play-caller rankings,medium
+TEN,Robert Saleh,2021,2026,Brian Daboll,OC,2018,yes,BUF:2018-2021;NYG:2024-2025,DirecTV 2026 hires; ESPN play-callers,medium
+WAS,Dan Quinn,2015,2024,David Blough,OC,2026,yes,,ESPN play-callers 2026,high
