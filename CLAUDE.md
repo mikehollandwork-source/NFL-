@@ -76,34 +76,25 @@ Useful tools:
 - `tools/td_study.py`
 - `tools/calibration_fit.py`
 
-## Board artifact
-The prop board is published as a claude.ai artifact: https://claude.ai/artifact/UNar8RW194dBtoQrQKQHw1
-- Republish with the Artifact tool to that URL.
-- In a new session, read it first (`action: read`), then publish to the same URL.
+## Board
+`output/2026/board/prop-board.html`, rebuilt by Actions and sent to Telegram as a file once its secrets exist.
+The old claude.ai artifact (https://claude.ai/artifact/UNar8RW194dBtoQrQKQHw1) only updates when a Claude session republishes it.
 
-## Automation
-**Scheduled tasks (claude.ai) fire into the session that created them** (session_016Z6EGjvSKFgYWjd5JYUxSk). If you start a new session, recreate them there with the same names, crons and prompts, then delete the old ones (`list_triggers` shows the full stored prompts). All times are America/New_York.
+## Automation (GitHub Actions on `main`, no Claude needed; live since Oct 27)
+`.github/workflows/nfl-props.yml` runs everything from the default branch `main`. Every run commits its outputs to `main`.
+Messages go to **issue #1** (built-in `GITHUB_TOKEN`) and to Telegram once `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` secrets exist (Telegram also gets the board HTML file).
 
-| Name | Cron (ET) | Runs |
+| When (ET) | Mode | Runs |
 |---|---|---|
-| lock Thursday games | `50 10,14,18 * * 4` | `auto --mode lock`, then `board`, republish, `money`, commit paper/money/tickets |
-| lock Sunday morning (international) | `5 8 * * 0` | same |
-| lock Sunday games | `50 11,14,18 * * 0` | same |
-| lock Monday games | `50 18 * * 1` | same |
-| lock Fri/Sat games (disabled; enable for Black Friday, Christmas, Dec/Jan Saturdays; reminder fires Nov 23) | `50 11,14,18 * * 5,6` | same |
-| money list after inactives (Sunday) | `30 12,15,19 * * 0` | `money --refresh`, post list, commit |
-| money list after inactives (Thu/Mon night) | `35 19 * * 1,4` | same |
-| refresh prop board after injury reports | `25 17 * * 3,5,6` | `board --refresh`, republish, `money`, commit |
-| daily grade (morning after game days) | `7 9,14 * * 0,1,2,5` | `daily`, post results, commit `output/2026/daily` |
-| grade finished weeks | `50 10 * * 2,3` | `auto --mode grade` + `parlays`, post, commit |
+| every 30 min around kickoffs | check | `due` (game <= 1.25 h out, after inactives): `auto --mode lock`, `board`, `money --send`, `board --resend`; else `soon --minutes 35`: `money --refresh --send` (final money list; freezes that game's picks) |
+| 9:07 AM and 2:07 PM Sun/Mon/Tue/Fri | daily | `daily --send` |
+| Tue 11:30 AM (Wed retry) | grade | `auto --mode grade` (incl. miss breakdown) + `parlays --once --send` |
+| Wed/Fri/Sat ~6:30 PM | board | `board --refresh`, `money --send`, `board --resend` |
+Manual: Actions -> NFL props -> Run workflow (board / lock / money / daily / grade / parlays).
 
-**GitHub Actions** (`.github/workflows/nfl-props.yml`) runs the same cycle on the repo's default branch (locks every 30 min around kickoffs, grade/parlays Tue/Wed, board Wed/Fri/Sat) and sends Telegram messages once the secrets exist.
-
-Still pending for the user:
-1. Add the Telegram secrets.
-2. Merge this branch to the default branch (offer to open a PR).
-3. Test the workflow with a manual dispatch.
-4. Then turn off the claude.ai scheduled tasks.
+The old claude.ai scheduled tasks are **disabled** (not deleted). The claude.ai board artifact is no longer updated.
+Development: work on the feature branch, merge `origin/main` first (the bot commits outputs there), then PR to `main`.
+Cost: roughly 1,000 of the 2,000 free Actions minutes a private repo gets per month.
 
 ## Key config (`config/projection.toml`)
 - `[players] eff_prior = "rec"`, `eff_prior_k = 60` (default), `target_share_power = 0.9`
