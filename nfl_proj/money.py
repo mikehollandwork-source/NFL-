@@ -98,7 +98,8 @@ def build(cfg: dict, paths: dict, week: int | None = None, refresh: bool = False
         old = pd.read_csv(logf) if logf.exists() else pd.DataFrame()
         new = picks[~picks["ticker"].isin(set(old.get("ticker", [])))] if len(old) else picks
         pd.concat([old, new], ignore_index=True).to_csv(logf, index=False)
-    picks = freeze(picks, week, paths, now)
+    kicks = {lab: k for k, lab in ko.values()}
+    picks = freeze(picks, week, paths, now, kicks, c.get("freeze_minutes", 35))
     cur = paths["out"] / "money" / f"week_{week:02d}_current.csv"
     (picks if len(picks) else pd.DataFrame(columns=["player", "kickoff"])).assign(
         listed_at=now.isoformat(timespec="minutes")).to_csv(cur, index=False)
@@ -128,13 +129,15 @@ def frozen_games(week: int, paths: dict) -> set:
     return set(f.read_text().splitlines()) if f.exists() else set()
 
 
-def freeze(picks: pd.DataFrame, week: int, paths: dict, now) -> pd.DataFrame:
-    """Once a game's lock run has happened, its money picks are fixed: the
-    first money run after the lock records them (price, stake) in
-    week_NN_final.csv, and every later run shows exactly those for that game.
-    Grading and CLV use the final picks."""
-    lockf = paths["out"] / "paper" / f"week_{week:02d}_lock_log.csv"
-    locked = set(pd.read_csv(lockf)["label"]) if lockf.exists() else set()
+def freeze(picks: pd.DataFrame, week: int, paths: dict, now, kicks: dict | None = None,
+           minutes: float = 35) -> pd.DataFrame:
+    """A game's money picks are fixed by the last money run before kickoff
+    (within ``minutes``: inactives are out and Kalshi's markets are open). That
+    run records them (price, stake) in week_NN_final.csv; every later run shows
+    exactly those for that game. Grading and CLV use the final picks."""
+    now_ts = pd.Timestamp(now)
+    locked = {g for g, k in (kicks or {}).items()
+              if pd.Timedelta(0) < pd.Timestamp(k) - now_ts <= pd.Timedelta(minutes=minutes)}
     finalf = paths["out"] / "money" / f"week_{week:02d}_final.csv"
     gf = paths["out"] / "money" / f"week_{week:02d}_frozen_games.txt"
     done = frozen_games(week, paths)

@@ -128,11 +128,14 @@ def main(argv=None):
     dy.add_argument("--no-refresh", action="store_true")
     dy.add_argument("--force", action="store_true", help="regrade a date already graded")
     dy.add_argument("--send", action="store_true")
+    so = sub.add_parser("soon", help="exit 0 if a game kicks off within --minutes (cheap: schedule only)")
+    so.add_argument("--minutes", type=float, default=35)
     du = sub.add_parser("due", help="exit 0 if a game kicks off within the lock window (cheap: schedule only)")
     du.add_argument("--window", type=float, help="hours before kickoff ([auto] lock_window_hours)")
     bd = sub.add_parser("board", help="rebuild the prop board HTML (games not yet kicked off)")
     bd.add_argument("--refresh", action="store_true", help="download + rebuild data first")
     bd.add_argument("--send", action="store_true", help="send the qualifying and locked bets to Telegram")
+    bd.add_argument("--resend", action="store_true", help="only send the board already built (no rebuild)")
     sub.add_parser("factor-tests", help="out-of-sample tests of candidate factors (2021-25)")
     pj = sub.add_parser("project")
     pj.add_argument("--week", type=int, help="defaults to the next week with unplayed games")
@@ -191,6 +194,12 @@ def main(argv=None):
             send(msg)
         return
 
+    if args.cmd == "soon":
+        from .auto import kickoff_soon
+        msg, soon = kickoff_soon(cfg, paths, args.minutes)
+        print(msg)
+        raise SystemExit(0 if soon else 1)
+
     if args.cmd == "due":
         from .auto import due_now
         msg, due = due_now(cfg, paths, args.window)
@@ -199,10 +208,12 @@ def main(argv=None):
 
     if args.cmd == "board":
         from .board import build, summary_text
-        out = build(cfg, paths, ROOT, refresh=args.refresh)
+        out = (paths["out"] / "board" / "prop-board.html") if args.resend else build(cfg, paths, ROOT, refresh=args.refresh)
+        args.send = args.send or args.resend
         if out and args.send:
-            from .notify import send
+            from .notify import send, send_file
             send(summary_text(out))
+            send_file(out, "Prop board: open in a browser")
         return
 
     if args.cmd == "factor-tests":

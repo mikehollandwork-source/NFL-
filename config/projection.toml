@@ -303,7 +303,8 @@ drive_eff = {}
 [auto]
 # A game is locked on the scheduled run that falls within this many hours of
 # its kickoff (after the final injury report and game-day inactives).
-lock_window_hours = 2.25
+# Lock about an hour before kickoff, after game-day inactives post (~90 min before).
+lock_window_hours = 1.25
 
 [odds]
 # source: "auto" = The Odds API when ODDS_API_KEY is set, else ESPN's public

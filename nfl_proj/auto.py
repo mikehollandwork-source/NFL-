@@ -63,6 +63,24 @@ def due_now(cfg: dict, paths: dict, window_h: float | None = None, now: datetime
                              if len(nxt) else "")), False
 
 
+def kickoff_soon(cfg: dict, paths: dict, minutes: float = 35, now: datetime | None = None):
+    """Cheap schedule-only check: does any game kick off within ``minutes``
+    (and not yet started)? That run fixes the game's money picks."""
+    from .nflverse import GAMES_URL, Downloader, parse_games
+    now = now or datetime.now(timezone.utc)
+    f = Downloader(paths["nflverse"], log=lambda *a: None).get(GAMES_URL, refresh=True)
+    raw = pd.read_csv(f, low_memory=False)
+    raw = raw[(raw["season"] == int(cfg["season"])) & (raw["game_type"] == "REG")]
+    games = parse_games(raw, int(cfg["season"]), set())
+    games["boxscore_id"] = np.where(raw["home_score"].notna().values, "played", None)
+    pend = games[games["boxscore_id"].isna()]
+    if pend.empty:
+        return "season over", False
+    g = kickoffs(games, int(pend["week"].min()))
+    soon = g[(g["kickoff"] > now) & (g["kickoff"] - now <= pd.Timedelta(minutes=minutes))]
+    return (f"kicking off soon: {', '.join(soon['label'])}" if len(soon) else "nothing kicking off soon"), bool(len(soon))
+
+
 def _refresh(cfg: dict, paths: dict, log) -> dict:
     """Same steps as ``scrape`` + ``build``: current season refreshed, last
     season (priors) and coach history built if a fresh checkout lacks them."""
