@@ -85,8 +85,8 @@ def close_price(series, ticker, kickoff_ts):
     return res
 
 
-def main(weeks=range(2, 7)):
-    cfg = load_cfg(ROOT / "config" / "projection.toml")
+def main(weeks=range(2, 7), config=None, tag=""):
+    cfg = load_cfg(Path(config) if config else ROOT / "config" / "projection.toml")
     paths = _paths(cfg)
     t = load_season(paths["db"])
     g = t["games"]
@@ -138,9 +138,12 @@ def main(weeks=range(2, 7)):
         if i % 50 == 0:
             print(f"  priced {i}/{len(main_)}", flush=True)
     main_ = pd.concat([main_.reset_index(drop=True), pd.DataFrame(closes)], axis=1)
-    main_.to_csv(ROOT / "output" / "2026" / "kalshi_backtest.csv", index=False)
+    main_.to_csv(ROOT / "output" / "2026" / f"kalshi_backtest{('_' + tag) if tag else ''}.csv", index=False)
     return main_
 
 
 if __name__ == "__main__":
-    main()
+    # python tools/kalshi_backtest.py [first-last weeks] [config file] [output tag]
+    a = sys.argv[1:]
+    wk = range(int(a[0].split("-")[0]), int(a[0].split("-")[1]) + 1) if a else range(2, 7)
+    main(wk, a[1] if len(a) > 1 else None, a[2] if len(a) > 2 else "")
