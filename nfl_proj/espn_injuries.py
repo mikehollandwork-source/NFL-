@@ -187,7 +187,10 @@ def live(roster: pd.DataFrame | None, log=print) -> pd.DataFrame:
         keep = out[~out["player_id"].isin(set(ina["player_id"]))]
         # inactive -> Out; on the game roster and active -> cleared (only players with a prior tag matter)
         tagged = set(out["player_id"])
-        ina = ina[(ina["report_status"] == "Out") | ina["player_id"].isin(tagged)]
+        ina = ina[(ina["report_status"] == "Out") | ina["player_id"].isin(tagged)].copy()
+        # keep the memory of a Questionable tag: active Questionable players still get fewer touches
+        was_q = set(out.loc[out["report_status"] == "Questionable", "player_id"])
+        ina.loc[(ina["report_status"] != "Out") & ina["player_id"].isin(was_q), "injury"] = "active (was Questionable)"
         ina = ina.assign(source="inactives", updated=pd.to_datetime(ina["updated"], utc=True))
         out = pd.concat([keep, ina[keep.columns.intersection(ina.columns)]], ignore_index=True)
     return out
