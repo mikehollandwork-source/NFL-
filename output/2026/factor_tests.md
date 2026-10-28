@@ -262,3 +262,14 @@ Fixes the over-spread found in section 15. Same code, b = 1 (current) vs 0.9 vs 
 b = 0.9 for targets: chosen on 2025, holds on 2026. Carries: averages improve but the rush-attempt prop
 probabilities get worse in both seasons (the only stat with a market edge), so carries stay unflattened.
 RB target over-projection (-19% / -25%) is unchanged by flattening: a separate fix to test.
+
+## 17. Touchdown "tells" (week 7 scorers vs non-scorers; tested on 2025 wk 4-18 + 2026 wk 3-7, 3,255 RB/WR/TE games; `tools/td_tells.py`)
+
+Week 7 (155 players with 3+ touches/game, 46 scored): scorers had more touches (10.5 vs 7.2/game), red-zone
+touches (1.7 vs 1.1), inside-10 touches (0.9 vs 0.5), last-3 touches (11.2 vs 7.4) and fewer games since a TD.
+Tested beyond the model's TD chance (logistic, both seasons):
+- vs the simulation alone, volume, red-zone and inside-10 touches add signal in both seasons (t 2.1-3.2).
+- vs the LIVE blended chance (simulation + stats TD model): nothing adds reliably (all |t| < 2 in at least one
+  season; best inside-10 touches t 0.9 / 1.8). The blend already uses those numbers.
+- No signal at all: end-zone targets, TDs so far, games since last TD ("due"), recent usage trend, team TDs/game.
+Blended chance is calibrated: 50-60% -> 52% scored, 40-50% -> 40%, 20-30% -> 28%. No change made.
