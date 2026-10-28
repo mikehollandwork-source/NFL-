@@ -111,6 +111,7 @@ def run_week(tables: dict, cfg: dict, paths: dict, week: int, asof: bool = False
     proj = Projector(plays, t["player_games"], games, cfg, labels, overrides, scheme, coach,
                      corners=corners, tables=t, priors=priors)
     proj._live_injuries = injuries          # merged nflverse + ESPN + Sleeper report (defensive starters)
+    proj.questionable = _questionable(injuries, week)
     if cfg["players"].get("eff_prior"):
         proj.eff_prior = _eff_prior(paths, cfg, proj, cfg["players"]["eff_prior"])
     _context_effects(proj, t, cfg, paths, week, teams, overrides, asof, log)
@@ -196,6 +197,16 @@ def _eff_prior(paths, cfg, proj, which) -> dict:
         g = d.groupby(col)["rel"].agg(["mean", "size"])
         out[fam] = (1 + (g["mean"] - 1) * g["size"] / (g["size"] + k_prev)).to_dict()
     return out
+
+
+def _questionable(injuries, week) -> set:
+    """Players listed Questionable for this week, including those whose tag was
+    cleared by the game-day active list (marked 'active (was Questionable)')."""
+    if injuries is None or injuries.empty or "report_status" not in injuries:
+        return set()
+    w = injuries[injuries["week"] == week]
+    was = w.get("injury", pd.Series("", index=w.index)).fillna("").astype(str).str.contains("was Questionable")
+    return set(w.loc[(w["report_status"] == "Questionable") | was, "player_id"].dropna())
 
 
 def _context_effects(proj, t, cfg, paths, week, teams, overrides, asof, log):

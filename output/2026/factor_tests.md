@@ -286,3 +286,85 @@ Live blended TD chance, RB/WR/TE with 3+ touches/game. Overall it's calibrated (
   Refit each season from the previous season's results (tools/td_teams.py rows).
 - Tight ends scored above the model in 2025 (27.0% vs 22.3%, t 2.3) but not clearly in 2026 (25.5% vs 24.1%);
   a TE bump fit on 2025 did not help 2026 (0.5703 vs 0.5702): left off.
+
+## 19. Free data sources checked (Oct 28) and Sleeper's free projections vs ours
+
+- nflverse participation (per-play players on field, personnel, box count, coverage, route of the target):
+  free for 2025 and earlier; 2026 not published yet (404), so usable for building/fitting, not live inputs.
+- nflverse Next Gen Stats rushing (box-count %, rush yards over expected): free, current through 2026 wk 7.
+- Sleeper stats endpoint: no routes; adds drops, broken tackles, red-zone targets/attempts (we already have).
+- Sleeper projections (api.sleeper.app/v1/projections/nfl/regular/<yr>/<wk>, free, history back to 2025):
+  average miss vs ours (players above prop-relevant volume):
+
+| stat | 2025 ours / Sleeper / 50-50 | 2026 wk 3-6 ours / Sleeper / 50-50 |
+|---|---|---|
+| carries | 3.82 / 3.62 / 3.62 | n/a (too few matched) |
+| targets | 2.10 / 1.87 / 1.93 | 2.49 / 2.22 / 2.31 |
+| receptions | 1.56 / 1.44 / 1.47 | 1.72 / 1.52 / 1.61 |
+| rec yds | 20.48 / 19.85 / 19.86 | 22.55 / 21.23 / 21.45 |
+| pass yds | 59.80 / 58.02 / 57.49 | 59.47 / 55.52 / 56.78 |
+
+Caveats: our backtest runs without injury news (as-of), while Sleeper's stored projections are their final
+pre-game numbers (injuries known, and likely built partly from betting lines, which our rule 2 excludes).
+Not used as a model input. Candidate use pending the owner's decision: a disagreement filter (hold money
+picks where our rush-attempt projection differs sharply from Sleeper's), to be backtested vs Kalshi first.
+
+## 20. Sleeper disagreement filter for the money list: REJECTED (`tools/sleeper_filter_test.py`)
+
+Rush-attempt bets with edge 10+ vs the Kalshi close (2026 weeks 2-6, YES at ask / NO at 1 - bid): 147 bets,
+38% won, ROI +25%. Filter: hold a bet when Sleeper's free pre-game projection sits on the losing side of the line.
+- Sleeper disagreed with 120 of 146 (82%): our edge bets ARE disagreements with consensus, and Sleeper ~ consensus.
+- Held bets ROI +24% vs kept +20%; kept beat held in only 45% of bootstrap draws.
+- Holding only big disagreements made it worse: Sleeper 3+ carries against us -> held 45 bets at +63% ROI,
+  kept 101 at +6%. The more Sleeper disagreed, the better our bets did.
+Conclusion: the rush-attempt edge comes from information consensus projections don't use; filtering toward
+consensus removes it. Not shipped. Bogus injury-guess edges stay handled by the HOLD rule (section 14).
+
+## 21. Questionable but playing: share haircut ON (`[players] questionable_targets = 0.95`, `questionable_carries = 0.85`)
+
+Bets lock after game-day inactives, so a chance-of-playing discount changes no bet. What does matter: players
+listed Questionable who suit up get fewer touches than projected (2025 wk 4-18 + 2026 wk 3-7 backtests):
+
+| | Questionable, played | everyone else |
+|---|---|---|
+| Carries vs projection | -18% (n 42, t -3.1; 2025 -17%, 2026 -22%) | -3% |
+| Targets vs projection | -11% (n 119, t -2.7; 2025 -10%, 2026 -15%) | -5% |
+| Questionable players who did not play (backtests use the report, not inactives) | 24-31% | 4-5% |
+
+Factors set from 2025 (relative to everyone else); the cut volume goes to teammates. Same code, off vs on:
+
+| | 2025 wk 4-18: off / on | 2026 wk 3-7 (out of sample): off / on |
+|---|---|---|
+| Carries MAE | 3.936 / 3.913 | 3.976 / 3.947 |
+| Rush-attempt prop log-loss | 0.6385 / 0.6376 | 0.6586 / 0.6569 |
+| Receiving-prop log-loss | 0.6530 / 0.6531 | 0.6433 / 0.6427 |
+| All props log-loss | 0.6513 / 0.6512 | 0.6518 / 0.6511 |
+| Questionable players' props (2026, n 146) | | 0.6633 / 0.6554 |
+
+Carries vs Kalshi closes (2026 wk 2-6, `tools/kalshi_backtest.py`): model log-loss 0.6850 -> 0.6796; edge >= 10
+bets: 159 at +37.8% -> 160 at +34.7%. On identical markets only 4 of 268 bets change side (2 wins, 2 losses
+either way); the ROI gap comes from different strikes being picked, i.e. noise. Edge intact.
+Live: `espn_injuries.live` now marks Questionable players cleared by the active list "active (was Questionable)"
+so the haircut still applies at lock time.
+
+## 22. Rejected: recent-share blend, team pace model; RB target bias explained
+
+**Recent-share blend** (`[players] recent_blend_targets / recent_blend_carries`, code kept, off). `tools/share_lab.py`:
+share misses are mostly luck. Error from share alone (targets per player-game): model 1.506 / 1.635 (2025 / 2026),
+an estimator that knew the player's whole-season share 1.439 / 1.551, pure binomial luck 1.196 / 1.243. Carries:
+model 1.203 / 1.205, season-share oracle 1.223 / 1.191. So at most ~4% is left to win on targets, ~0 on carries.
+Mixing the model share 50/50 (targets) and 75/25 (carries) with a 3-game weighted recent share helped in the
+share-only lab, but the full 2026 backtest got worse: receiving-prop log-loss 0.6433 -> 0.6454, rush-attempt
+props 0.6586 -> 0.6627. Rejected.
+
+**Team volume / pace.** Team-level forecasts already beat simple pace models (season average, 3-game weighted,
+opponent-adjusted): pass attempts MAE 5.94 vs 6.22 best simple (2025), 6.84 vs 7.39 (2026); team carries (sum of
+player projections) 6.11 / 5.53, and blending in the season average makes both seasons worse. The rest of the
+team-volume miss is game script (section 15), not knowable before kickoff. No change.
+
+**RB targets (-19% to -25% in section 15).** Over all projected RBs the bias is small: -10% / -5% including
+did-not-play, -5% / +2% for RBs who played. The large number appears only among RBs projected 2.5+ targets, i.e.
+the high projections regressing. Neither the blend nor the haircut moves it. Left as is.
+
+**Still open:** QB rush attempts are over-projected ~20% in both seasons (-19% / -21%), the largest steady
+carries bias left. Candidate for the next test (QB carries are part of the money list).

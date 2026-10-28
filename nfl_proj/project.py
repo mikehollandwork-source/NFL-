@@ -684,7 +684,49 @@ class Projector:
                 f = float(np.clip(target / cur, 0.7, 1.4))
                 pb.loc[pb[id_col] == top, "share"] *= f
                 pb["share"] = pb["share"] / pb.groupby(bucket_col)["share"].transform("sum")
+        # Recent-share blend ([players] recent_blend_targets / recent_blend_carries, 0 = off): mix each
+        # player's share with his share over the games he played, weighted toward the last ~3
+        # (share lab, factor_tests section 22: rejected, off). Per-bucket shape is kept; only the player's level moves.
+        wb = self.cfg["players"].get("recent_blend_targets" if id_col == "target_id" else "recent_blend_carries", 0.0)
+        if wb and not players.empty:
+            rec = self._recent_share(df, id_col, self.cfg["players"].get("recent_half_life_games", 3.0))
+            if rec:
+                vol = df.groupby(bucket_col)["w"].sum()
+                vol = vol / vol.sum()
+                lvl = (pb["share"] * pb[bucket_col].map(vol).fillna(0)).groupby(pb[id_col]).sum()
+                tgt = {p: (1 - wb) * m + wb * rec.get(p, m) for p, m in lvl.items()}
+                f = {p: (tgt[p] / m if m > 0 else 1.0) for p, m in lvl.items()}
+                pb["share"] = pb["share"] * pb[id_col].map(f).fillna(1.0)
+                pb["share"] = pb["share"] / pb.groupby(bucket_col)["share"].transform("sum")
+        # Questionable but playing ([players] questionable_targets / questionable_carries, 1 = off):
+        # listed players who suit up get fewer touches than their history says (factor_tests section 21).
+        qf = self.cfg["players"].get("questionable_targets" if id_col == "target_id" else "questionable_carries", 1.0)
+        q = getattr(self, "questionable", set())
+        if qf != 1.0 and q:
+            hit = pb[id_col].isin(q)
+            if hit.any():
+                pb.loc[hit, "share"] *= qf
+                pb["share"] = pb["share"] / pb.groupby(bucket_col)["share"].transform("sum")
         return pb[[id_col, bucket_col, "share"]]
+
+    def _recent_share(self, df: pd.DataFrame, id_col: str, hl: float) -> dict:
+        """player -> share of team volume over the games he played, each game weighted
+        0.5 ** (games ago / hl). Raw counts (no play weights)."""
+        if "boxscore_id" not in df or "week" not in df:
+            return {}
+        per_g = df.groupby("boxscore_id").agg(V=(id_col, "size"), week=("week", "max"))
+        cnt = df.groupby(["boxscore_id", id_col]).size()
+        pg = self.pg[self.pg["boxscore_id"].isin(per_g.index)]
+        on = pg[(pg.get("off_snaps", 0).fillna(0) > 0) | (pg["targets"] > 0) | (pg["rush_att"] > 0)]
+        out = {}
+        for pid, games in on.groupby("player_id")["boxscore_id"]:
+            g = per_g.loc[per_g.index.isin(set(games))].sort_values("week")
+            if g.empty or g["V"].sum() <= 0:
+                continue
+            w = 0.5 ** (np.arange(len(g))[::-1] / hl)
+            c = np.array([cnt.get((b, pid), 0) for b in g.index], dtype=float)
+            out[pid] = float((w * c).sum() / (w * g["V"].values).sum())
+        return out
 
     def _games_played_factor(self, df: pd.DataFrame, id_col: str) -> dict:
         """player -> team volume in all games / team volume in the games he

@@ -47,6 +47,7 @@ Read this first in every new session. It holds the rules, the record so far, wha
   - Game-day inactives.
   - Team TD adjustment from last season (`data/models/td_team_adj.json`, section 18; refit each season).
   - Target-share flattening `[players] target_share_power = 0.9` (section 16). Carries left at 1.0 (hurt rush-attempt props).
+  - Questionable-but-playing haircut `[players] questionable_carries = 0.85`, `questionable_targets = 0.95` (section 21): improves carries MAE and rush-attempt props in 2025 and 2026; Kalshi carries edge unchanged.
   - Money picks are frozen at each game's lock run (`week_NN_final.csv`, `week_NN_frozen_games.txt`); later runs show them unchanged, and grading/CLV use only the frozen picks.
   - Money-list HOLD rule: picks on a team whose lead back missed its last game are held until inactives post (section 14).
 - **Tested and OFF or no signal:**
@@ -54,6 +55,8 @@ Read this first in every new session. It holds the rules, the record so far, wha
   - Pass-zone matchups
   - Player/team accuracy persistence (players r 0.04, teams −0.30)
   - Backup-RB projected carries as a win tell
+  - Recent-share blend (`recent_blend_*`, section 22): helped a share-only lab, hurt 2026 props. Share misses are mostly luck (at most ~4% left to win on targets, ~0 on carries).
+  - Team pace models (section 22): our team volume already beats them; the rest is game script.
   - Underdog rushing signals (section 12; watchlist: "underdog's runs rising over the last 3 games" covered 57% on 227 games, best of 17 tries, so not a bet until paper-tracked)
 
 ## Commands (`python -m nfl_proj <cmd>`)
@@ -98,7 +101,7 @@ Development: work on the feature branch, merge `origin/main` first (the bot comm
 Cost: roughly 1,000 of the 2,000 free Actions minutes a private repo gets per month.
 
 ## Key config (`config/projection.toml`)
-- `[players] eff_prior = "rec"`, `eff_prior_k = 60` (default), `target_share_power = 0.9`
+- `[players] eff_prior = "rec"`, `eff_prior_k = 60` (default), `target_share_power = 0.9`, `questionable_carries = 0.85`, `questionable_targets = 0.95`
 - `[sim] td_calib = {a=-0.248, b=0.781}`
 - `[script] pass_rate_per_point = 0.0`
 - `[paper]`:
@@ -119,6 +122,7 @@ Cost: roughly 1,000 of the 2,000 free Actions minutes a private repo gets per mo
 - nflverse updates overnight, so grading runs the next morning.
 - Game-day inactives post about 90 minutes before kickoff (`espn_injuries.fetch_inactives`). Kalshi rush-attempt markets often open only about 40 minutes before kickoff.
 - **Ideas ranked but not built:**
+  0. QB rush attempts are over-projected ~20% in both seasons (section 22): the largest carries bias left; test a fix next.
   1. RB early-down and goal-line snap participation (check whether free nflverse participation data covers 2025-26).
   2. More graded weeks vs real prices.
   3. NGS rushing data (box counts, expected yards).
