@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import json
+
 import numpy as np
 import pandas as pd
 
@@ -127,6 +129,21 @@ def candidates(r: dict, cfg: dict, week: int, form: dict, target: float = 0.70) 
     return c.sort_values("score", ascending=False).drop_duplicates("player_id")
 
 
+TEAM_TD = Path(__file__).resolve().parents[1] / "data" / "models" / "td_team_adj.json"
+
+
+def team_td_adjust(p, teams):
+    """Team-specific TD adjustment (log-odds), from last season's players-who-scored vs the
+    model's expectation, shrunk (k = 100 player-games). Fit on 2025, it improved 2026 TD
+    log-loss 0.5702 -> 0.5683 (tools/td_teams.py, factor_tests section 18)."""
+    if not TEAM_TD.exists():
+        return p
+    adj = json.loads(TEAM_TD.read_text()).get("adj", {})
+    a = pd.Series(teams).map(adj).fillna(0.0).values
+    q = np.clip(np.asarray(p, float), 1e-4, 1 - 1e-4)
+    return 1 / (1 + np.exp(-(np.log(q / (1 - q)) + a)))
+
+
 def td_candidates(r: dict, cfg: dict, week: int, floor: float = 0.30,
                   positions: tuple = ("WR", "TE", "RB")) -> pd.DataFrame:
     from .td_model import blend, current_features, predict
@@ -137,6 +154,7 @@ def td_candidates(r: dict, cfg: dict, week: int, floor: float = 0.30,
     lg_env = float(feat["env"].median()) if len(feat) else np.nan
     w["p_stats"] = w["player_id"].map(ps)
     w["p_td"] = np.where(w["p_stats"].notna(), blend(w["anytime_td"], w["p_stats"].fillna(0.5)), w["anytime_td"])
+    w["p_td"] = team_td_adjust(w["p_td"], w["team"])
     status = _status(r.get("injuries"), week)
     pg = r["tables"]["player_games"]
     pg = pg[pg["week"] < week]
