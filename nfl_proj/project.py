@@ -686,7 +686,7 @@ class Projector:
                 pb["share"] = pb["share"] / pb.groupby(bucket_col)["share"].transform("sum")
         # Recent-share blend ([players] recent_blend_targets / recent_blend_carries, 0 = off): mix each
         # player's share with his share over the games he played, weighted toward the last ~3
-        # (share lab, factor_tests section 21). Per-bucket shape is kept; only the player's level moves.
+        # (share lab, factor_tests section 22: rejected, off). Per-bucket shape is kept; only the player's level moves.
         wb = self.cfg["players"].get("recent_blend_targets" if id_col == "target_id" else "recent_blend_carries", 0.0)
         if wb and not players.empty:
             rec = self._recent_share(df, id_col, self.cfg["players"].get("recent_half_life_games", 3.0))
@@ -699,7 +699,7 @@ class Projector:
                 pb["share"] = pb["share"] * pb[id_col].map(f).fillna(1.0)
                 pb["share"] = pb["share"] / pb.groupby(bucket_col)["share"].transform("sum")
         # Questionable but playing ([players] questionable_targets / questionable_carries, 1 = off):
-        # listed players who suit up get fewer touches than their history says (factor_tests section 22).
+        # listed players who suit up get fewer touches than their history says (factor_tests section 21).
         qf = self.cfg["players"].get("questionable_targets" if id_col == "target_id" else "questionable_carries", 1.0)
         q = getattr(self, "questionable", set())
         if qf != 1.0 and q:
