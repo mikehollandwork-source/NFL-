@@ -45,6 +45,7 @@ Read this first in every new session. It holds the rules, the record so far, wha
   - `pass_rate_per_point = 0` (game script was double-counted).
   - Side-specific calibration `[paper] calib_side`.
   - Game-day inactives.
+  - Team TD adjustment from last season (`data/models/td_team_adj.json`, section 18; refit each season).
   - Target-share flattening `[players] target_share_power = 0.9` (section 16). Carries left at 1.0 (hurt rush-attempt props).
   - Money picks are frozen at each game's lock run (`week_NN_final.csv`, `week_NN_frozen_games.txt`); later runs show them unchanged, and grading/CLV use only the frozen picks.
   - Money-list HOLD rule: picks on a team whose lead back missed its last game are held until inactives post (section 14).

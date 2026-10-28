@@ -273,3 +273,16 @@ Tested beyond the model's TD chance (logistic, both seasons):
   season; best inside-10 touches t 0.9 / 1.8). The blend already uses those numbers.
 - No signal at all: end-zone targets, TDs so far, games since last TD ("due"), recent usage trend, team TDs/game.
 Blended chance is calibrated: 50-60% -> 52% scored, 40-50% -> 40%, 20-30% -> 28%. No change made.
+
+## 18. Team-specific touchdowns (`tools/td_teams.py`, `output/2026/td_teams.md`): small team adjustment ON
+
+Live blended TD chance, RB/WR/TE with 3+ touches/game. Overall it's calibrated (2025: 27.4% scored vs 26.5%;
+2026: 28.5% vs 27.6%; RB and WR exact).
+- Team miss, odd vs even weeks within a season: r +0.01 (2025), +0.12 (2026): little within-season signal.
+- Team miss 2025 -> 2026 (league-adjusted): r +0.41; 20 of 32 teams missed in the same direction both years.
+- Out-of-sample test: team log-odds adjustment fit on 2025 (shrunk), applied to 2026: log-loss 0.5702 -> 0.5678
+  (k=50) / 0.5683 (k=100); 93% of game-clustered bootstrap draws favor it. Shipped with k=100 (not tuned on 2026):
+  `data/models/td_team_adj.json`, -0.15 (MIN, LVR) to +0.16 (LAR, SFO) log-odds = about -3 to +4 points at 30%.
+  Refit each season from the previous season's results (tools/td_teams.py rows).
+- Tight ends scored above the model in 2025 (27.0% vs 22.3%, t 2.3) but not clearly in 2026 (25.5% vs 24.1%);
+  a TE bump fit on 2025 did not help 2026 (0.5703 vs 0.5702): left off.
