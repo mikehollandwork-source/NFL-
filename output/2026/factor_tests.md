@@ -308,3 +308,14 @@ Caveats: our backtest runs without injury news (as-of), while Sleeper's stored p
 pre-game numbers (injuries known, and likely built partly from betting lines, which our rule 2 excludes).
 Not used as a model input. Candidate use pending the owner's decision: a disagreement filter (hold money
 picks where our rush-attempt projection differs sharply from Sleeper's), to be backtested vs Kalshi first.
+
+## 20. Sleeper disagreement filter for the money list: REJECTED (`tools/sleeper_filter_test.py`)
+
+Rush-attempt bets with edge 10+ vs the Kalshi close (2026 weeks 2-6, YES at ask / NO at 1 - bid): 147 bets,
+38% won, ROI +25%. Filter: hold a bet when Sleeper's free pre-game projection sits on the losing side of the line.
+- Sleeper disagreed with 120 of 146 (82%): our edge bets ARE disagreements with consensus, and Sleeper ~ consensus.
+- Held bets ROI +24% vs kept +20%; kept beat held in only 45% of bootstrap draws.
+- Holding only big disagreements made it worse: Sleeper 3+ carries against us -> held 45 bets at +63% ROI,
+  kept 101 at +6%. The more Sleeper disagreed, the better our bets did.
+Conclusion: the rush-attempt edge comes from information consensus projections don't use; filtering toward
+consensus removes it. Not shipped. Bogus injury-guess edges stay handled by the HOLD rule (section 14).
