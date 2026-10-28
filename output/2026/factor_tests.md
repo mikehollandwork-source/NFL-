@@ -286,3 +286,25 @@ Live blended TD chance, RB/WR/TE with 3+ touches/game. Overall it's calibrated (
   Refit each season from the previous season's results (tools/td_teams.py rows).
 - Tight ends scored above the model in 2025 (27.0% vs 22.3%, t 2.3) but not clearly in 2026 (25.5% vs 24.1%);
   a TE bump fit on 2025 did not help 2026 (0.5703 vs 0.5702): left off.
+
+## 19. Free data sources checked (Oct 28) and Sleeper's free projections vs ours
+
+- nflverse participation (per-play players on field, personnel, box count, coverage, route of the target):
+  free for 2025 and earlier; 2026 not published yet (404), so usable for building/fitting, not live inputs.
+- nflverse Next Gen Stats rushing (box-count %, rush yards over expected): free, current through 2026 wk 7.
+- Sleeper stats endpoint: no routes; adds drops, broken tackles, red-zone targets/attempts (we already have).
+- Sleeper projections (api.sleeper.app/v1/projections/nfl/regular/<yr>/<wk>, free, history back to 2025):
+  average miss vs ours (players above prop-relevant volume):
+
+| stat | 2025 ours / Sleeper / 50-50 | 2026 wk 3-6 ours / Sleeper / 50-50 |
+|---|---|---|
+| carries | 3.82 / 3.62 / 3.62 | n/a (too few matched) |
+| targets | 2.10 / 1.87 / 1.93 | 2.49 / 2.22 / 2.31 |
+| receptions | 1.56 / 1.44 / 1.47 | 1.72 / 1.52 / 1.61 |
+| rec yds | 20.48 / 19.85 / 19.86 | 22.55 / 21.23 / 21.45 |
+| pass yds | 59.80 / 58.02 / 57.49 | 59.47 / 55.52 / 56.78 |
+
+Caveats: our backtest runs without injury news (as-of), while Sleeper's stored projections are their final
+pre-game numbers (injuries known, and likely built partly from betting lines, which our rule 2 excludes).
+Not used as a model input. Candidate use pending the owner's decision: a disagreement filter (hold money
+picks where our rush-attempt projection differs sharply from Sleeper's), to be backtested vs Kalshi first.
