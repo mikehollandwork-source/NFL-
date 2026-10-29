@@ -368,3 +368,30 @@ the high projections regressing. Neither the blend nor the haircut moves it. Lef
 
 **Still open:** QB rush attempts are over-projected ~20% in both seasons (-19% / -21%), the largest steady
 carries bias left. Candidate for the next test (QB carries are part of the money list).
+
+## 23. Defense play-calling pull ("do teams pass or run more against this defense?"): REJECTED (`tools/def_tendency.py`, `output/2026/def_tendency.md`)
+
+Every play gets an expected pass chance from down, distance, field position, score and clock (league table).
+Defense pull = how much more than usual opponents pass against a defense after removing the situation AND each
+offense's own lean (the current model instead uses the plain pass share faced, shrunk with k = 1030).
+
+- It exists: spread about 2.4 points of pass rate (~1.5 pass attempts per game). 2026 extremes: LAC -4.5,
+  PHI -4.2, MIN -3.7 (opponents run more than usual).
+- It repeats in full seasons (odd vs even weeks r 0.49 in 2024, 0.36 in 2025, -0.09 in 2026 after 7 weeks).
+- Next-game prediction of the offense's pass residual (b = 0.5 fit on 2024): 2025 miss 3.522 -> 3.482 pass
+  attempts (-1.1%, better than the plain faced share, 3.507); 2026 3.259 -> 3.283 (worse).
+- Offense style: strong-identity offenses barely bend (slope on the pull: run-first 0.24, pass-first 0.34);
+  balanced offenses adapt most (0.58).
+
+In the full model (`[matchup] def_pass_pull`, replacing the plain faced share), no gain in either season:
+
+| | 2025 wk 4-18: now / 0.5 / 0.3 | 2026 wk 3-7: now / 0.5 / 0.3 |
+|---|---|---|
+| Team pass attempts MAE | 5.938 / 5.951 / 5.976 | 6.831 / 6.830 / 6.832 |
+| Team carries MAE | 6.105 / 6.107 / 6.136 | 5.553 / 5.604 / 5.563 |
+| Carries MAE | 3.913 / 3.908 / 3.905 | 3.947 / 3.987 / 3.975 |
+| Rush-attempt prop log-loss | 0.6376 / 0.6379 / 0.6375 | 0.6569 / 0.6585 / 0.6537 |
+| All props log-loss | 0.6512 / 0.6516 / 0.6517 | 0.6511 / 0.6520 / 0.6515 |
+
+The effect is real but ~1 play a game, smaller than the noise, and the existing heavily-shrunk faced share
+already captures most of it. Code kept, off (`def_pass_pull = 0` / absent).

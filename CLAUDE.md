@@ -57,6 +57,7 @@ Read this first in every new session. It holds the rules, the record so far, wha
   - Backup-RB projected carries as a win tell
   - Recent-share blend (`recent_blend_*`, section 22): helped a share-only lab, hurt 2026 props. Share misses are mostly luck (at most ~4% left to win on targets, ~0 on carries).
   - Team pace models (section 22): our team volume already beats them; the rest is game script.
+  - Defense play-calling pull (section 23): opponents do pass/run ~1.5 plays more or less vs some defenses, after situation and offense lean, but it doesn't improve props in 2025 or 2026. Run-first/pass-first offenses barely bend; balanced ones adapt most.
   - Underdog rushing signals (section 12; watchlist: "underdog's runs rising over the last 3 games" covered 57% on 227 games, best of 17 tries, so not a bet until paper-tracked)
 
 ## Commands (`python -m nfl_proj <cmd>`)
