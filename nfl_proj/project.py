@@ -437,6 +437,35 @@ class Projector:
         d = shrink(d_val, n, lg_val * prior_mult, self.k_def)
         return float(1 + self.dw * (d / lg_val - 1))
 
+    def _def_pulls(self) -> dict:
+        """defense -> average (dropback - situational expectation - offense's own lean) over the
+        plays it faced this season. Expectation: pass share by down, distance, field position,
+        score and clock from this season's plays (coarser bins when thin)."""
+        if getattr(self, "_pull_cache", None) is not None:
+            return self._pull_cache
+        p = self.p[self.p["down"].between(1, 4) & self.p["play_type"].isin(["pass", "sack", "scramble", "run"])].copy()
+        if p.empty:
+            self._pull_cache = {}
+            return self._pull_cache
+        p["db"] = p["play_type"].isin(["pass", "sack", "scramble"]).astype(float)
+        p["d_"] = p["down"].astype(int)
+        p["y_"] = pd.cut(p["ytg"], [-1, 2, 4, 7, 10, 15, 99], labels=False)
+        p["f_"] = pd.cut(p["yardline_100"], [-1, 5, 20, 50, 80, 101], labels=False)
+        p["s_"] = pd.cut(p["score_diff"].clip(-30, 30), [-31, -17, -9, -4, 0, 3, 8, 16, 31], labels=False)
+        t = p["game_secs_left"]
+        p["c_"] = np.select([t > 1920, t > 1800, t > 900, t > 300, t > 120], [0, 1, 2, 3, 4], 5)
+        xp = pd.Series(np.nan, index=p.index)
+        for lv in (["d_", "y_", "f_", "s_", "c_"], ["d_", "y_", "s_", "c_"], ["d_", "y_", "s_"], ["d_", "y_"], ["d_"]):
+            tb = p.groupby(lv)["db"].agg(["mean", "size"])
+            tb = tb[tb["size"] >= 40]["mean"]
+            key = pd.MultiIndex.from_frame(p[lv]) if len(lv) > 1 else p[lv[0]]
+            xp = xp.fillna(pd.Series(tb.reindex(key).values, index=p.index))
+        r = p["db"] - xp.fillna(p["db"].mean())
+        lean = r.groupby(p["offense"]).mean()
+        adj = r - p["offense"].map(lean)
+        self._pull_cache = adj.groupby(p["defense"]).mean().to_dict()
+        return self._pull_cache
+
     def team_volume(self, team: str, opp: str, week: int | None = None) -> dict:
         p, allp = self.p, self.all
         off_games = allp[allp["offense"] == team].groupby("boxscore_id").size()
@@ -453,7 +482,12 @@ class Projector:
 
         t, d = p[p["offense"] == team], p[p["defense"] == opp]
         db_rate = _wmean(t, "dropback")
-        if self.measured and "def_pass_rate" in self.k:
+        pull_w = self.cfg["matchup"].get("def_pass_pull", 0.0)
+        if pull_w:
+            # How much MORE than usual opponents pass against this defense, after situation (down,
+            # distance, field, score, clock) and each offense's own lean (factor_tests section 23)
+            db_rate += pull_w * self._def_pulls().get(opp, 0.0)
+        elif self.measured and "def_pass_rate" in self.k:
             # How much opponents throw against this defense, shrunk by its measured constant
             db_rate += shrink(_wmean(d, "dropback"), len(d), self.lg_dropback, self.k["def_pass_rate"]) - self.lg_dropback
         else:
