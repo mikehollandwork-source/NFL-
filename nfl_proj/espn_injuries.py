@@ -203,6 +203,17 @@ def merge(injuries: pd.DataFrame | None, live: pd.DataFrame, week: int) -> pd.Da
     if live is None or live.empty:
         return inj
     lv = live[live["player_id"].fillna("") != ""].copy()
+    # A live tag a day or more old must not override this week's official report when that report lists
+    # the player practicing fully with no game status (ESPN kept Skattebo "Out" from week 9 after he
+    # practiced fully in week 10, Nov 12 2026).
+    wk = inj[(inj["week"] == week) & inj["report_status"].isna()]
+    if "practice_status" in wk:
+        cleared = set(wk.loc[wk["practice_status"].fillna("").str.startswith("Full"), "player_id"])
+        upd = pd.to_datetime(lv.get("updated"), utc=True, errors="coerce")
+        stale = upd < pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=24)
+        drop = lv["player_id"].isin(cleared) & lv["report_status"].notna() & stale.fillna(False) \
+            & (lv.get("source", "") != "inactives")
+        lv = lv[~drop]
     known = set(lv["player_id"])
     keep = inj[~((inj["week"] == week) & inj["player_id"].isin(known))]
     add = lv.assign(week=week)[["week", "team", "player_id", "player", "pos", "report_status", "injury"]]

@@ -21,15 +21,11 @@ Read this first in every new session. It holds the rules, the record so far, wha
 6. **Secrets:** never ask the user to paste tokens or keys into chat. They go in GitHub repo secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, optional `ODDS_API_KEY`). As of Oct 22 the user has **not** added them yet.
 7. Scheduled runs never edit code, config or locked files, and never use `--force`.
 
-## The record (as of Oct 22, 2026, week 7)
-- **Paper bets (qualifying bets, -115 assumed):** week 6 went 13-7, +6.45 units on 30 staked (+21.5%). This is the only graded week so far. Source: `output/2026/paper/ledger.csv`, `summary.md`.
-- **Daily grades:** Thu Oct 15 2-0 (+2.61u), Sun Oct 18 10-6 (+4.04u), Mon Oct 19 1-1 (-0.20u). Rush-attempt leans went 24-7 that week; every other stat was close to 50/50. See `output/2026/daily/`.
-- **Every lean on a posted line:** 51% right (320 lines). By stat: carries 77%, all others 45-51%.
-- **Money list (real money, carries vs Kalshi), week 7 picks so far** (NE @ CHI, in `output/2026/money/week_07.csv`):
-  - Henderson 8+ rush attempts YES at 35¢, $2.50
-  - Swift 15+ YES at 52¢, $2.50
-  - Maye 2 or fewer rush attempts (NO on 3+) at 13¢, $1.69
-- **Parlay backtest, weeks 2-6 (regraded Oct 21):** 65 tickets, 2 hits (both 9-13-leg milestone tickets), $11 back on $65 (-83%). First-TD tickets went 0-3. An earlier "first-TD hit" was a grading bug, now fixed.
+## The record (as of Nov 5, 2026, after week 8)
+- **Paper bets (qualifying bets, -115 assumed):** 29-28, -4.47 units on 85 staked (-5.2%). Week 6 13-7 (+6.45u), week 7 1-4 (-4.70u), week 8 15-17 (-6.23u). By stat: carries 11-3 (+9.64u, +46%); receptions 7-13 (-10.46u); pass yds 3-6 (-5.09u). Source: `output/2026/paper/summary.md` (on `main`).
+- **Every lean on a posted line:** 53.7% right (815 lines). Carries 61%, everything else 46-55%.
+- **Money list (real money, carries vs Kalshi):** 26-47, -$27.17 on $174.63 (-16%). Week 7 14-17 (+$1.06), week 8 12-30 (-$28.23). Beat Kalshi's closing price on only 29% of 73 picks (-0.9¢ per contract): so far the market is NOT confirming the carries edge.
+- **Parlays:** week 2-6 backtest 2 of 65 hit (-83%). Live anytime-TD tickets are mostly misses; one 3-leg hit Nov 2.
 
 - **Closing-line value (CLV)** is tracked on every money pick from week 7 on (`nfl_proj/clv.py`, `output/2026/money/week_NN_clv.csv`). It is the main test of whether the carries edge is real: beating the close on most picks over about 50 picks means yes.
 
