@@ -1,0 +1,3 @@
+week,game,kickoff,player,team,stat,k,side,model,price,edge,stake,volume,ticker,dk,found_at,hold
+10,WAS @ NYG,2026-11-13T01:15:00+00:00,Devin Singletary,NYG,carries,11,YES,0.937,0.22,0.717,2.5,321.14,KXNFLRSHATT-26NOV12WASNYG-NYGDSINGLETARY26-11,DK over 7.5 (model 99%),2026-11-12T03:18:19+00:00,
+10,WAS @ NYG,2026-11-13T01:15:00+00:00,Jayden Daniels,WAS,carries,7,NO,0.755,0.57,0.185,2.5,79.16,KXNFLRSHATT-26NOV12WASNYG-WASJDANIELS5-7,DK under 5.5 (model 66%),2026-11-12T03:18:19+00:00,
