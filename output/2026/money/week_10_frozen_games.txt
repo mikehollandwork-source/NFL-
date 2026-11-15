@@ -1,0 +1,7 @@
+BUF @ NYJ
+CAR @ NOR
+HOU @ CLE
+JAX @ TEN
+KAN @ ATL
+MIA @ IND
+MIN @ GNB
