@@ -1,0 +1,2 @@
+week,game,kickoff,player,team,stat,k,side,model,price,edge,stake,volume,ticker,dk,found_at,hold,close_mid,close_value,clv,clv_roi,beat_close
+11,IND @ HOU,2026-11-20T01:15:00+00:00,Jonathan Taylor,IND,carries,16,YES,0.51,0.32,0.19,2.5,295.24,KXNFLRSHATT-26NOV19INDHOU-INDJTAYLOR28-16,DK over 13.5 (model 65%),2026-11-19T03:48:39+00:00,,0.305,0.305,-0.015000000000000013,-0.046875,False
